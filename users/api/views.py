@@ -14,7 +14,7 @@ from django.contrib.auth import authenticate
 
 
 
-from users.models import User, Wallet
+from users.models import User, Wallet, Bank
 from users.api.serializers import (
     UserSerializer, 
     UserUpdateSerializer, 
@@ -113,7 +113,7 @@ def update_user_detail_view(request, username):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     except User.DoesNotExist:
         raise NotFound(detail='this user does not exist')
-# correct the profile does not exist error in legacy's api
+    
 
 @api_view(['DELETE', ])
 @permission_classes([IsAuthenticated])
