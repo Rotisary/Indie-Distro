@@ -1,4 +1,5 @@
 import requests
+import os
 
 
 def create_flw_subaccount(sub_account, wallet_instance, name, email, phone_number):
@@ -10,7 +11,7 @@ def create_flw_subaccount(sub_account, wallet_instance, name, email, phone_numbe
     }
 
     headers = {
-        "Authorization": "Bearer FLWSECK_TEST-17ed81eb2be3b4858a832b1659f79d56-X"
+        "Authorization": f"Bearer {os.getenv('FLW_SECRET_KEY')}"
     }
     url = 'https://api.flutterwave.com/v3/payout-subaccounts'
 

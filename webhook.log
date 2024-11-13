@@ -1,0 +1,1010 @@
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\urls.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\urls.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\urls.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\urls.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+Not Found: /
+Not Found: /favicon.ico
+Watching for file changes with StatReloader
+Invalid HTTP_HOST header: '3822-197-211-52-134.ngrok-free.app'. You may need to add '3822-197-211-52-134.ngrok-free.app' to ALLOWED_HOSTS.
+Traceback (most recent call last):
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\utils\deprecation.py", line 133, in __call__
+    response = self.process_request(request)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\middleware\common.py", line 48, in process_request
+    host = request.get_host()
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\http\request.py", line 150, in get_host
+    raise DisallowedHost(msg)
+django.core.exceptions.DisallowedHost: Invalid HTTP_HOST header: '3822-197-211-52-134.ngrok-free.app'. You may need to add '3822-197-211-52-134.ngrok-free.app' to ALLOWED_HOSTS.
+Bad Request: /
+Invalid HTTP_HOST header: '3822-197-211-52-134.ngrok-free.app'. You may need to add '3822-197-211-52-134.ngrok-free.app' to ALLOWED_HOSTS.
+Traceback (most recent call last):
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\utils\deprecation.py", line 133, in __call__
+    response = self.process_request(request)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\middleware\common.py", line 48, in process_request
+    host = request.get_host()
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\http\request.py", line 150, in get_host
+    raise DisallowedHost(msg)
+django.core.exceptions.DisallowedHost: Invalid HTTP_HOST header: '3822-197-211-52-134.ngrok-free.app'. You may need to add '3822-197-211-52-134.ngrok-free.app' to ALLOWED_HOSTS.
+Bad Request: /favicon.ico
+C:\Users\HP\Documents\django-project\money_wallet\paylink\settings.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\paylink\settings.py changed, reloading.
+Watching for file changes with StatReloader
+Invalid HTTP_HOST header: '3822-197-211-52-134.ngrok-free.app'. You may need to add '3822-197-211-52-134.ngrok-free.app' to ALLOWED_HOSTS.
+Traceback (most recent call last):
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\utils\deprecation.py", line 133, in __call__
+    response = self.process_request(request)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\middleware\common.py", line 48, in process_request
+    host = request.get_host()
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\http\request.py", line 150, in get_host
+    raise DisallowedHost(msg)
+django.core.exceptions.DisallowedHost: Invalid HTTP_HOST header: '3822-197-211-52-134.ngrok-free.app'. You may need to add '3822-197-211-52-134.ngrok-free.app' to ALLOWED_HOSTS.
+Bad Request: /
+Invalid HTTP_HOST header: '3822-197-211-52-134.ngrok-free.app'. You may need to add '3822-197-211-52-134.ngrok-free.app' to ALLOWED_HOSTS.
+Traceback (most recent call last):
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\utils\deprecation.py", line 133, in __call__
+    response = self.process_request(request)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\middleware\common.py", line 48, in process_request
+    host = request.get_host()
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\http\request.py", line 150, in get_host
+    raise DisallowedHost(msg)
+django.core.exceptions.DisallowedHost: Invalid HTTP_HOST header: '3822-197-211-52-134.ngrok-free.app'. You may need to add '3822-197-211-52-134.ngrok-free.app' to ALLOWED_HOSTS.
+Bad Request: /favicon.ico
+C:\Users\HP\Documents\django-project\money_wallet\paylink\settings.py changed, reloading.
+Watching for file changes with StatReloader
+Invalid HTTP_HOST header: '3822-197-211-52-134.ngrok-free.app'. You may need to add '3822-197-211-52-134.ngrok-free.app' to ALLOWED_HOSTS.
+Traceback (most recent call last):
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\utils\deprecation.py", line 133, in __call__
+    response = self.process_request(request)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\middleware\common.py", line 48, in process_request
+    host = request.get_host()
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\http\request.py", line 150, in get_host
+    raise DisallowedHost(msg)
+django.core.exceptions.DisallowedHost: Invalid HTTP_HOST header: '3822-197-211-52-134.ngrok-free.app'. You may need to add '3822-197-211-52-134.ngrok-free.app' to ALLOWED_HOSTS.
+Bad Request: /
+Invalid HTTP_HOST header: '3822-197-211-52-134.ngrok-free.app'. You may need to add '3822-197-211-52-134.ngrok-free.app' to ALLOWED_HOSTS.
+Traceback (most recent call last):
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\utils\deprecation.py", line 133, in __call__
+    response = self.process_request(request)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\middleware\common.py", line 48, in process_request
+    host = request.get_host()
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\http\request.py", line 150, in get_host
+    raise DisallowedHost(msg)
+django.core.exceptions.DisallowedHost: Invalid HTTP_HOST header: '3822-197-211-52-134.ngrok-free.app'. You may need to add '3822-197-211-52-134.ngrok-free.app' to ALLOWED_HOSTS.
+Bad Request: /favicon.ico
+C:\Users\HP\Documents\django-project\money_wallet\paylink\settings.py changed, reloading.
+Watching for file changes with StatReloader
+Invalid HTTP_HOST header: '3822-197-211-52-134.ngrok-free.app'. You may need to add '3822-197-211-52-134.ngrok-free.app' to ALLOWED_HOSTS.
+Traceback (most recent call last):
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\utils\deprecation.py", line 133, in __call__
+    response = self.process_request(request)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\middleware\common.py", line 48, in process_request
+    host = request.get_host()
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\http\request.py", line 150, in get_host
+    raise DisallowedHost(msg)
+django.core.exceptions.DisallowedHost: Invalid HTTP_HOST header: '3822-197-211-52-134.ngrok-free.app'. You may need to add '3822-197-211-52-134.ngrok-free.app' to ALLOWED_HOSTS.
+Bad Request: /favicon.ico
+Watching for file changes with StatReloader
+Invalid HTTP_HOST header: '3822-197-211-52-134.ngrok-free.app'. You may need to add '3822-197-211-52-134.ngrok-free.app' to ALLOWED_HOSTS.
+Traceback (most recent call last):
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\utils\deprecation.py", line 133, in __call__
+    response = self.process_request(request)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\middleware\common.py", line 48, in process_request
+    host = request.get_host()
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\http\request.py", line 150, in get_host
+    raise DisallowedHost(msg)
+django.core.exceptions.DisallowedHost: Invalid HTTP_HOST header: '3822-197-211-52-134.ngrok-free.app'. You may need to add '3822-197-211-52-134.ngrok-free.app' to ALLOWED_HOSTS.
+Bad Request: /
+Invalid HTTP_HOST header: '3822-197-211-52-134.ngrok-free.app'. You may need to add '3822-197-211-52-134.ngrok-free.app' to ALLOWED_HOSTS.
+Traceback (most recent call last):
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\utils\deprecation.py", line 133, in __call__
+    response = self.process_request(request)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\middleware\common.py", line 48, in process_request
+    host = request.get_host()
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\http\request.py", line 150, in get_host
+    raise DisallowedHost(msg)
+django.core.exceptions.DisallowedHost: Invalid HTTP_HOST header: '3822-197-211-52-134.ngrok-free.app'. You may need to add '3822-197-211-52-134.ngrok-free.app' to ALLOWED_HOSTS.
+Bad Request: /favicon.ico
+Invalid HTTP_HOST header: '3822-197-211-52-134.ngrok-free.app'. You may need to add '3822-197-211-52-134.ngrok-free.app' to ALLOWED_HOSTS.
+Traceback (most recent call last):
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\utils\deprecation.py", line 133, in __call__
+    response = self.process_request(request)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\middleware\common.py", line 48, in process_request
+    host = request.get_host()
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\http\request.py", line 150, in get_host
+    raise DisallowedHost(msg)
+django.core.exceptions.DisallowedHost: Invalid HTTP_HOST header: '3822-197-211-52-134.ngrok-free.app'. You may need to add '3822-197-211-52-134.ngrok-free.app' to ALLOWED_HOSTS.
+Bad Request: /
+Invalid HTTP_HOST header: '3822-197-211-52-134.ngrok-free.app'. You may need to add '3822-197-211-52-134.ngrok-free.app' to ALLOWED_HOSTS.
+Traceback (most recent call last):
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\utils\deprecation.py", line 133, in __call__
+    response = self.process_request(request)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\middleware\common.py", line 48, in process_request
+    host = request.get_host()
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\http\request.py", line 150, in get_host
+    raise DisallowedHost(msg)
+django.core.exceptions.DisallowedHost: Invalid HTTP_HOST header: '3822-197-211-52-134.ngrok-free.app'. You may need to add '3822-197-211-52-134.ngrok-free.app' to ALLOWED_HOSTS.
+Bad Request: /favicon.ico
+C:\Users\HP\Documents\django-project\money_wallet\paylink\settings.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\paylink\settings.py changed, reloading.
+Watching for file changes with StatReloader
+Invalid HTTP_HOST header: '3822-197-211-52-134.ngrok-free.app'. You may need to add '3822-197-211-52-134.ngrok-free.app' to ALLOWED_HOSTS.
+Traceback (most recent call last):
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\utils\deprecation.py", line 133, in __call__
+    response = self.process_request(request)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\middleware\common.py", line 48, in process_request
+    host = request.get_host()
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\http\request.py", line 150, in get_host
+    raise DisallowedHost(msg)
+django.core.exceptions.DisallowedHost: Invalid HTTP_HOST header: '3822-197-211-52-134.ngrok-free.app'. You may need to add '3822-197-211-52-134.ngrok-free.app' to ALLOWED_HOSTS.
+Bad Request: /
+Invalid HTTP_HOST header: '3822-197-211-52-134.ngrok-free.app'. You may need to add '3822-197-211-52-134.ngrok-free.app' to ALLOWED_HOSTS.
+Traceback (most recent call last):
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\utils\deprecation.py", line 133, in __call__
+    response = self.process_request(request)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\middleware\common.py", line 48, in process_request
+    host = request.get_host()
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\http\request.py", line 150, in get_host
+    raise DisallowedHost(msg)
+django.core.exceptions.DisallowedHost: Invalid HTTP_HOST header: '3822-197-211-52-134.ngrok-free.app'. You may need to add '3822-197-211-52-134.ngrok-free.app' to ALLOWED_HOSTS.
+Bad Request: /favicon.ico
+C:\Users\HP\Documents\django-project\money_wallet\paylink\settings.py changed, reloading.
+Watching for file changes with StatReloader
+Not Found: /favicon.ico
+C:\Users\HP\Documents\django-project\money_wallet\paylink\settings.py changed, reloading.
+Watching for file changes with StatReloader
+Not Found: /
+Not Found: /favicon.ico
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Not Found: /favicon.ico
+C:\Users\HP\Documents\django-project\money_wallet\paylink\settings.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\paylink\settings.py changed, reloading.
+Watching for file changes with StatReloader
+Not Found: /
+Not Found: /favicon.ico
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\external_requests.py changed, reloading.
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\paylink\settings.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\paylink\settings.py changed, reloading.
+Watching for file changes with StatReloader
+Invalid HTTP_HOST header: 'c45a-197-211-52-131.ngrok-free.app'. You may need to add 'c45a-197-211-52-131.ngrok-free.app' to ALLOWED_HOSTS.
+Traceback (most recent call last):
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\utils\deprecation.py", line 133, in __call__
+    response = self.process_request(request)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\middleware\common.py", line 48, in process_request
+    host = request.get_host()
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\http\request.py", line 150, in get_host
+    raise DisallowedHost(msg)
+django.core.exceptions.DisallowedHost: Invalid HTTP_HOST header: 'c45a-197-211-52-131.ngrok-free.app'. You may need to add 'c45a-197-211-52-131.ngrok-free.app' to ALLOWED_HOSTS.
+Bad Request: /
+Invalid HTTP_HOST header: 'c45a-197-211-52-131.ngrok-free.app'. You may need to add 'c45a-197-211-52-131.ngrok-free.app' to ALLOWED_HOSTS.
+Traceback (most recent call last):
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\utils\deprecation.py", line 133, in __call__
+    response = self.process_request(request)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\middleware\common.py", line 48, in process_request
+    host = request.get_host()
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\http\request.py", line 150, in get_host
+    raise DisallowedHost(msg)
+django.core.exceptions.DisallowedHost: Invalid HTTP_HOST header: 'c45a-197-211-52-131.ngrok-free.app'. You may need to add 'c45a-197-211-52-131.ngrok-free.app' to ALLOWED_HOSTS.
+Bad Request: /favicon.ico
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\paylink\settings.py changed, reloading.
+Watching for file changes with StatReloader
+Not Found: /
+Not Found: /favicon.ico
+Watching for file changes with StatReloader
+Not Found: /
+Internal Server Error: /api/payment/webhooks
+Traceback (most recent call last):
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\utils\deprecation.py", line 136, in __call__
+    response = self.process_response(request, response)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\middleware\common.py", line 108, in process_response
+    return self.response_redirect_class(self.get_full_path_with_slash(request))
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\middleware\common.py", line 87, in get_full_path_with_slash
+    raise RuntimeError(
+RuntimeError: You called this URL via POST, but the URL doesn't end in a slash and you have APPEND_SLASH set. Django can't redirect to the slash URL while maintaining POST data. Change your form to point to c45a-197-211-52-131.ngrok-free.app/api/payment/webhooks/ (note the trailing slash), or set APPEND_SLASH=False in your Django settings.
+Not Found: /
+Not Found: /favicon.ico
+Internal Server Error: /api/payment/webhooks
+Traceback (most recent call last):
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\utils\deprecation.py", line 136, in __call__
+    response = self.process_response(request, response)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\middleware\common.py", line 108, in process_response
+    return self.response_redirect_class(self.get_full_path_with_slash(request))
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\middleware\common.py", line 87, in get_full_path_with_slash
+    raise RuntimeError(
+RuntimeError: You called this URL via POST, but the URL doesn't end in a slash and you have APPEND_SLASH set. Django can't redirect to the slash URL while maintaining POST data. Change your form to point to c45a-197-211-52-131.ngrok-free.app/api/payment/webhooks/ (note the trailing slash), or set APPEND_SLASH=False in your Django settings.
+Watching for file changes with StatReloader
+Unauthorized: /api/payment/webhooks/
+C:\Users\HP\Documents\django-project\money_wallet\paylink\settings.py changed, reloading.
+Watching for file changes with StatReloader
+Unauthorized: /api/payment/webhooks/
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+webhook data received: 
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+Internal Server Error: /api/payment/webhooks/
+Traceback (most recent call last):
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\views\decorators\csrf.py", line 56, in wrapper_view
+    return view_func(*args, **kwargs)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\views\decorators\csrf.py", line 56, in wrapper_view
+    return view_func(*args, **kwargs)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\views\generic\base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\rest_framework\decorators.py", line 50, in handler
+    return func(*args, **kwargs)
+  File "C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py", line 182, in event_webhooks
+    payload = json.loads(request.data)
+  File "C:\Program Files\Python310\lib\json\__init__.py", line 339, in loads
+    raise TypeError(f'the JSON object must be str, bytes or bytearray, '
+TypeError: the JSON object must be str, bytes or bytearray, not dict
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+Not Found: /
+Not Found: /favicon.ico
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\paylink\settings.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\external_requests.py changed, reloading.
+Watching for file changes with StatReloader
+webhook data received: 
+webhook data received: 
+webhook data received: 
+webhook data received: 
+webhook data received: 
+webhook data received: 
+Watching for file changes with StatReloader
+Not Found: /favicon.ico
+Not Found: /favicon.ico
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\external_requests.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\external_requests.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\external_requests.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\external_requests.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\external_requests.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\external_requests.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\external_requests.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\external_requests.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\external_requests.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Not Found: /admin/movies/moviestar/
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\external_requests.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\external_requests.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\external_requests.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\external_requests.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\external_requests.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\external_requests.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\external_requests.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\external_requests.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\external_requests.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\external_requests.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\external_requests.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\external_requests.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\external_requests.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\external_requests.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\external_requests.py changed, reloading.
+Watching for file changes with StatReloader
+Forbidden: /api/payment/send-money/
+Internal Server Error: /api/payment/send-money/
+Traceback (most recent call last):
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\views\decorators\csrf.py", line 56, in wrapper_view
+    return view_func(*args, **kwargs)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\views\generic\base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\rest_framework\decorators.py", line 50, in handler
+    return func(*args, **kwargs)
+  File "C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py", line 110, in send_money
+    transfer_funds_response = transfer_funds(
+TypeError: transfer_funds() got an unexpected keyword argument 'beneficiary_name'
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+Internal Server Error: /api/payment/send-money/
+Traceback (most recent call last):
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\views\decorators\csrf.py", line 56, in wrapper_view
+    return view_func(*args, **kwargs)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\views\generic\base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\rest_framework\decorators.py", line 50, in handler
+    return func(*args, **kwargs)
+  File "C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py", line 110, in send_money
+    transfer_funds_response = transfer_funds(
+TypeError: transfer_funds() got an unexpected keyword argument 'recipien_name'
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Internal Server Error: /api/payment/send-money/
+Traceback (most recent call last):
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\views\decorators\csrf.py", line 56, in wrapper_view
+    return view_func(*args, **kwargs)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\views\generic\base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\rest_framework\decorators.py", line 50, in handler
+    return func(*args, **kwargs)
+  File "C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py", line 110, in send_money
+    transfer_funds_response = transfer_funds(
+  File "C:\Users\HP\Documents\django-project\money_wallet\payment\api\external_requests.py", line 41, in transfer_funds
+    return payment['status'], payment
+KeyError: 'status'
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\external_requests.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+Bad Request: /api/payment/send-money/
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+Bad Request: /api/payment/send-money/
+Not Found: /api/payment/send-money/
+Internal Server Error: /api/payment/send-money/
+Traceback (most recent call last):
+  File "C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py", line 126, in send_money
+    wallet = Wallet.objects.get(wallet_number=wallet_number)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\db\models\query.py", line 637, in get
+    raise self.model.DoesNotExist(
+users.models.Wallet.DoesNotExist: Wallet matching query does not exist.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\views\decorators\csrf.py", line 56, in wrapper_view
+    return view_func(*args, **kwargs)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\django\views\generic\base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\rest_framework\decorators.py", line 50, in handler
+    return func(*args, **kwargs)
+  File "C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py", line 139, in send_money
+    account_number = wallet_sub_account.recipient_account_number,
+UnboundLocalError: local variable 'wallet_sub_account' referenced before assignment
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+Bad Request: /api/payment/send-money/
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+Bad Request: /api/payment/validate-bank/
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\users\models.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\models.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\models.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\models.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\models.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\models.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\models.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\models.py changed, reloading.
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\external_requests.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\external_requests.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\external_requests.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\external_requests.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\external_requests.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\external_requests.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\external_requests.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\external_requests.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\external_requests.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\external_requests.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\external_requests.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\external_requests.py changed, reloading.
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Not Found: /favicon.ico
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\external_requests.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\external_requests.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\payment\api\external_requests.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\users\api\external_requests.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\users\api\external_requests.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\users\api\external_requests.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\users\api\external_requests.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\users\api\external_requests.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\users\api\external_requests.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\HP\Documents\django-project\money_wallet\users\api\external_requests.py changed, reloading.
+Watching for file changes with StatReloader

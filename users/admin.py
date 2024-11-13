@@ -3,8 +3,8 @@ from django.contrib.auth.admin import UserAdmin
 from .models import User, Wallet, SubAccount, Bank
 
 class CustomUserAdmin(UserAdmin):
-    list_display = ['email', 'username', 'date_joined']
-    search_fields = ['email', 'username']
+    list_display = ['email', 'username', 'name', 'date_joined']
+    search_fields = ['email', 'username', 'name']
     readonly_fields = ['date_joined', 'last_login']
 
     filter_horizontal = ()

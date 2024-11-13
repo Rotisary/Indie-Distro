@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-hkp)*xa9#c%txjag9ku7#rgm2^61n+0sy@c!*mzg61q_vb7obw
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '0.0.0.0', '127.0.0.1', 'c45a-197-211-52-131.ngrok-free.app']
 
 
 # Application definition
@@ -85,6 +85,24 @@ REST_FRAMEWORK = {
 WSGI_APPLICATION = 'paylink.wsgi.application'
 AUTH_USER_MODEL = "users.User"
 
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': 'webhook.log',
+        },
+    },
+    'loggers': {
+        '': {
+            'handlers': ['file'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+    },
+}
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases

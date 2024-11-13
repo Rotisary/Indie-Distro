@@ -105,7 +105,7 @@ class Wallet(models.Model):
                                       null=False, 
                                       blank=False,
                                       unique=True)                                          
-    balance = models.IntegerField(default=0)
+    balance = models.FloatField(default=0)
     wallet_pin = models.IntegerField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
                                      

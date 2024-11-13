@@ -20,4 +20,4 @@ class WalletBalanceNotZero(BasePermission):
 class TransactionDetailPerm(BasePermission):
 
     def has_object_permission(self, request, view, obj):
-        return request.user == obj.sender or request.user.wallet == obj.recipient
+        return request.user == obj.sender or request.user.wallet.wallet_number == obj.recipient_account_number
