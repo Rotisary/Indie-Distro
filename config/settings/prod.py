@@ -1,16 +1,14 @@
 from .base import *
 
-PRODUCTION = True
-
 DATABASES = {
     "default": {
-        "ENGINE": os.getenv(
-            "POSTGRESQL_ENGINE", "django.db.backends.postgresql_psycopg2"
+        "ENGINE": env.str(
+            "DJANGO_POSTGRESQL_ENGINE", "django.db.backends.postgresql_psycopg2"
         ),
-        "NAME": os.getenv("POSTGRES_NAME", "***"),
-        "USER": os.getenv("POSTGRES_USER", "***"),
-        "PASSWORD": os.getenv("POSTGRES_PASSWORD", "***"),
-        "HOST": os.getenv("POSTGRES_HOST", "*****"),
-        "PORT": os.getenv("POSTGRES_PORT", 5432),
+        "NAME": env.str("DJANGO_POSTGRES_NAME", "***"),
+        "USER": env.str("DJANGO_POSTGRES_USER", "***"),
+        "PASSWORD": env.str("DJANGO_POSTGRES_PASSWORD", "***"),
+        "HOST": env.str("DJANGO_POSTGRES_HOST", "*****"),
+        "PORT": env.int("DJANGO_POSTGRES_PORT", 5432),
     },
 }
