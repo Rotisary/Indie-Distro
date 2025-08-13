@@ -1,72 +1,99 @@
-# from rest_framework import serializers
-# from core.users.models import User, Wallet
-# from itertools import chain 
-# import string
-
-# class UserSerializer(serializers.ModelSerializer):
-#     confirm_password = serializers.CharField(style={'input_type': 'password'}, write_only=True)
-
-#     class Meta:
-#         model = User 
-#         fields = ['id', 'email', 'username', 'name', 'phone_number', 'age', 'password', 'confirm_password', 'ip_address']
-#         extra_kwargs = {
-#             'password': {'write_only': True},
-#             'id': {'read_only': True},
-#             'ip_address': {'read_only': True}
-#         }
+from rest_framework import serializers
+from django.utils.translation import gettext_lazy as _
+from django.contrib.auth.hashers import make_password
+from core.users.models import User
+from phonenumbers import parse, is_valid_number
+from phonenumbers.phonenumberutil import  NumberParseException
 
 
-#     def validate(self, data):
-#         if data['password'] != data['confirm_password']:
-#             raise serializers.ValidationError({'error': 'confirm password does not match password'})
+
+class UserSerializer:
+    class Retrieve(serializers.ModelSerializer):
+        class Meta:
+            model = User
+            exclude = [
+                "password",
+                "is_active",
+                "ban_duration_in_minutes",
+                "ban_expiry_date",
+                "date_added",
+                "date_last_modified",
+                "groups",
+                "user_permissions",
+                "last_login",
+            ]
+    
+    class Create(serializers.ModelSerializer):
+        password2 = serializers.CharField(
+            write_only=True,
+            required=True,
+            style={"input_type": "password"},
+            help_text=_("Confirm Password"),
+        )
+
+        class Meta:
+            model = User
+            fields = [
+                "email",
+                "first_name",
+                "last_name",
+                "username",
+                "phone_number",
+                "is_phone_number_verified",
+                "is_email_verified",
+                "bio",
+                "gender",
+                "dob",
+                "is_banned",
+                "account_type",
+                "location",
+                "password",
+                "password2",
+            ]
+
+        def validate(self, attrs):
+            password = attrs.get("password")
+            password2 = attrs.pop("password2", None)
+
+            if password and password2 and password != password2:
+                raise serializers.ValidationError(
+                    {"password": _("Passwords do not match.")}
+                )
+
+            return attrs
         
-#         return data
-    
-
-#     def validate_phone_number(self, value):
-#         if len(value) == 11:
-#             letters = chain(range(ord('A'), ord('z') + 1), range(ord('a'), ord('z') + 1))
-#             for char in letters:
-#                 if chr(char) in value:
-#                     raise serializers.ValidationError({'error': 'phone number is in invalid format, please use digits only!'})
-#         else:
-#             raise serializers.ValidationError({'error': 'your phone number can not be longer or shorter than eleven digits!'})
+        def validate_phone_number(self, value):
+            value = ("+" + value) if not value.startswith("+") else value
+            try:
+                phone_number_instance = parse(value)
+                if not is_valid_number(phone_number_instance):
+                    message = (
+                        f"Kindly provide a valid phone number, Note: Phone number must be provided in "
+                        f"international format and must start with '+'"
+                    )
+                    raise serializers.ValidationError(message, "invalid phone number")
+            except NumberParseException as err:
+                message = err._msg
+                raise serializers.ValidationError(message, "invalid phone number")
+            return value
         
-#         return value
-    
-
-    
-#     def create(self, validated_data):
-#         password_two = validated_data.pop('confirm_password', None)
-#         password = validated_data.pop('password')
-#         user = User.objects.create(**validated_data)
-#         user.set_password(password)
-#         user.save()
-#         return user
-    
-
-# class UserUpdateSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = User
-#         fields = ['email', 'username', 'name', 'phone_number'] 
-
-    
-#     def validate_phone_number(self, value):
-#         if len(value) == 11:
-#             letters = chain(range(ord('A'), ord('z') + 1), range(ord('a'), ord('z') + 1))
-#             for char in letters:
-#                 if chr(char) in value:
-#                     raise serializers.ValidationError({'error': 'phone number is in invalid format, please use digits only!'})
-#         else:
-#             raise serializers.ValidationError({'error': 'your phone number can not be longer or shorter than eleven digits!'})
+        def create(self, validated_data):
+            validated_data["password"] = make_password(validated_data["password"])
+            return super().create(validated_data)
         
-#         return value
 
+class AuthSerializer:
+    class Login(serializers.Serializer):
+        email = serializers.EmailField(required=True, help_text=_("Email"))
+        password = serializers.CharField(
+            write_only=True, required=True, style={"input_type": "password"}, help_text=_("Password")
+        )
 
-# class PasswordChangeSerializer(serializers.Serializer):
-#     old_password = serializers.CharField(write_only=True, required=True)
-#     new_password = serializers.CharField(write_only=True, required=True) 
-#     confirm_password = serializers.CharField(write_only=True, required=True) 
+    class TokenRefresh(serializers.Serializer):
+        refresh = serializers.CharField(
+            required=True,
+            help_text=_("This is the 'refresh' key in account AccessToken"),
+        ) 
 
 
 # class WalletSerializer(serializers.HyperlinkedModelSerializer):

@@ -169,6 +169,21 @@ class User(AbstractBaseUser, PermissionsMixin, mixins.BaseModelMixin):
 
     objects = UserManager()
 
+    class Meta:
+        verbose_name = _("User")
+        verbose_name_plural = _("Users")
+
+
+    def retrieve_auth_token(self):
+        data = {}
+        refresh = RefreshToken.for_user(self)
+        data["refresh"] = str(refresh)
+        data["access"] = str(refresh.access_token)
+        return data
+
+    def __str__(self):
+        return f"< {type(self).__name__}({self.id}) ({self.first_name})  {self.email}>"
+
 
 class UserSession(mixins.BaseModelMixin):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
