@@ -59,7 +59,7 @@ INSTALLED_APPS = [
 CORE_APPS = [
     'core.users.apps.UsersConfig',
     'core.payment.apps.PaymentConfig',
-    'core.testing.apps.TestingConfig',
+    'core.feed.apps.FeedConfig',
     'core.utils.apps.UtilsConfig',
 ]
 

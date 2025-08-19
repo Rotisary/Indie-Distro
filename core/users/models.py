@@ -148,7 +148,8 @@ class User(AbstractBaseUser, PermissionsMixin, mixins.BaseModelMixin):
     )
     has_pending_issues = models.BooleanField(
         _("Has Pending Issue?"), default=False, blank=True, null=False
-    )
+    ),
+    is_creator = models.BooleanField(_("Is user a film creator?"), blank=True, default=False)
     is_staff = models.BooleanField(
         _("staff status"),
         default=False,
