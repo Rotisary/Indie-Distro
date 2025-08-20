@@ -1,6 +1,8 @@
 from rest_framework import status, decorators, response, views
 from rest_framework.parsers import JSONParser
 from rest_framework.permissions import IsAuthenticated
+
+from loguru import logger
 from drf_spectacular.utils import extend_schema
 
 
@@ -8,7 +10,7 @@ from .models import Feed
 from .serializers import FeedSerializer
 from core.utils import mixins as global_mixins, exceptions
 from core.utils.helpers.decorators import RequestDataManipulationsDecorators
-from core.utils.permissions import IsAccountType
+from core.utils.permissions import IsAccountType, IsFilmOwner, FilmNotReleased
 
 
 @extend_schema(tags=["feed"])
@@ -28,6 +30,7 @@ class ListCreateFeed(views.APIView):
         serializer = FeedSerializer.FeedCreate(data=request.data)
         serializer.is_valid(raise_exception=True)
         instance = serializer.save()
+        logger.success(f"Film created with title: {instance.title}")
         serializer = FeedSerializer.FeedRetrieve(instance=instance)
         return response.Response(data=serializer.data, status=status.HTTP_201_CREATED)
 
@@ -38,9 +41,69 @@ class ListCreateFeed(views.APIView):
     )
     def get(self, request):
         queryset = Feed.objects.filter(owner=request.user)
+        if not queryset.exists():
+            raise exceptions.CustomException(
+                message="No films found",
+                status_code=status.HTTP_404_NOT_FOUND
+            )
         serializer = FeedSerializer.FeedRetrieve(queryset, many=True)
+        # logger.info(f"Retrieved {len(serializer.data['results'])} films for the user.")
         return response.Response(data=serializer.data, status=status.HTTP_200_OK)
     
 
+class RetrieveUpdateFeed(views.APIView):
+    http_method_names = ["get", "patch"]
+    permission_classes = [
+        IsAuthenticated, 
+        IsAccountType.IsCreatorAccount, 
+        IsFilmOwner, 
+        FilmNotReleased
+    ]
+    parser_classes = [JSONParser, ]
 
+
+    def get_permissions(self):
+        if self.request.method == "GET":
+            return [IsAuthenticated()]
+        return super().get_permissions()
+
+
+    @extend_schema(
+        description="endpoint for retrieving details of a specific film",
+        request=None,
+        responses={200: FeedSerializer.FeedRetrieve},
+    )
+    def get(self, request, pk):
+        try: 
+            feed = Feed.objects.get(id=pk)          
+            serializer = FeedSerializer.FeedRetrieve(instance=feed)
+            logger.info(f"Retrieved film with ID: {pk}")
+            return response.Response(data=serializer.data, status=status.HTTP_200_OK)
+        except Feed.DoesNotExist:
+            raise exceptions.CustomException(
+                "Film not found", 
+                status_code=status.HTTP_404_NOT_FOUND
+            )
+    
+    @RequestDataManipulationsDecorators.update_request_data_with_owner_data("owner")
+    @extend_schema(
+        description="endpoint for updating details of a specific film",
+        request=FeedSerializer.FeedCreate,
+        responses={200: FeedSerializer.FeedRetrieve},
+    )
+    def patch(self, request, pk):
+        try:
+            feed = Feed.objects.get(id=pk, owner=request.user)
+            self.check_object_permissions(request, feed)
+            serializer = FeedSerializer.FeedCreate(instance=feed, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            instance = serializer.save()
+            logger.success(f"Film with ID: {pk} successfully updated.")
+            serializer = FeedSerializer.FeedRetrieve(instance=instance)
+            return response.Response(data=serializer.data, status=status.HTTP_200_OK)
+        except Feed.DoesNotExist:
+            raise exceptions.CustomException(
+                "Film not found", 
+                status_code=status.HTTP_404_NOT_FOUND
+            )
 

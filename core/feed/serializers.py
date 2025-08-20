@@ -1,3 +1,5 @@
+import datetime
+
 from rest_framework import serializers
 from django.utils.translation import gettext_lazy as _
 
@@ -13,6 +15,7 @@ class FeedSerializer:
             exclude = [
                 "slug",
                 "saved",
+                "is_released",
                 "date_added",
                 "date_last_modified"
             ]
@@ -29,10 +32,17 @@ class FeedSerializer:
                 raise serializers.ValidationError("Cannot have more than 5 crew members.")
             return value
         
+        def validate_release_date(self, value):
+            if value and value <= datetime.date.today():
+                raise serializers.ValidationError(
+                    "Release date cannot be today. Please set a date later than today."
+                )
+            return value
+        
     
     class FeedRetrieve(serializers.ModelSerializer):
         owner = BaseUserSerializer()
 
         class Meta:
             model = Feed
-            fields = "__all__"
+            exclude = ["saved", "date_last_modified"]

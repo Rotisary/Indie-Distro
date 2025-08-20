@@ -44,6 +44,18 @@ class Feed(BaseModelMixin):
         help_text=_("The type of film e.g Series, Standalone")
     )
     length = models.TimeField(_("Film Length"), null=True, blank=True)
+    release_date = models.DateField(
+        _("Release Date "),
+        null=True,
+        blank=True,
+        help_text=_("The date the film was/is to be released")
+    )
+    is_released = models.BooleanField(
+        _("Has the movie been released?"),
+        blank=True,
+        null=True,
+        default=False
+    )
     cast = ArrayField(
         models.CharField(max_length=100),
         verbose_name=_("Film Actors"),
