@@ -199,6 +199,17 @@ UNFOLD = {
                     },
                 ],
             },
+            {
+                "title": _("Feed"),
+                "collapsible": True,
+                "items": [
+                    {
+                        "title": _("Films"),
+                        "icon": "movie",
+                        "link": reverse_lazy("admin:feed_feed_changelist"),
+                    },
+                ]
+            }
         ]
     }
 }

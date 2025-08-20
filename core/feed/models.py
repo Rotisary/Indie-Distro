@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.contrib.postgres.fields import ArrayField
+from django.db.models import JSONField
 from django.utils.text import slugify
 
 
@@ -42,7 +43,7 @@ class Feed(BaseModelMixin):
         null=False,
         help_text=_("The type of film e.g Series, Standalone")
     )
-    length = models.TimeField(_("Film Length"), null=False, blank=True)
+    length = models.TimeField(_("Film Length"), null=True, blank=True)
     cast = ArrayField(
         models.CharField(max_length=100),
         verbose_name=_("Film Actors"),
@@ -51,13 +52,12 @@ class Feed(BaseModelMixin):
         help_text=_("List of the names of major actors from the film"),
         default=list,
     )
-    crew = ArrayField(
-        models.CharField(max_length=100),
+    crew = JSONField(
         verbose_name=_("Film Crew"),
         blank=True,
         null=True,
         help_text=_("List of the names of film crew members"),
-        default=list,
+        default=dict,
     )
     language = models.CharField(
         _("Language"),
@@ -77,7 +77,7 @@ class Feed(BaseModelMixin):
         if not self.slug:
             self.slug = slugify(self.title)
         super().save(*args, **kwargs)
-        
+
 
     class Meta:
         verbose_name = _("Film")

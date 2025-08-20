@@ -54,6 +54,7 @@ class UserAdmin(BaseUserAdmin, ModelAdmin):
                     "phone_number",
                     "is_phone_number_verified",
                     "is_email_verified",
+                    "is_creator",
                     "account_type",
                     "total_earned",
                 ),

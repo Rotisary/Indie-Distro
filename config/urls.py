@@ -28,6 +28,7 @@ urlpatterns = [
         name="redoc",
     ),
     path("api/", include("core.users.urls")),
+    path("api/films/", include("core.feed.urls"))
 ]
 
 if not settings.PRODUCTION:

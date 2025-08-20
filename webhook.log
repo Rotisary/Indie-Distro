@@ -1662,3 +1662,109 @@ C:\Users\olado\Documents\django-projects\Indie-Distro\core\users\views.py change
 Watching for file changes with StatReloader
 Bad Request: /api/users/me/
 Bad Request: /api/users/me/
+Watching for file changes with StatReloader
+Not Found: /favicon.ico
+C:\Users\olado\Documents\django-projects\Indie-Distro\core\feed\serializers.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\olado\Documents\django-projects\Indie-Distro\core\feed\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\olado\Documents\django-projects\Indie-Distro\core\feed\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\olado\Documents\django-projects\Indie-Distro\core\feed\views.py changed, reloading.
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+C:\Users\olado\Documents\django-projects\Indie-Distro\core\feed\views.py changed, reloading.
+Watching for file changes with StatReloader
+Bad Request: /api/auth/token/refresh/
+Unauthorized: /api/auth/login/
+Forbidden: /api/films/
+C:\Users\olado\Documents\django-projects\Indie-Distro\config\settings\base.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\olado\Documents\django-projects\Indie-Distro\config\settings\base.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\olado\Documents\django-projects\Indie-Distro\config\settings\base.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\olado\Documents\django-projects\Indie-Distro\config\settings\base.py changed, reloading.
+Watching for file changes with StatReloader
+Not Found: /favicon.ico
+C:\Users\olado\Documents\django-projects\Indie-Distro\core\users\admin.py changed, reloading.
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Internal Server Error: /api/films/
+Traceback (most recent call last):
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\django\views\generic\base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+TypeError: RequestDataManipulationsDecorators.update_request_data_with_owner_data.<locals>.inner() takes 1 positional argument but 2 were given
+C:\Users\olado\Documents\django-projects\Indie-Distro\core\feed\views.py changed, reloading.
+Watching for file changes with StatReloader
+Internal Server Error: /api/films/
+Traceback (most recent call last):
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\django\views\generic\base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\core\utils\helpers\decorators\__init__.py", line 48, in function_to_execute
+    return function(self, request, *args, **kwargs)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\core\feed\views.py", line 29, in post
+    serializer.is_valid(raise_exception=True)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\serializers.py", line 216, in is_valid
+    assert hasattr(self, 'initial_data'), (
+AssertionError: Cannot call `.is_valid()` as no `data=` keyword argument was passed when instantiating the serializer instance.
+C:\Users\olado\Documents\django-projects\Indie-Distro\core\feed\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\olado\Documents\django-projects\Indie-Distro\core\feed\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\olado\Documents\django-projects\Indie-Distro\core\feed\views.py changed, reloading.
+Watching for file changes with StatReloader
+Bad Request: /api/films/
+C:\Users\olado\Documents\django-projects\Indie-Distro\core\feed\models.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\olado\Documents\django-projects\Indie-Distro\core\feed\models.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\olado\Documents\django-projects\Indie-Distro\core\feed\models.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\olado\Documents\django-projects\Indie-Distro\core\feed\models.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\olado\Documents\django-projects\Indie-Distro\core\feed\models.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\olado\Documents\django-projects\Indie-Distro\core\feed\models.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\olado\Documents\django-projects\Indie-Distro\core\feed\models.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\olado\Documents\django-projects\Indie-Distro\core\feed\models.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\olado\Documents\django-projects\Indie-Distro\core\feed\models.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\olado\Documents\django-projects\Indie-Distro\core\feed\models.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\olado\Documents\django-projects\Indie-Distro\core\feed\models.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\olado\Documents\django-projects\Indie-Distro\core\feed\models.py changed, reloading.
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader

@@ -6,6 +6,19 @@ from phonenumbers import parse, is_valid_number
 from phonenumbers.phonenumberutil import  NumberParseException
 
 
+class BaseUserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = [
+            "id",
+            "first_name",
+            "last_name",
+            "is_creator",
+            "phone_number",
+            "date_added",
+        ]
+
 
 class UserSerializer:
     class Retrieve(serializers.ModelSerializer):
