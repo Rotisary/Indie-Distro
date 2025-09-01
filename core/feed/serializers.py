@@ -46,3 +46,6 @@ class FeedSerializer:
         class Meta:
             model = Feed
             exclude = ["saved", "date_last_modified"]
+
+    class Bookmark(serializers.Serializer):
+        id = serializers.PrimaryKeyRelatedField(queryset=Feed.objects.all())

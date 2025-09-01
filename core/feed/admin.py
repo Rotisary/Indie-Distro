@@ -36,6 +36,7 @@ class DiscoveryAdmin(ModelAdmin):
                     "crew",
                     "language",
                     "length",
+                    "price",
                     "saved",
                 ),
             },

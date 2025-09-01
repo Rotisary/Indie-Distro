@@ -77,6 +77,13 @@ class Feed(BaseModelMixin):
         default="en",
         help_text="Language of the movie, e.g., 'en' for English",
     )
+    price = models.DecimalField(
+        _("Film price"),
+        decimal_places=2, 
+        max_digits=17,
+        null=True, 
+        blank=True
+    )
     saved = models.ManyToManyField(
         to="users.User",
         verbose_name=_("Users Who Have Bookmarked the film"),

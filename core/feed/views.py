@@ -1,5 +1,6 @@
 from rest_framework import status, decorators, response, views
 from rest_framework.parsers import JSONParser
+from rest_framework.renderers import JSONRenderer
 from rest_framework.permissions import IsAuthenticated
 
 from loguru import logger
@@ -37,7 +38,8 @@ class ListCreateFeed(views.APIView):
     
     @extend_schema(
         description="endpoint for retrieving list of films owned by the authenticated user",
-        responses={200: FeedSerializer.FeedRetrieve}, 
+        request=None,
+        responses={200: FeedSerializer.FeedRetrieve(many=True)}, 
     )
     def get(self, request):
         queryset = Feed.objects.filter(owner=request.user)
@@ -50,7 +52,7 @@ class ListCreateFeed(views.APIView):
         # logger.info(f"Retrieved {len(serializer.data['results'])} films for the user.")
         return response.Response(data=serializer.data, status=status.HTTP_200_OK)
     
-
+@extend_schema(tags=["feed"])
 class RetrieveUpdateFeed(views.APIView):
     http_method_names = ["get", "patch"]
     permission_classes = [
@@ -64,7 +66,8 @@ class RetrieveUpdateFeed(views.APIView):
 
     def get_permissions(self):
         if self.request.method == "GET":
-            return [IsAuthenticated()]
+            return [IsAuthenticated(), ]
+        
         return super().get_permissions()
 
 
@@ -106,4 +109,62 @@ class RetrieveUpdateFeed(views.APIView):
                 "Film not found", 
                 status_code=status.HTTP_404_NOT_FOUND
             )
+        
+        
+@extend_schema(tags=["feed"])
+class Bookmark(views.APIView):
+    http_method_names = ["post", ]
+    parser_classes = [JSONParser, ]
 
+
+    @extend_schema(
+        description="endpoint to bookmark a film",
+        request=FeedSerializer.Bookmark,
+        responses={201: None}
+    )
+    def post(self, request):
+        serializer = FeedSerializer.Bookmark(
+            data=request.data
+        )
+        serializer.is_valid(raise_exception=True)
+        feed: Feed = serializer.validated_data["id"]
+        response_data = {}
+        if request.user not in feed.saved.all():
+            feed.saved.add(request.user)
+            response_data["status"] = "success"
+        else:
+            response_data["status"] = "failed"
+
+        return response.Response(
+            data=response_data, status=status.HTTP_200_OK
+        )
+
+
+@extend_schema(tags=["feed"])
+class RemoveBookmark(views.APIView):
+    http_method_names = ["post", ]
+    parser_classes = [JSONParser, ]
+    renderer_classes = [JSONRenderer, ]
+
+
+    @extend_schema(
+        description="endpoint to un-bookmark a film",
+        request=FeedSerializer.Bookmark,
+        responses={201: None}
+    )
+    def post(self, request):
+        serializer = FeedSerializer.Bookmark(
+            data=request.data
+        )
+        serializer.is_valid(raise_exception=True)
+        feed: Feed = serializer.validated_data["id"]
+        response_data = {}
+        if request.user in feed.saved.all():
+            feed.saved.remove(request.user)
+            response_data["status"] = "success"
+        else:
+            response_data["status"] = "failed"
+
+        return response.Response(
+            data=response_data, status=status.HTTP_200_OK
+        )
