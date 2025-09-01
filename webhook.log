@@ -2026,3 +2026,5 @@ Watching for file changes with StatReloader
 Not Found: /api/feed/bookmark/
 C:\Users\olado\Documents\django-projects\Indie-Distro\core\feed\urls.py changed, reloading.
 Watching for file changes with StatReloader
+Not Found: /api/feed/bookmark/
+Bad Request: /api/films/remove_bookmark/
