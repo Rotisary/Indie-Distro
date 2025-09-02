@@ -166,6 +166,10 @@ class Purchase(BaseModelMixin):
         help_text=_("film time of expiry for rented films")
     )
 
+    class Meta:
+        verbose_name = _('Film Purchase')
+        verbose_name_plural = _("Film Purchases")
+
 
     def save(self, *args, **kwargs):
         if not self.id:
