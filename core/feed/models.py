@@ -134,7 +134,7 @@ class Purchase(BaseModelMixin):
     id = models.CharField(
         primary_key=True, 
         blank=True, 
-        null=True, 
+        null=False, 
         unique=True, 
         max_length=100
     )

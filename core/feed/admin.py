@@ -39,7 +39,6 @@ class FeedAdmin(ModelAdmin):
                     "length",
                     "price",
                     "rental_duration",
-                    "bought",
                     "saved",
                 ),
             },
