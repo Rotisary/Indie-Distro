@@ -61,6 +61,7 @@ CORE_APPS = [
     'core.payment.apps.PaymentConfig',
     'core.feed.apps.FeedConfig',
     'core.utils.apps.UtilsConfig',
+    'core.playback.PlaybackConfig',
 ]
 
 INSTALLED_APPS += CORE_APPS

@@ -2089,3 +2089,46 @@ C:\Users\olado\Documents\django-projects\Indie-Distro\config\settings\base.py ch
 Watching for file changes with StatReloader
 Watching for file changes with StatReloader
 Not Found: /favicon.ico
+Internal Server Error: /admin/feed/purchase/add/
+Traceback (most recent call last):
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\django\contrib\admin\options.py", line 719, in wrapper
+    return self.admin_site.admin_view(view)(*args, **kwargs)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\django\utils\decorators.py", line 192, in _view_wrapper
+    result = _process_exception(request, e)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\django\utils\decorators.py", line 190, in _view_wrapper
+    response = view_func(request, *args, **kwargs)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\django\views\decorators\cache.py", line 80, in _view_wrapper
+    response = view_func(request, *args, **kwargs)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\django\contrib\admin\sites.py", line 246, in inner
+    return view(request, *args, **kwargs)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\django\contrib\admin\options.py", line 1984, in add_view
+    return self.changeform_view(request, None, form_url, extra_context)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\unfold\mixins\base_model_admin.py", line 42, in changeform_view
+    return super().changeform_view(request, object_id, form_url, extra_context)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\unfold\mixins\action_model_admin.py", line 92, in changeform_view
+    return super().changeform_view(request, object_id, form_url, extra_context)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\django\utils\decorators.py", line 48, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\django\utils\decorators.py", line 192, in _view_wrapper
+    result = _process_exception(request, e)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\django\utils\decorators.py", line 190, in _view_wrapper
+    response = view_func(request, *args, **kwargs)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\django\contrib\admin\options.py", line 1843, in changeform_view
+    return self._changeform_view(request, object_id, form_url, extra_context)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\django\contrib\admin\options.py", line 1900, in _changeform_view
+    self.log_addition(request, new_object, change_message)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\django\contrib\admin\options.py", line 953, in log_addition
+    return LogEntry.objects.log_actions(
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\django\contrib\admin\models.py", line 82, in log_actions
+    log_entry_list = [
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\django\contrib\admin\models.py", line 89, in <listcomp>
+    object_repr=str(obj)[:200],
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\core\feed\models.py", line 181, in __str__
+    return f"film({self.film.id})-{self.user.first_name}-purchase({self.id})"
+AttributeError: 'Purchase' object has no attribute 'user'
+C:\Users\olado\Documents\django-projects\Indie-Distro\core\feed\models.py changed, reloading.
+Watching for file changes with StatReloader

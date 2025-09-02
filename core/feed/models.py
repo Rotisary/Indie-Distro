@@ -178,5 +178,5 @@ class Purchase(BaseModelMixin):
 
     
     def __str__(self):
-        return f"film({self.film.id})-{self.user.first_name}-purchase({self.id})"
+        return f"film({self.film.id})-{self.owner.first_name}-purchase({self.id})"
 
