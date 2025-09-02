@@ -1,3 +1,4 @@
+import uuid
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.contrib.postgres.fields import ArrayField
@@ -6,7 +7,12 @@ from django.utils.text import slugify
 
 
 from  core.utils.mixins import BaseModelMixin
-from core.utils.enums import FilmGenreType, FilmCategoryType
+from core.utils.enums import (
+    FilmGenreType, 
+    FilmCategoryType,
+    FilmSaleType,
+    PurchaseStatusType
+)
 from core.users.models import User
 
 
@@ -43,7 +49,7 @@ class Feed(BaseModelMixin):
         null=False,
         help_text=_("The type of film e.g Series, Standalone")
     )
-    length = models.TimeField(_("Film Length"), null=True, blank=True)
+    length = models.DurationField(_("Film Length(Runtime)"), null=True, blank=True)
     release_date = models.DateField(
         _("Release Date "),
         null=True,
@@ -77,11 +83,28 @@ class Feed(BaseModelMixin):
         default="en",
         help_text="Language of the movie, e.g., 'en' for English",
     )
+    sale_type = models.CharField(
+        choices=FilmSaleType.choices(), 
+        default=FilmSaleType.ONE_TIME_SALE.value,
+        verbose_name=_("Sale Type"),
+        blank=True,
+        help_text=_("The sale type of the film,(one time sale, rental)"),     
+    )
     price = models.DecimalField(
         _("Film price"),
         decimal_places=2, 
         max_digits=17,
         null=True, 
+        blank=True
+    )
+    rental_duration = models.IntegerField(
+        verbose_name=_("Rental Duration(in hours)"), blank=True, null=True
+    )
+    bought = models.ManyToManyField(
+        to="users.User",
+        through="Purchase",
+        verbose_name=_("Users Who Have Paid for the film"),
+        related_name="bought_films",
         blank=True
     )
     saved = models.ManyToManyField(
@@ -105,3 +128,51 @@ class Feed(BaseModelMixin):
 
     def __str__(self):
         return f"{self.slug}"
+    
+
+class Purchase(BaseModelMixin):
+    id = models.CharField(
+        primary_key=True, 
+        blank=True, 
+        null=True, 
+        unique=True, 
+        max_length=100
+    )
+    owner = models.ForeignKey(
+        to="users.User",
+        verbose_name=_("Purchase Owner"),
+        null=False,
+        blank=False,
+        related_name="purchases_made",
+        on_delete=models.DO_NOTHING,
+        help_text=_("User that made purchase"),
+    )
+    film = models.ForeignKey(
+        to=Feed,
+        verbose_name="Film of Purchase",
+        on_delete=models.CASCADE,
+        related_name="purchases",
+        help_text=_("the film that the purchase was made for")
+    )
+    status = models.CharField(
+        choices=PurchaseStatusType.choices(), 
+        default=PurchaseStatusType.REVOKED.value, 
+        verbose_name=_("The current status of the purchase")
+    )
+    expiry_time = models.TimeField(
+        _("Time of Expiry"), 
+        blank=True, 
+        null=True,
+        help_text=_("film time of expiry for rented films")
+    )
+
+
+    def save(self, *args, **kwargs):
+        if not self.id:
+            self.id = uuid.uuid4()
+        super().save(*args, **kwargs)
+
+    
+    def __str__(self):
+        return f"film({self.film.id})-{self.user.first_name}-purchase({self.id})"
+

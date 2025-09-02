@@ -1,11 +1,11 @@
 from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
 from unfold.admin import ModelAdmin
-from .models import Feed
+from .models import Feed, Purchase
 
 
 @admin.register(Feed)
-class DiscoveryAdmin(ModelAdmin):
+class FeedAdmin(ModelAdmin):
     fieldsets = (
         (
             _("Owner"),
@@ -23,6 +23,7 @@ class DiscoveryAdmin(ModelAdmin):
                     "slug",
                     "genre",
                     "type",
+                    "sale_type"
                 ),
             },
         ),
@@ -37,6 +38,8 @@ class DiscoveryAdmin(ModelAdmin):
                     "language",
                     "length",
                     "price",
+                    "rental_duration",
+                    "bought",
                     "saved",
                 ),
             },
@@ -50,7 +53,50 @@ class DiscoveryAdmin(ModelAdmin):
         ),
     )
 
-    list_display = ["owner__first_name", "owner__last_name", "title", "length"]
-    search_fields = ["title", "genre", "type"]
+    list_display = ["owner__first_name", "owner__last_name", "title", "length", "price"]
+    search_fields = ["title", "genre", "type", "sale_type"]
     readonly_fields = ["date_added", "date_last_modified"]
     ordering = ["title"]
+
+
+@admin.register(Purchase)
+class PurchaseAdmin(ModelAdmin):
+    fieldsets = (
+        (
+            _("Owner"),
+            {
+                "classes": ["tab"],
+                "fields": (
+                    "owner",
+                    "film"
+                ),
+            },
+        ),
+        (
+            _("Personal Info"),
+            {
+                "classes": ["tab"],
+                "fields": (
+                    "id",
+                    "status",
+                    "expiry_time",
+                ),
+            },
+        ),
+        (
+            _("Important dates"),
+            {
+                "classes": ["tab"],
+                "fields": ("date_added", "date_last_modified"),
+            },
+        ),
+    )
+
+    list_display = ["id", "film__id", "owner__first_name", "status"]
+    search_fields = [
+        "owner__first_name", 
+        "owner__last_name",
+        "film__name"
+    ]
+    readonly_fields = ["date_added", "date_last_modified"]
+    ordering = ["-date_added"]

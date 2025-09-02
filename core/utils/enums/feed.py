@@ -18,3 +18,15 @@ class FilmCategoryType(BaseEnum):
     DOCUMENTARY = "documentary"
     SHORT_FILM = "short film"
     FRANCHISE = "franchise"
+
+
+class FilmSaleType(BaseEnum):
+    ONE_TIME_SALE = "one-time sale"
+    RENTAL = "rental"
+
+
+class PurchaseStatusType(BaseEnum):
+    ACTIVE = "active"
+    REVOKED = "revoked"
+    EXPIRED = "expired"
+    CHARGEBACK = "chargeback"
