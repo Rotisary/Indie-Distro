@@ -1,6 +1,12 @@
 import jwt, datetime
+
+from rest_framework import status
 from django.conf import settings
-from core.users.models import UserSession
+
+from core.users.models import User, UserSession
+from core.feed.models import Purchase
+from core.utils.enums import PurchaseStatusType
+from core.utils.exceptions import CustomException
 
 
 class AccessUtils:
@@ -24,4 +30,24 @@ class AccessUtils:
             "jti": f"{owner}:{film}:{session.id}"
         }
         token = jwt.encode(payload, settings.JWT_SECRET, algorithm="HS256")
+        return token
+    
+
+    @staticmethod
+    def return_playback_token(purchase_id: str, user: User):
+        """
+            returns the generated token for a verified purchase. To be reused across playback endpoints
+        """
+        purchase = Purchase.objects.filter(
+            id=purchase_id, owner=user, status=PurchaseStatusType.ACTIVE.value
+        ).first()
+        if not purchase:
+            raise CustomException(
+                message="Permission Denied",
+                status_code=status.HTTP_403_FORBIDDEN
+            )
+        
+        token = AccessUtils.generate_playback_token(
+            user.id, purchase.film.id, purchase_id, user.usersession
+        )
         return token

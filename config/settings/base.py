@@ -61,7 +61,7 @@ CORE_APPS = [
     'core.payment.apps.PaymentConfig',
     'core.feed.apps.FeedConfig',
     'core.utils.apps.UtilsConfig',
-    'core.playback.PlaybackConfig',
+    'core.playback.apps.PlaybackConfig',
 ]
 
 INSTALLED_APPS += CORE_APPS
@@ -245,6 +245,7 @@ SIMPLE_JWT = {
     "SLIDING_TOKEN_LIFETIME": timedelta(days=5),
     "SLIDING_TOKEN_REFRESH_LIFETIME": timedelta(days=1),
 }
+JWT_SECRET = env.str("JWT_SECRET")
 
 LOGGING = {
     'version': 1,
