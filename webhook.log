@@ -2276,3 +2276,4 @@ C:\Users\olado\Documents\django-projects\Indie-Distro\core\playback\urls.py chan
 Watching for file changes with StatReloader
 Watching for file changes with StatReloader
 Watching for file changes with StatReloader
+Forbidden: /api/playback/get_url/
