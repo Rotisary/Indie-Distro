@@ -5,4 +5,4 @@ from .models import FileModel
 
 @admin.register(FileModel)
 class FileModelAdmin(ModelAdmin):
-    list_display = ["id", "owner", "purpose"]
+    list_display = ["id", "owner", "file_purpose"]

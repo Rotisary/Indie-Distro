@@ -7,7 +7,6 @@ from django.conf import settings
 from core.utils.mixins import BaseModelMixin
 from core.utils import enums
 from core.users.models import User
-from core.feed.models import Feed
 
 
 class FileModel(BaseModelMixin):
@@ -26,7 +25,7 @@ class FileModel(BaseModelMixin):
         verbose_name=_("File Owner")
     )
     film = models.ForeignKey(
-        to=Feed,
+        to="feed.Feed",
         on_delete=models.CASCADE,
         null=True,
         blank=True,
@@ -90,7 +89,7 @@ class FileModel(BaseModelMixin):
         mimetype = self.mime_type
         return mimetype and mimetype.split("/")[0]
     
-    
+
     @property
     def file_src(self):
         return (
