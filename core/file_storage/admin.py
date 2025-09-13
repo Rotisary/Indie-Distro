@@ -1,3 +1,8 @@
 from django.contrib import admin
+from unfold.admin import ModelAdmin
+from .models import FileModel
 
-# Register your models here.
+
+@admin.register(FileModel)
+class FileModelAdmin(ModelAdmin):
+    list_display = ["id", "owner", "purpose"]
