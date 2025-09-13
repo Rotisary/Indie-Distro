@@ -16,6 +16,9 @@ class AccessUtils:
 
     @staticmethod
     def generate_playback_token(owner: int, film: int, purchase: str, session: UserSession):
+        """
+            method to encode user and film data in order to generate token for movie access
+        """
         now = datetime.datetime.now(datetime.timezone.utc)
         payload = {
             "sub": str(owner),
