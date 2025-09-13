@@ -14,6 +14,7 @@ from core.utils.enums import (
     PurchaseStatusType
 )
 from core.users.models import User
+from core.file_storage.models import FileModel
 
 
 class Feed(BaseModelMixin):
@@ -99,6 +100,13 @@ class Feed(BaseModelMixin):
     )
     rental_duration = models.IntegerField(
         verbose_name=_("Rental Duration(in hours)"), blank=True, null=True
+    )
+    film_file = models.ForeignKey(
+        to=FileModel,
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        verbose_name=_("The File of the Film")
     )
     bought = models.ManyToManyField(
         to="users.User",
