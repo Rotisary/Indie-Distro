@@ -216,6 +216,18 @@ UNFOLD = {
                         "link": reverse_lazy("admin:feed_purchase_changelist"),
                     },
                 ]
+            },
+            {
+                "title": _("File Storage"),
+                "collapsible": True,
+                "items": [
+                    {
+                        "title": _("Files"),
+                        "icon": "folder",
+                        "link": reverse_lazy("admin:file_storage_filemodel_changelist"),
+                    },
+
+                ]
             }
         ]
     }
