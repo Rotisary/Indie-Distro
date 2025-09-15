@@ -110,7 +110,7 @@ class FileModel(BaseModelMixin):
         return self.id
     
 
-    def save(self, *args, **kwargs):
-        if not self.id:
-            self.id = self.get_identifier()
-        super().save(*args, **kwargs)
+    # def save(self, *args, **kwargs):
+    #     if not self.id:
+    #         self.id = self.get_identifier()
+    #     super().save(*args, **kwargs)

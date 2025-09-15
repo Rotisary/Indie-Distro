@@ -1,6 +1,8 @@
 import mimetypes
 import boto3
+
 from django.conf import settings
+from django.core.cache import cache
 
 from core.utils.commons.utils import identifiers
 
@@ -8,6 +10,22 @@ from core.utils.commons.utils import identifiers
 class FileUploadUtils:
     """Utility class for handling file uploads to S3."""
 
+
+
+    @staticmethod
+    def save_file_metadata_in_memory(owner, file_id, file_key, expires_in):
+        """
+        Store file metadata in cache for a limited time. This is useful for tracking file uploads.
+        """
+
+        cache_key = f"pending_upload-{file_id}"
+        cache_value = {
+            "file_key": file_key,
+            "owner": owner.id
+        }
+        cache.set(cache_key, cache_value, timeout=expires_in)
+        return cache_key
+    
 
     @staticmethod
     def get_file_key(owner, file_name, purpose):
@@ -26,7 +44,15 @@ class FileUploadUtils:
         else:
             extension = ""
 
-        return f"uploads/{owner_email}/{purpose}/{file_id}{extension}"
+        file_key = f"uploads/{owner_email}/{purpose}/{file_id}{extension}"
+        FileUploadUtils.save_file_metadata_in_memory(
+            owner, file_id, file_key, expires_in=3600
+        )
+        data = {
+            "file_id": file_id,
+            "file_key": file_key
+        }
+        return data
     
 
     @staticmethod
