@@ -22,6 +22,7 @@ class FileModel(BaseModelMixin):
         on_delete=models.CASCADE,
         null=False,
         blank=False,
+        related_name="files",
         verbose_name=_("File Owner")
     )
     film = models.ForeignKey(
@@ -29,6 +30,7 @@ class FileModel(BaseModelMixin):
         on_delete=models.CASCADE,
         null=True,
         blank=True,
+        related_name="content_files",
         verbose_name=_("File Film"),
         help_text=_("The film related to the file")
     )
@@ -38,12 +40,6 @@ class FileModel(BaseModelMixin):
         blank=False,
         verbose_name=_("File purpose"),
         max_length=100
-    )
-    file = models.FileField(
-        _("Content"),
-        upload_to="uploads/%Y/%m/%d/", 
-        null=False, 
-        blank=False
     )
     file_key = models.CharField(
         _("File Key"),
@@ -97,13 +93,13 @@ class FileModel(BaseModelMixin):
         return mimetype and mimetype.split("/")[0]
     
 
-    @property
-    def file_src(self):
-        return (
-            self.file.url
-            if settings.USING_MANAGED_STORAGE
-            else os.path.join(settings.BASE_DIR, self.file.path)
-        )
+    # @property
+    # def file_src(self):
+    #     return (
+    #         self.file.url
+    #         if settings.USING_MANAGED_STORAGE
+    #         else os.path.join(settings.BASE_DIR, self.file.path)
+    #     )
     
 
     def __str__(self):

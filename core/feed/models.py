@@ -106,6 +106,7 @@ class Feed(BaseModelMixin):
         null=True,
         blank=True,
         on_delete=models.CASCADE,
+        related_name="films",
         verbose_name=_("The File of the Film")
     )
     bought = models.ManyToManyField(
