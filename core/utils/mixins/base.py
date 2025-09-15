@@ -2,6 +2,8 @@ import secrets
 from django.db import models
 from django.utils import timezone
 
+from core.utils.commons.utils import identifiers
+
 
 class BaseModelMixin(models.Model):
     date_added = models.DateTimeField(auto_now_add=True)
@@ -14,4 +16,4 @@ class BaseModelMixin(models.Model):
         return f"< {type(self).__name__}({self.id}) >"
 
     def get_identifier(self):
-        return secrets.token_hex(5) + str(int(timezone.now().timestamp()))
+        return identifiers.ObjectIdentifiers.unique_id
