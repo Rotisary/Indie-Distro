@@ -45,6 +45,13 @@ class FileModel(BaseModelMixin):
         null=False, 
         blank=False
     )
+    file_key = models.CharField(
+        _("File Key"),
+        null=True,
+        blank=False,
+        max_length=255,
+        help_text=_("The file key in the storage provider")
+    )
     mime_type = models.CharField(
         _("File MIME Type"),
         null=True,
