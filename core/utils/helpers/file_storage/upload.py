@@ -1,9 +1,12 @@
 import mimetypes
 import boto3
+from loguru import logger
 
 from django.conf import settings
 from django.core.cache import cache
+from rest_framework import status
 
+from core.utils import exceptions
 from core.utils.commons.utils import identifiers
 
 
@@ -72,21 +75,28 @@ class FileUploadUtils:
         mime_type: MIME type (e.g. 'video/mp4')
         expires_in: link validity in seconds
         """
-        s3_client = boto3.client(
-            "s3",
-            aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-            aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
-            region_name=settings.AWS_REGION,
-        )
-        
-        presigned_url = s3_client.generate_presigned_url(
-            "put_object",
-            Params={
-                "Bucket": settings.AWS_STORAGE_BUCKET_NAME,
-                "Key": file_key,
-                "ContentType": mime_type,
-            },
-            ExpiresIn=expires_in,
-        )
+        try:
+            s3_client = boto3.client(
+                "s3",
+                aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+                region_name=settings.AWS_REGION,
+            )
+            
+            presigned_url = s3_client.generate_presigned_url(
+                "put_object",
+                Params={
+                    "Bucket": settings.AWS_STORAGE_BUCKET_NAME,
+                    "Key": file_key,
+                    "ContentType": mime_type,
+                },
+                ExpiresIn=expires_in,
+            )
+        except Exception as e:
+            logger.error(f"presigned url generation failed: {e}")
+            raise exceptions.CustomException(
+                message="presigned url generation failed",
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
         return presigned_url
