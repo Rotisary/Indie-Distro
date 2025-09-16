@@ -8,6 +8,7 @@ from rest_framework import status
 
 from core.utils import exceptions
 from core.utils.commons.utils import identifiers
+from .base import BaseStorageHelper
 
 
 class FileUploadUtils:
@@ -57,18 +58,10 @@ class FileUploadUtils:
         }
         return data
     
-
-    @staticmethod
-    def get_mime_type(file_name):
-
-        """Determine the MIME type of a file based on its name."""
-
-        mime_type, *_ = mimetypes.guess_type(file_name)
-        return mime_type if mime_type else "application/octet-stream"
     
 
     @staticmethod
-    def generate_presigned_url(file_key, mime_type, expires_in=3600):
+    def generate_presigned_upload_url(file_key, file_name, expires_in=3600):
         """
         Generate a pre-signed URL for uploading to S3.
         file_key: the S3 key (path inside bucket)
@@ -76,19 +69,14 @@ class FileUploadUtils:
         expires_in: link validity in seconds
         """
         try:
-            s3_client = boto3.client(
-                "s3",
-                aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-                aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
-                region_name=settings.AWS_REGION,
-            )
+            storage_helper = BaseStorageHelper()
             
-            presigned_url = s3_client.generate_presigned_url(
+            presigned_url = storage_helper.s3_client.generate_presigned_url(
                 "put_object",
                 Params={
                     "Bucket": settings.AWS_STORAGE_BUCKET_NAME,
                     "Key": file_key,
-                    "ContentType": mime_type,
+                    "ContentType": storage_helper.get_mime_type(file_name),
                 },
                 ExpiresIn=expires_in,
             )

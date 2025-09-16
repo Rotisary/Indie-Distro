@@ -37,9 +37,8 @@ class GetSignedUploadURL(views.APIView):
         file_purpose = serializer.validated_data["purpose"]
 
         file_metadata = FileUploadUtils.get_file_key(request.user, file_name, file_purpose) 
-        mime_type = FileUploadUtils.get_mime_type(file_name)
-        signed_url = FileUploadUtils.generate_presigned_url(
-            file_metadata["file_key"], mime_type
+        signed_url = FileUploadUtils.generate_presigned_upload_url(
+            file_metadata["file_key"], file_name
         )
         response_data = {
             "file_id": file_metadata["file_id"],
@@ -96,7 +95,7 @@ class CreateFileObject(views.APIView):
             mime_type=self.get_mime_type(file_name=file_name)
         )
         cache.delete(f"pending_upload-{file_id}")
-        # TODO: call file processing endpoint
+        # TODO: call file processing background task
         serializer = FileSerializer.ListRetrieve(
             instance=file
         )
