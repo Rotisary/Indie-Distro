@@ -31,9 +31,7 @@ class FileSerializer:
 
 
 class SignedURLRequestSerializer(serializers.Serializer):
-    file_name = serializers.CharField(
-        read_only=True, required=True, 
-    )
+    file_name = serializers.CharField(required=True)
     purpose = serializers.ChoiceField(
         choices=FilePurposeType.choices(), required=True
     )
