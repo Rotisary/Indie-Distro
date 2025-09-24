@@ -68,6 +68,10 @@ class FileUploadUtils:
         mime_type: MIME type (e.g. 'video/mp4')
         expires_in: link validity in seconds
         """
+
+        assert(
+            settings.USING_MANAGED_STORAGE
+        ), "Cannot invoke this function when not using managed storage"
         try:
             storage_helper = BaseStorageHelper()
             
