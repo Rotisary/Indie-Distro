@@ -126,20 +126,36 @@ class UserSerializer:
                 message = err._msg
                 raise serializers.ValidationError(message, "invalid phone number")
             return value
-        
+
+
+class TokenSerializer(serializers.Serializer):
+    access = serializers.CharField(help_text=_("Access token (short-lived JWT)"))
+    refresh = serializers.CharField(help_text=_("Refresh token (long-lived JWT)"))
+
 
 class AuthSerializer:
+
     class Login(serializers.Serializer):
         email = serializers.EmailField(required=True, help_text=_("Email"))
         password = serializers.CharField(
             write_only=True, required=True, style={"input_type": "password"}, help_text=_("Password")
         )
 
+
+    class AccountRetrieve(serializers.Serializer):
+        user = UserSerializer.Retrieve(help_text=_("User details"))
+        token = TokenSerializer(help_text=_("JWT token pair"))
+
+
     class TokenRefresh(serializers.Serializer):
         refresh = serializers.CharField(
             required=True,
             help_text=_("This is the 'refresh' key in account AccessToken"),
         ) 
+    
+
+    class Logout(serializers.Serializer):
+        refresh = serializers.CharField()
 
 
 # class WalletSerializer(serializers.HyperlinkedModelSerializer):

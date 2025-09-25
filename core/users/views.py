@@ -11,7 +11,11 @@ from rest_framework.renderers import JSONRenderer
 from rest_framework.permissions import IsAuthenticated
 
 from core.users.models import User, UserSession
-from core.users.serializers import UserSerializer, AuthSerializer
+from core.users.serializers import (
+    UserSerializer, 
+    TokenSerializer,
+    AuthSerializer
+)
 from core.utils import exceptions
 from utils.permissions import IsGuestUser
 
@@ -38,7 +42,7 @@ class CreateUser(views.APIView):
         auth=[],
         description="endpoint for user creation",
         request=UserSerializer.Create,
-        responses={201: UserSerializer.Retrieve},
+        responses={201: AuthSerializer.AccountRetrieve},
     )
     def post(self, request):
         serializer = UserSerializer.Create(data=request.data)
@@ -47,7 +51,6 @@ class CreateUser(views.APIView):
         logger.info(f"created user with email {account.email}")
 
         auth_token = account.retrieve_auth_token()
-        logger.info(f"\n\nUser Auth\n{auth_token}")
 
         logger.info("CREATING SESSION FOR THE NEW USER")
         UserSession.objects.create(
@@ -105,7 +108,7 @@ class Login(views.APIView):
         auth=[],
         description="endpoint for user login",
         request=AuthSerializer.Login,
-        responses={200: UserSerializer.Retrieve},
+        responses={200: AuthSerializer.AccountRetrieve},
     )
     def post(self, request):
         serializer = AuthSerializer.Login(data=request.data)
@@ -122,18 +125,6 @@ class Login(views.APIView):
             )
 
         auth_token = account.retrieve_auth_token()
-        logger.info(f"\n\nUser Auth\n{auth_token}")
-        session = UserSession.objects.filter(user=account).first()
-
-        if session:
-            logger.info("SESSION EXISTS")
-            try:
-                token = RefreshToken(session.refresh)
-                token.blacklist()
-            except Exception as e:
-                raise exceptions.CustomException(message="unable to blacklist token")
-            session.delete()
-            logger.info("OLD SESSION DELETED")
 
         logger.info("CREATING NEW SESSION")
         UserSession.objects.create(
@@ -146,7 +137,8 @@ class Login(views.APIView):
         )
         logger.info(f"User {account.email} logged in successfully")
 
-        response_data = {"user": UserSerializer.Retrieve(instance=account).data, "token": auth_token}
+        serializer = UserSerializer.Retrieve(instance=account)
+        response_data = {"user": serializer.data,  "token": auth_token}
         return response.Response(response_data, status=status.HTTP_200_OK)
     
 
@@ -157,28 +149,25 @@ class Logout(views.APIView):
 
     @extend_schema(
         description="endpoint for user logout",
-        request=None,
+        request=AuthSerializer.Logout,
         responses={200: None},
     )
     def post(self, request):
         try:
-            session = UserSession.objects.filter(user=request.user).first()
-            if session:
-                token = RefreshToken(session.refresh)
-                token.blacklist()
-                session.delete()
-                logger.info(f"User {request.user.email} logged out successfully")
-                return response.Response({"message": "Logged out successfully"}, status=status.HTTP_200_OK)
+            refresh_token = request.data.get("refresh")
+            UserSession.objects.get(refresh=refresh_token).delete()
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+        except TokenError:
+            pass  # Ignore if token has already expired
+        except UserSession.DoesNotExist:
             raise exceptions.CustomException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                message="this user is not authenticated"
+                message="user does not have an active session"
             )
-        except TokenError as err:
-            raise exceptions.CustomException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                message=str(err),
-                errors=["refresh token error"],
-            )
+        else:
+            logger.info(f"User {request.user.email} logged out successfully")
+            return response.Response(status=status.HTTP_205_RESET_CONTENT)
         
 
 class TokenRefresh(views.APIView):
@@ -190,7 +179,7 @@ class TokenRefresh(views.APIView):
     @extend_schema(
         description="endpoint for refreshing user access token after it expires",
         request=AuthSerializer.TokenRefresh,
-        responses={200: None}
+        responses={200: TokenSerializer}
     )
     def post(self, request):
         serializer = AuthSerializer.TokenRefresh(data=request.data)
