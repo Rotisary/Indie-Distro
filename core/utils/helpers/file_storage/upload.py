@@ -37,7 +37,7 @@ class FileUploadUtils:
         """Generate a unique file key for S3 storage."""
 
         owner_email = owner.email.lower()
-        file_id = identifiers.ObjectIdentifiers.unique_id
+        file_id = identifiers.ObjectIdentifiers.unique_id()
 
         if file_name:
             splitted_filename = file_name.split(".")
@@ -91,4 +91,5 @@ class FileUploadUtils:
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
+        logger.info(f"presigned url generated successfully for {file_key}")
         return presigned_url
