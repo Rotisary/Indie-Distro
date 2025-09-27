@@ -2481,3 +2481,63 @@ C:\Users\olado\Documents\django-projects\Indie-Distro\core\utils\commons\utils\i
 Watching for file changes with StatReloader
 C:\Users\olado\Documents\django-projects\Indie-Distro\core\utils\helpers\file_storage\upload.py changed, reloading.
 Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+C:\Users\olado\Documents\django-projects\Indie-Distro\core\utils\helpers\file_storage\base.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\olado\Documents\django-projects\Indie-Distro\core\utils\helpers\file_storage\base.py changed, reloading.
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+C:\Users\olado\Documents\django-projects\Indie-Distro\core\file_storage\views.py changed, reloading.
+Watching for file changes with StatReloader
+Bad Request: /api/files/create_file_object/
+Bad Request: /api/files/create_file_object/
+C:\Users\olado\Documents\django-projects\Indie-Distro\core\file_storage\views.py changed, reloading.
+Watching for file changes with StatReloader
+Internal Server Error: /api/files/create_file_object/
+Traceback (most recent call last):
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\django\views\generic\base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\core\utils\helpers\decorators\__init__.py", line 48, in function_to_execute
+    return function(self, request, *args, **kwargs)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\core\file_storage\views.py", line 79, in post
+    file_id = serializer.validated_data["id"]
+KeyError: 'id'
+Bad Request: /api/files/create_file_object/
+Forbidden: /api/files/8c9f56d5e11758875216/
+Not Found: /favicon.ico
+Not Found: /accounts/profile/
+C:\Users\olado\Documents\django-projects\Indie-Distro\core\utils\helpers\file_storage\base.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\olado\Documents\django-projects\Indie-Distro\core\utils\helpers\file_storage\base.py changed, reloading.
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Not Found: /favicon.ico
+C:\Users\olado\Documents\django-projects\Indie-Distro\core\utils\helpers\file_storage\base.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\olado\Documents\django-projects\Indie-Distro\core\utils\helpers\file_storage\base.py changed, reloading.
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+C:\Users\olado\Documents\django-projects\Indie-Distro\core\utils\helpers\file_storage\base.py changed, reloading.
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Not Found: /favicon.ico
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
