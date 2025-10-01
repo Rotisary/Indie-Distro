@@ -228,7 +228,7 @@ UNFOLD = {
                     },
                     {
                         "title": _("File Processing Jobs"),
-                        "icon": "jobs",
+                        "icon": "build",
                         "link": reverse_lazy("admin:file_storage_fileprocessingjob_changelist"),
                     },
                 ]

@@ -8,7 +8,68 @@ from .models import FileModel, FileProcessingJob
 
 @admin.register(FileModel)
 class FileModelAdmin(ModelAdmin):
-    list_display = ["id", "owner", "file_purpose"]
+    fieldsets = (
+        (
+            _("Owner"),
+            {
+                "classes": ["tab"],
+                "fields": ("owner",),
+            },
+        ),
+        (
+            _("Personal Info"),
+            {
+                "classes": ["tab"],
+                "fields": (
+                    "film",
+                    "file_purpose",
+                    "file_key",
+                    "mime_type",
+                    "original_filename",
+                    "is_verified",
+                    "checksum"
+                ),
+            },
+        ),
+        (
+            _("Metadata"),
+            {
+                "classes": ["tab"],
+                "fields": (
+                    "file_width",
+                    "file_height",
+                    "format_name",
+                    "has_audio",
+                    "hls_master_key",
+                    "dash_mpd_key",
+                    "last_error"
+                ),
+            },
+        ),
+        (
+            _("Status"),
+            {
+                "classes": ["tab"],
+                "fields": (
+                    "is_verified",
+                    "processing_status",
+                    "last_processed_at"
+                )
+            }
+        ),
+        (
+            _("Important dates"),
+            {
+                "classes": ["tab"],
+                "fields": ("date_added", "date_last_modified"),
+            },
+        ),
+    )
+
+    list_display = ["id", "owner__first_name", "file_purpose", "mime_type"]
+    search_fields = ["id",]
+    readonly_fields = ["date_added", "date_last_modified"]
+    ordering = ["date_added"]
 
 
 @admin.register(FileProcessingJob)

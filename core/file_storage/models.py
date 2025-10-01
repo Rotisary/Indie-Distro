@@ -57,26 +57,6 @@ class FileModel(BaseModelMixin):
         blank=True,
         max_length=100,
     )
-    is_verified = models.BooleanField(
-        _("Is this file verified"),
-        null=False,
-        blank=True,
-        default=False,
-        editable=True,
-    )
-    upload_session_id = models.CharField(
-        _("File Upload Session ID"),
-        null=False,
-        editable=False,
-        default=uuid.uuid4,
-        max_length=64,
-    )
-    currently_under_processing = models.BooleanField(
-        _("Is this file currently under processing"),
-        null=False,
-        blank=True,
-        default=True,
-    )
     original_filename = models.CharField(
         _("Original File Name"),
         null=True,
@@ -84,6 +64,45 @@ class FileModel(BaseModelMixin):
         max_length=500,
         editable=False,
     )
+    is_verified = models.BooleanField(
+        _("Is this file verified"),
+        null=False,
+        blank=True,
+        default=False,
+        editable=True,
+    )
+    checksum = models.CharField(
+        max_length=128, 
+        null=True, 
+        blank=True, 
+        help_text=_("checksum for file integrity verification")
+    )
+    file_width = models.IntegerField(
+        _("Width of File"), null=True, blank=True
+    )
+    file_height = models.IntegerField(
+        _("Height of File"), null=True, blank=True
+    )
+    format_name = models.CharField(
+        _("Format Name"), max_length=64, null=True, blank=True
+    )
+    has_audio = models.BooleanField(default=True)
+    hls_master_key = models.CharField(
+        _("HLS Master Key"), max_length=1024, null=True, blank=True
+    )
+    dash_mpd_key = models.CharField(
+        _("Dash MPD Key"), max_length=1024, null=True, blank=True
+    )
+    last_error = models.TextField(
+        _("Last Error During Processing"), null=True, blank=True
+    )
+    processing_status = models.CharField(
+        _("Processing Status"),
+        max_length=16, 
+        choices=enums.JobStatus.choices(), 
+        default=enums.JobStatus.PENDING.value
+    )
+    last_processed_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         verbose_name = _("File")
