@@ -25,8 +25,6 @@ class FileModelAdmin(ModelAdmin):
                     "file_purpose",
                     "file_key",
                     "mime_type",
-                    "original_filename",
-                    "is_verified",
                     "checksum"
                 ),
             },

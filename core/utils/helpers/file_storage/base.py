@@ -1,5 +1,10 @@
 import boto3
 import mimetypes
+import hashlib
+import os
+import shutil
+import subprocess
+from typing import Iterable, Optional, Tuple
 
 from loguru import logger
 
@@ -11,9 +16,9 @@ from core.utils import exceptions
 
 
 
-class BaseStorageHelper:
+class StorageClient:
     """
-    helper class that contains all base storage utilities(utilities to be reused across the codebase)
+    s3 client class. Contains all base methods that involves s3 clients
     """
 
     def __init__(self):
@@ -62,3 +67,64 @@ class BaseStorageHelper:
             )
 
         return presigned_url
+    
+
+    # def upload_file_s3(local_path: str, key: str, content_type: Optional[str] = None) -> None:
+    # helper = BaseStorageHelper()
+    # bucket = settings.AWS_STORAGE_BUCKET_NAME
+    # extra = {}
+    # if content_type:
+    #     extra["ContentType"] = content_type
+    # logger.info("Uploading {} -> s3://{}/{}", local_path, bucket, key)
+    # helper.s3_client.upload_file(local_path, bucket, key, ExtraArgs=extra or None)
+    
+
+class StorageUtils:
+
+    @staticmethod
+    def ensure_binary_on_path(binary: str):
+        if shutil.which(binary) is None:
+            logger.error("{} binary not found on PATH", binary)
+            raise exceptions.CustomException(
+                message=f"{binary} not available on server",
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+        
+    @staticmethod
+    def run_cmd(cmd: Iterable[str], timeout: int = 3600) -> str:
+        """
+        Run a command safely; return (stdout, stderr). Raise on failure.
+        """
+
+        logger.info(f"Running command: {" ".join(cmd)}")
+        try:
+            response = subprocess.run(
+                list(cmd),
+                capture_output=True,
+                text=True,
+                check=True,
+                timeout=timeout,
+            )
+            return response.stdout or ""
+        except subprocess.CalledProcessError as e:
+            logger.error(
+                "ffprobe failed: returncode={}, stderr={}",
+                getattr(e, "returncode", None),
+                getattr(e, "stderr", None),
+            )
+            raise exceptions.CustomException(
+                message="ffprobe processing failed",
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+        except subprocess.TimeoutExpired as e:
+            logger.error(f"ffprobe timed out after {timeout} seconds: {e}")
+            raise exceptions.CustomException(
+                message="ffprobe timed out",
+                status_code=status.HTTP_504_GATEWAY_TIMEOUT,
+            )
+        except Exception as e:
+            logger.exception(f"unexpected error running ffprobe: {e}")
+            raise exceptions.CustomException(
+                message="unexpected error running ffprobe",
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
