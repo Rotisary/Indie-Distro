@@ -226,7 +226,11 @@ UNFOLD = {
                         "icon": "folder",
                         "link": reverse_lazy("admin:file_storage_filemodel_changelist"),
                     },
-
+                    {
+                        "title": _("File Processing Jobs"),
+                        "icon": "jobs",
+                        "link": reverse_lazy("admin:file_storage_fileprocessingjob_changelist"),
+                    },
                 ]
             }
         ]
