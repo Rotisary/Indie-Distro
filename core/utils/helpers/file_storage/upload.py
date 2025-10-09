@@ -8,7 +8,7 @@ from rest_framework import status
 
 from core.utils import exceptions
 from core.utils.commons.utils import identifiers
-from .base import BaseStorageHelper
+from .base import StorageClient, StorageUtils
 
 
 class FileUploadUtils:
@@ -17,7 +17,7 @@ class FileUploadUtils:
 
 
     @staticmethod
-    def save_file_metadata_in_memory(owner, file_id, file_key, expires_in):
+    def save_file_metadata_in_memory(owner, file_id, file_key, expires_in=settings.PRESIGNED_UPLOAD_TTL):
         """
         Store file metadata in cache for a limited time. This is useful for tracking file uploads.
         """
@@ -49,9 +49,7 @@ class FileUploadUtils:
             extension = ""
 
         file_key = f"uploads/{owner_email}/{purpose}/{file_id}{extension}"
-        FileUploadUtils.save_file_metadata_in_memory(
-            owner, file_id, file_key, expires_in=3600
-        )
+        FileUploadUtils.save_file_metadata_in_memory(owner, file_id, file_key)
         data = {
             "file_id": file_id,
             "file_key": file_key
@@ -61,7 +59,7 @@ class FileUploadUtils:
     
 
     @staticmethod
-    def generate_presigned_upload_url(file_key, file_name, expires_in=3600):
+    def generate_presigned_upload_url(file_key, file_name, expires_in=settings.PRESIGNED_UPLOAD_TTL):
         """
         Generate a pre-signed URL for uploading to S3.
         file_key: the S3 key (path inside bucket)
@@ -73,7 +71,7 @@ class FileUploadUtils:
             settings.USING_MANAGED_STORAGE
         ), "Cannot invoke this function when not using managed storage"
         try:
-            storage_helper = BaseStorageHelper()
+            storage_helper = StorageClient()
             
             presigned_url = storage_helper.s3_client.generate_presigned_url(
                 "put_object",

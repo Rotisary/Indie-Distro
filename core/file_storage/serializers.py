@@ -15,7 +15,7 @@ class FileSerializer:
         class Meta:
             model = FileModel
             exclude = [
-                "currently_under_processing",
+                "processing_status",
                 "is_verified",
                 "file_key"
             ]

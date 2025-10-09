@@ -4,6 +4,7 @@ import hashlib
 import os
 import shutil
 import subprocess
+import tempfile
 from typing import Iterable, Optional, Tuple
 
 from loguru import logger
@@ -13,7 +14,12 @@ from django.conf import settings
 
 from core.utils import exceptions
 
-
+# Register common streaming types; for use in file processing
+mimetypes.init()
+mimetypes.add_type("application/vnd.apple.mpegurl", ".m3u8", strict=True)
+mimetypes.add_type("video/mp2t", ".ts", strict=True)
+mimetypes.add_type("application/dash+xml", ".mpd", strict=True)
+mimetypes.add_type("video/iso.segment", ".m4s", strict=True)
 
 
 class StorageClient:
@@ -67,16 +73,15 @@ class StorageClient:
             )
 
         return presigned_url
-    
 
-    # def upload_file_s3(local_path: str, key: str, content_type: Optional[str] = None) -> None:
-    # helper = BaseStorageHelper()
-    # bucket = settings.AWS_STORAGE_BUCKET_NAME
-    # extra = {}
-    # if content_type:
-    #     extra["ContentType"] = content_type
-    # logger.info("Uploading {} -> s3://{}/{}", local_path, bucket, key)
-    # helper.s3_client.upload_file(local_path, bucket, key, ExtraArgs=extra or None)
+
+    def upload_file_to_s3(self, local_path: str, key: str, content_type: Optional[str] = None) -> None:
+        bucket = settings.AWS_STORAGE_BUCKET_NAME
+        extra = {}
+        if content_type:
+            extra["ContentType"] = content_type
+        logger.info(f"Uploading {local_path} -> s3://{bucket}/{key}")
+        self.s3_client.upload_file(local_path, bucket, key, ExtraArgs=extra or None)
     
 
 class StorageUtils:
@@ -96,7 +101,7 @@ class StorageUtils:
         Run a command safely; return (stdout, stderr). Raise on failure.
         """
 
-        logger.info(f"Running command: {" ".join(cmd)}")
+        logger.info(f"Running command: {cmd}")
         try:
             response = subprocess.run(
                 list(cmd),
@@ -108,23 +113,28 @@ class StorageUtils:
             return response.stdout or ""
         except subprocess.CalledProcessError as e:
             logger.error(
-                "ffprobe failed: returncode={}, stderr={}",
+                "command failed: returncode={}, stderr={}",
                 getattr(e, "returncode", None),
                 getattr(e, "stderr", None),
             )
             raise exceptions.CustomException(
-                message="ffprobe processing failed",
+                message="command processing failed",
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
         except subprocess.TimeoutExpired as e:
-            logger.error(f"ffprobe timed out after {timeout} seconds: {e}")
+            logger.error(f"command timed out after {timeout} seconds: {e}")
             raise exceptions.CustomException(
-                message="ffprobe timed out",
+                message="command timed out",
                 status_code=status.HTTP_504_GATEWAY_TIMEOUT,
             )
         except Exception as e:
-            logger.exception(f"unexpected error running ffprobe: {e}")
+            logger.exception(f"unexpected error running command: {e}")
             raise exceptions.CustomException(
-                message="unexpected error running ffprobe",
+                message="unexpected error running command",
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
+        
+    
+    @staticmethod
+    def make_tempdir(prefix: str = "proc-") -> str:
+        return tempfile.mkdtemp(prefix=prefix)

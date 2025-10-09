@@ -9,8 +9,9 @@ from loguru import logger
 from drf_spectacular.utils import extend_schema
 
 
-from .models import FileModel
+from .models import FileModel, FileProcessingJob
 from .serializers import FileSerializer, SignedURLRequestSerializer
+from .tasks import start_pipeline
 from core.utils import mixins as global_mixins, exceptions
 from core.utils.helpers.decorators import RequestDataManipulationsDecorators
 from core.utils.helpers.file_storage import FileUploadUtils
@@ -95,10 +96,16 @@ class CreateFileObject(views.APIView):
             mime_type=self.get_mime_type(file_name=file_name)
         )
         cache.delete(f"pending_upload-{file_id}")
-        # TODO: call file processing background task
-        serializer = FileSerializer.ListRetrieve(
-            instance=file
+
+        # create job and start file processing pipeline
+        job, created = FileProcessingJob.objects.get_or_create(
+            owner=request.user, 
+            file=file,
+            source_key=file.file_key
         )
+        start_pipeline.delay(job.id)
+
+        serializer = FileSerializer.ListRetrieve(instance=file)
         return response.Response(
             data={
                 "message": "file currently being processed",

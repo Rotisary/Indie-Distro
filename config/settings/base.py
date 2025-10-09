@@ -264,6 +264,22 @@ SIMPLE_JWT = {
 }
 JWT_SECRET = env.str("JWT_SECRET")
 
+# Chatting & Caches
+SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"
+
+
+REDIS_HOST = env.str("REDIS_HOST", default="localhost")
+REDIS_PORT = env.int("REDIS_PORT", default=6379)
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": f"redis://{REDIS_HOST}:{REDIS_PORT}",
+    }
+}
+
+PRESIGNED_UPLOAD_TTL = 60*60
+
 CELERY_BROKER = env.str("CELERY_BROKER")
 CELERY_BROKER_URL = CELERY_BROKER
 CELERY_RESULT_BACKEND = env.str("CELERY_BACKEND")

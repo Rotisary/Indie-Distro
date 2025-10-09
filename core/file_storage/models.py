@@ -70,7 +70,7 @@ class FileModel(BaseModelMixin):
         blank=True,
         default=False,
         editable=True,
-    )
+    )  
     checksum = models.CharField(
         max_length=128, 
         null=True, 
