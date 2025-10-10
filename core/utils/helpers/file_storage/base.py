@@ -76,12 +76,41 @@ class StorageClient:
 
 
     def upload_file_to_s3(self, local_path: str, key: str, content_type: Optional[str] = None) -> None:
+        assert settings.USING_MANAGED_STORAGE, "Managed storage must be enabled"
         bucket = settings.AWS_STORAGE_BUCKET_NAME
         extra = {}
         if content_type:
             extra["ContentType"] = content_type
-        logger.info(f"Uploading {local_path} -> s3://{bucket}/{key}")
-        self.s3_client.upload_file(local_path, bucket, key, ExtraArgs=extra or None)
+
+        try:
+            logger.info(f"Uploading {local_path} -> s3://{bucket}/{key}")
+            self.s3_client.upload_file(local_path, bucket, key, ExtraArgs=extra or None)
+        except Exception as e:
+            logger.error(f"upload failed for {local_path} -> s3://{bucket}/{key}: {e}")
+            raise exceptions.CustomException(
+                message="upload to storage failed",
+                status_code=status.HTTP_502_BAD_GATEWAY,
+            )
+
+
+    def download_file_from_s3(self, key: str, local_path: str) -> str:
+        """
+        Download an object from S3/Spaces to a local file path (creates parent dirs).
+        Returns the local_path on success.
+        """
+        assert settings.USING_MANAGED_STORAGE, "Managed storage must be enabled"
+        bucket = settings.AWS_STORAGE_BUCKET_NAME
+        os.makedirs(os.path.dirname(local_path), exist_ok=True)
+        try:
+            logger.info(f"Downloading s3://{bucket}/{key} -> {local_path}")
+            self.s3_client.download_file(bucket, key, local_path)
+            return local_path
+        except Exception as e:
+            logger.error(f"download failed for s3://{bucket}/{key}: {e}")
+            raise exceptions.CustomException(
+                message="download from storage failed",
+                status_code=status.HTTP_502_BAD_GATEWAY,
+            )
     
 
 class StorageUtils:
@@ -96,12 +125,14 @@ class StorageUtils:
             )
         
     @staticmethod
-    def run_cmd(cmd: Iterable[str], timeout: int = 3600) -> str:
+    def run_cmd(cmd: Iterable[str], timeout: int = 3600, cwd: Optional[str] = None) -> str:
         """
         Run a command safely; return (stdout, stderr). Raise on failure.
         """
 
         logger.info(f"Running command: {cmd}")
+        if cwd:
+            logger.info(f"Working directory: {cwd}")
         try:
             response = subprocess.run(
                 list(cmd),
@@ -109,6 +140,7 @@ class StorageUtils:
                 text=True,
                 check=True,
                 timeout=timeout,
+                cwd=cwd,
             )
             return response.stdout or ""
         except subprocess.CalledProcessError as e:
@@ -138,3 +170,27 @@ class StorageUtils:
     @staticmethod
     def make_tempdir(prefix: str = "proc-") -> str:
         return tempfile.mkdtemp(prefix=prefix)
+ 
+    @staticmethod
+    def get_job_workdir(job_id: int) -> str:
+        """
+        Deterministic per-job workspace.
+        Persists across tasks and is deleted in finalize.
+        """
+        job_dir = os.path.join(settings.BASE_DIR, "jobs", str(job_id))
+        os.makedirs(job_dir, exist_ok=True)
+        return job_dir
+
+    @staticmethod
+    def ensure_dir(path: str) -> str:
+        os.makedirs(path, exist_ok=True)
+        return path
+    
+    @staticmethod
+    def cleanup_job_workdir(job_id: int) -> None:
+        job_dir = os.path.join(settings.BASE_DIR, "jobs", str(job_id))
+        try:
+            shutil.rmtree(job_dir, ignore_errors=True)
+            logger.info(f"Cleaned workspace: {job_dir}")
+        except Exception:
+            logger.warning(f"Failed to cleanup workspace: {job_dir}")

@@ -17,9 +17,9 @@ from core.utils import exceptions
 class FileProcessingUtils:
 
     @staticmethod
-    def ffprobe_get_json(file_url):
+    def ffprobe_get_json(file):
         """
-        Run ffprobe on 'file key' (presigned URL) and return parsed JSON.
+        Run ffprobe on source file and return parsed JSON.
         """
 
         StorageUtils.ensure_binary_on_path("ffprobe")
@@ -29,7 +29,7 @@ class FileProcessingUtils:
             "-show_format",
             "-show_streams",
             "-print_format", "json",
-            file_url,
+            file,
         ]       
         stdout = StorageUtils.run_cmd(cmd)
         try:

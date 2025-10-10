@@ -27,8 +27,15 @@ def ffprobe_metadata(self, job_id: int):
     job.mark_stage(Stage.PROBE.value)
     StorageUtils.ensure_binary_on_path("ffprobe")
     client = StorageClient()
-    file_url = client.generate_presigned_get_url(job.source_key)
-    ffprobe_json = FileProcessingUtils.ffprobe_get_json(file_url)
+    job_dir = StorageUtils.get_job_workdir(job_id)
+    src_dir = StorageUtils.ensure_dir(os.path.join(job_dir, "source"))
+    local_src = os.path.join(src_dir, "source_file.mp4")
+
+    # Ensure local source exists (download once)
+    if not os.path.exists(local_src):
+        client.download_file_from_s3(job.source_key, local_src)
+
+    ffprobe_json = FileProcessingUtils.ffprobe_get_json(local_src)
     job.metadata = {"ffprobe": ffprobe_json}
     FileProcessingUtils.update_obj_fields(
         job, {"metadata": {"ffprobe": ffprobe_json}}
@@ -134,58 +141,57 @@ def transcode_rendition(
             if r.get("name") == name:
                 return {"name": r.get("name"), "mp4_key": r.get("mp4_key")} 
 
-    workdir = StorageUtils.make_tempdir(f"transcode-{name}-")  
     client = StorageClient()
-    input_file_url = client.generate_presigned_get_url(job.source_key)
-    local_out = os.path.join(workdir, f"{name}.mp4")
-    try:
-        # Baseline H.264 + AAC MP4
-        vf = (
-            f"scale=w={width}:h={height}:force_original_aspect_ratio=decrease:force_divisible_by=2,"
-            f"pad=w={width}:h={height}:x=(ow-iw)/2:y=(oh-ih)/2:color=black,"
-            "setsar=1,setdar=16/9"
-        )
-        cmd = [
-            "ffmpeg", "-y",
-            "-reconnect", "1", "-reconnect_streamed", "1", "-reconnect_delay_max", "5",
-            "-i", input_file_url,
-            "-vf", vf,
-            "-c:v", "libx264", "-profile:v", "main", "-preset", "veryfast",
-            "-b:v", f"{v_bitrate_k}k", "-maxrate", f"{int(v_bitrate_k*1.2)}k", "-bufsize", f"{int(v_bitrate_k*2)}k",
-            "-c:a", "aac", "-b:a", f"{a_bitrate_k}k",
-            "-pix_fmt", "yuv420p",
-            "-movflags", "+faststart",
-            "-g", "60",
-            "-keyint_min", "60",
-            "-sc_threshold", "0",
-            local_out,
-        ]
-        StorageUtils.run_cmd(cmd, timeout=60*60*4)
+    job_dir = StorageUtils.get_job_workdir(job_id)
+    src_dir = StorageUtils.ensure_dir(os.path.join(job_dir, "source"))
+    mp4_dir = StorageUtils.ensure_dir(os.path.join(job_dir, "mp4"))
+    local_src = os.path.join(src_dir, "source_file.mp4")
 
-        # Upload processed file to s3
-        out_key = f"processed/{job.owner.email}/{job.id}/mp4/{job.file.id}/{name}.mp4"
-        client.upload_file_to_s3(local_out, out_key, content_type="video/mp4")
-        
-        renditions = job.renditions or []
-        renditions = [r for r in renditions if r.get("name") != name]
-        renditions.append({
-            "name": name, 
-            "mp4_key": out_key, 
-            "width": width, 
-            "height": height, 
-            "video_bitrate": v_bitrate_k, 
-            "audio_bitrate": a_bitrate_k
-        })
-        FileProcessingUtils.update_obj_fields(
-            job, {"renditions": renditions}
-        )
-        return {"name": name, "mp4_key": out_key}
-    finally:
-        try:
-            shutil.rmtree(workdir, ignore_errors=True)
-        except Exception:
-            logger.info("failed to delete temporary directory")
-            pass
+    # Ensure local source exists (download once)
+    if not os.path.exists(local_src):
+        client.download_file_from_s3(job.source_key, local_src)
+    local_out = os.path.join(mp4_dir, f"{name}.mp4")
+    
+    # Baseline H.264 + AAC MP4
+    vf = (
+        f"scale=w={width}:h={height}:force_original_aspect_ratio=decrease:force_divisible_by=2,"
+        f"pad=w={width}:h={height}:x=(ow-iw)/2:y=(oh-ih)/2:color=black,"
+        "setsar=1,setdar=16/9"
+    )
+    cmd = [
+        "ffmpeg", "-y",
+        "-i", local_src,
+        "-vf", vf,
+        "-c:v", "libx264", "-profile:v", "main", "-preset", "veryfast",
+        "-b:v", f"{v_bitrate_k}k", "-maxrate", f"{int(v_bitrate_k*1.2)}k", "-bufsize", f"{int(v_bitrate_k*2)}k",
+        "-c:a", "aac", "-b:a", f"{a_bitrate_k}k",
+        "-pix_fmt", "yuv420p",
+        "-movflags", "+faststart",
+        "-g", "60",
+        "-keyint_min", "60",
+        "-sc_threshold", "0",
+        local_out,
+    ]
+    StorageUtils.run_cmd(cmd, timeout=60*60*4)
+
+    # Upload processed file to s3
+    out_key = f"processed/{job.owner.email}/{job.id}/mp4/{job.file.id}/{name}.mp4"
+    client.upload_file_to_s3(local_out, out_key, content_type="video/mp4")
+    
+    renditions = job.renditions or []
+    renditions = [r for r in renditions if r.get("name") != name]
+    renditions.append({
+        "name": name, 
+        "mp4_key": out_key, 
+        "width": width, 
+        "height": height, 
+        "video_bitrate": v_bitrate_k, 
+        "audio_bitrate": a_bitrate_k
+    })
+    FileProcessingUtils.update_obj_fields(
+        job, {"renditions": renditions}
+    )
+    return {"name": name, "mp4_key": out_key}
 
 
 @shared_task(bind=True, time_limit=60*60*2, name="file_pipeline.package.hls")
@@ -208,53 +214,53 @@ def package_hls(self, job_id: int):
         logger.error("No renditions to package")
         raise exceptions.CustomException("No renditions", status.HTTP_400_BAD_REQUEST)
 
-    workdir = StorageUtils.make_tempdir("hls-")
-    try:
-        # For each rendition, repackage to HLS (segment)
-        variant_infos = []
-        for r in renditions:
-            client = StorageClient()
-            input_file_url = client.generate_presigned_get_url(r.get("mp4_key"))
-            name = r["name"]
-            variant_dir = os.path.join(workdir, f"hls_{name}")
-            os.makedirs(variant_dir, exist_ok=True)
-            variant_m3u8 = os.path.join(variant_dir, f"{name}.m3u8")
+    job_dir = StorageUtils.get_job_workdir(job_id)
+    mp4_dir = StorageUtils.ensure_dir(os.path.join(job_dir, "mp4"))
+    hls_dir = StorageUtils.ensure_dir(os.path.join(job_dir, "hls"))
+    client = StorageClient()
 
-            cmd = [
-                "ffmpeg", "-y",
-                "-i", input_file_url,
-                "-c", "copy",
-                "-f", "hls",
-                "-hls_time", "6",
-                "-hls_playlist_type", "vod",
-                "-hls_segment_filename", os.path.join(variant_dir, f"{name}_%04d.ts"),
-                variant_m3u8,
-            ]
-            StorageUtils.run_cmd(cmd, timeout=60*60)
+    # For each rendition, repackage to HLS (segment)
+    variant_infos = []  
+    for r in renditions:
+        name = r["name"]
+        local_mp4 = os.path.join(mp4_dir, f"{name}.mp4")
 
-            # Upload variant playlist + segments
-            prefix = f"processed/{job.owner.email}/{job.id}/hls/{job.file.id}/{name}"
-            FileProcessingUtils.upload_packaging_outputs(variant_dir, prefix)
+        # Ensure local source exists (download once)
+        if not os.path.exists(local_mp4):
+            client.download_file_from_s3(r["mp4_key"], local_mp4)
 
-            variant_infos.append({
-                "name": name,
-                "playlist": f"{prefix}/{name}.m3u8",
-                "bandwidth": r.get("video_bitrate", 1000)*1000,
-                "resolution": f"{r.get('width')}x{r.get('height')}",
-            })
+        variant_dir = StorageUtils.ensure_dir(os.path.join(hls_dir, f"hls_{name}"))
+        variant_m3u8 = os.path.join(variant_dir, f"{name}.m3u8")
 
-        master_key = FileProcessingUtils.create_and_upload_master_playlist(variant_infos, workdir, job)
+        cmd = [
+            "ffmpeg", "-y",
+            "-i", local_mp4,
+            "-c", "copy",
+            "-f", "hls",
+            "-hls_time", "6",
+            "-hls_playlist_type", "vod",
+            "-hls_segment_filename", os.path.join(variant_dir, f"{name}_%04d.ts"),
+            variant_m3u8,
+        ]
+        StorageUtils.run_cmd(cmd, timeout=60*60)
 
-        packaging = job.packaging or {}
-        packaging["hls"] = {"master": master_key, "variants": variant_infos}
-        FileProcessingUtils.update_obj_fields(job, {"packaging": packaging})
-        return {"hls_master": master_key}
-    finally:
-        try:
-            shutil.rmtree(workdir, ignore_errors=True)
-        except Exception:
-            logger.info("failed to delete temporary directory")
-            pass
+        # Upload variant playlist + segments
+        prefix = f"processed/{job.owner.email}/{job.id}/hls/{job.file.id}/{name}"
+        FileProcessingUtils.upload_packaging_outputs(variant_dir, prefix)
+
+        variant_infos.append({
+            "name": name,
+            "playlist": f"{prefix}/{name}.m3u8",
+            "bandwidth": r.get("video_bitrate", 1000)*1000,
+            "resolution": f"{r.get('width')}x{r.get('height')}",
+        })
+
+    master_key = FileProcessingUtils.create_and_upload_master_playlist(variant_infos, hls_dir, job)
+
+    packaging = job.packaging or {}
+    packaging["hls"] = {"master": master_key, "variants": variant_infos}
+    FileProcessingUtils.update_obj_fields(job, {"packaging": packaging})
+    return {"hls_master": master_key}
 
 
 @shared_task(bind=True, time_limit=60*60*2, name="file_pipeline.package.dash")
@@ -276,50 +282,50 @@ def package_dash(self, job_id: int):
         logger.error("No renditions to package")
         raise exceptions.CustomException("No renditions", status.HTTP_400_BAD_REQUEST)
 
-    workdir = StorageUtils.make_tempdir("dash-")
-    try:
-        client = StorageClient()
-        out_dir = os.path.join(workdir, "dash")
-        os.makedirs(out_dir, exist_ok=True)
-        mpd_local = os.path.join(out_dir, "stream.mpd")
+    client = StorageClient()
+    job_dir = StorageUtils.get_job_workdir(job_id)
+    mp4_dir = StorageUtils.ensure_dir(os.path.join(job_dir, "mp4"))
+    dash_dir = StorageUtils.ensure_dir(os.path.join(job_dir, "dash"))
 
-        # Build ffmpeg DASH packaging command
-        cmd = ["ffmpeg", "-y"]
-        for r in renditions:
-            input_file_url = client.generate_presigned_get_url(r["mp4_key"])
-            cmd += ["-i", input_file_url]
+    local_inputs = []
+    for r in renditions:
+        name = r["name"]
+        local_mp4 = os.path.join(mp4_dir, f"{name}.mp4")
+        if not os.path.exists(local_mp4):
+            client.download_file_from_s3(r["mp4_key"], local_mp4)
+        local_inputs.append(local_mp4)
 
-        for idx, _ in enumerate(renditions):
-            cmd += ["-map", f"{idx}:v:0"]
-            cmd += ["-map", f"{idx}:a:0?"]
+    local_mpd = "stream.mpd"
+    # Build ffmpeg DASH packaging command
+    cmd = ["ffmpeg", "-y"]
+    for input in local_inputs:
+        cmd += ["-i", input]
 
-        cmd += [
-            "-c", "copy",
-            "-f", "dash",
-            "-use_timeline", "1",
-            "-use_template", "1",
-            "-seg_duration", "6",
-            "-init_seg_name", "init_$RepresentationID$.m4s",
-            "-media_seg_name", "chunk_$RepresentationID$_$Number%05d$.m4s",
-            "-adaptation_sets", "id=0,streams=v id=1,streams=a",
-            mpd_local,
-        ]
-        StorageUtils.run_cmd(cmd, timeout=60*60)
+    for idx, _ in enumerate(local_inputs):
+        cmd += ["-map", f"{idx}:v:0"]
+        cmd += ["-map", f"{idx}:a:0?"]
 
-        # Upload all DASH outputs
-        prefix = f"processed/{job.owner.email}/{job.id}/dash/{job.file.id}"
-        FileProcessingUtils.upload_packaging_outputs(out_dir, prefix)
+    cmd += [
+        "-c", "copy",
+        "-f", "dash",
+        "-use_timeline", "1",
+        "-use_template", "1",
+        "-seg_duration", "6",
+        "-init_seg_name", "init_$RepresentationID$.m4s",
+        "-media_seg_name", "chunk_$RepresentationID$_$Number%05d$.m4s",
+        "-adaptation_sets", "id=0,streams=v id=1,streams=a",
+        local_mpd,
+    ]
+    StorageUtils.run_cmd(cmd, timeout=60*60, cwd=dash_dir)
 
-        packaging = job.packaging or {}
-        packaging["dash"] = {"mpd": f"{prefix}/stream.mpd"}
-        FileProcessingUtils.update_obj_fields(job, {"packaging": packaging})
-        return {"dash_mpd": f"{prefix}/stream.mpd"}
-    finally:
-        try:
-            shutil.rmtree(workdir, ignore_errors=True)
-        except Exception:
-            logger.info("failed to delete temporary directory")
-            pass
+    # Upload all DASH outputs
+    prefix = f"processed/{job.owner.email}/{job.id}/dash/{job.file.id}"
+    FileProcessingUtils.upload_packaging_outputs(dash_dir, prefix)
+
+    packaging = job.packaging or {}
+    packaging["dash"] = {"mpd": f"{prefix}/stream.mpd"}
+    FileProcessingUtils.update_obj_fields(job, {"packaging": packaging})
+    return {"dash_mpd": f"{prefix}/stream.mpd"}
 
 
 @shared_task(bind=True, time_limit=30*60, name="file_pipeline.thumbnails")
@@ -341,47 +347,47 @@ def generate_thumbnails(self, job_id: int):
         logger.error("No renditions to generate thumbnails from")
         raise exceptions.CustomException("No renditions", status.HTTP_400_BAD_REQUEST)
 
-    top = sorted(renditions, key=lambda r: r["video_bitrate"], reverse=True)[0]
-    workdir = StorageUtils.make_tempdir("thumbs-") 
-    try:
-        client = StorageClient()
-        input_file_url = client.generate_presigned_get_url(top.get("mp4_key"))
-        out_dir = os.path.join(workdir, "thumbs")
-        os.makedirs(out_dir, exist_ok=True)
+    top_rend = sorted(renditions, key=lambda r: r["video_bitrate"], reverse=True)[0]
+    name = top_rend["name"]
+    client = StorageClient()
+    job_dir = StorageUtils.get_job_workdir(job_id)
+    mp4_dir = StorageUtils.ensure_dir(os.path.join(job_dir, "mp4"))
+    thumbnail_dir = StorageUtils.ensure_dir(os.path.join(job_dir, "thumbnail"))
 
-        # Extract 1 frame every 10 seconds, 5 thumbnails max
-        cmd = [
-            "ffmpeg", "-y",
-            "-i", input_file_url,
-            "-vf", "fps=1/10,scale=640:-1",
-            "-frames:v", "5",
-            os.path.join(out_dir, "thumb_%03d.jpg"),
-        ]
-        StorageUtils.run_cmd(cmd, timeout=30*60)
+    top_rend_mp4 = os.path.join(mp4_dir, f"{name}.mp4")
+    if not os.path.exists(top_rend_mp4):
+        client.download_file_from_s3(top_rend["mp4_key"],  top_rend_mp4)
+    
+    local_thumb_dir = StorageUtils.ensure_dir(os.path.join(thumbnail_dir, "thumbs"))
 
-        uploaded = []
-        # upload generated thumbnail files to s3 and save their keys to a list
-        prefix = f"processed/{job.owner.email}/{job.id}/thumbnails/{job.file.id}"
-        for fn in sorted(os.listdir(out_dir)):
-            local_path = os.path.join(out_dir, fn)
-            key = f"{prefix}/{fn}"
-            client.upload_file_to_s3(local_path, key, "image/jpeg")
-            uploaded.append(key)
+    # Extract 1 frame every 10 seconds, 5 thumbnails max
+    cmd = [
+        "ffmpeg", "-y",
+        "-i", top_rend_mp4,
+        "-vf", "fps=1/10,scale=640:-1",
+        "-frames:v", "5",
+        os.path.join(local_thumb_dir, "thumb_%03d.jpg"),
+    ]
+    StorageUtils.run_cmd(cmd, timeout=30*60)
 
-        FileProcessingUtils.update_obj_fields(job, {"thumbnails": uploaded})
-        return {"thumbnails": uploaded}
-    finally:
-        try:
-            shutil.rmtree(workdir, ignore_errors=True)
-        except Exception:
-            logger.info("failed to delete temporary directory")
-            pass
+    uploaded = []
+    # upload generated thumbnail files to s3 and save their keys to a list
+    prefix = f"processed/{job.owner.email}/{job.id}/thumbnails/{job.file.id}"
+    for fn in sorted(os.listdir(local_thumb_dir)):
+        local_path = os.path.join(local_thumb_dir, fn)
+        key = f"{prefix}/{fn}"
+        client.upload_file_to_s3(local_path, key, "image/jpeg")
+        uploaded.append(key)
+
+    FileProcessingUtils.update_obj_fields(job, {"thumbnails": uploaded})
+    return {"thumbnails": uploaded}
 
 
 @shared_task(bind=True, name="file_pipeline.finalize")
 def finalize_job(self, job_id: int):
     job = FileProcessingJob.objects.get(pk=job_id)
     job.mark_completed()
+    StorageUtils.cleanup_job_workdir(job_id)
     logger.success(f"Processing job {job_id} completed")
     return job_id
 
@@ -405,7 +411,6 @@ def start_pipeline(self, job_id: int, renditions: list[dict] | None = None):
         for r in renditions
     )
 
-    # Packaging can be parallel as well (HLS + DASH) then one callback to merge results.
     packaging_group = group(
         package_hls.si(job_id),
         package_dash.si(job_id),
@@ -414,8 +419,8 @@ def start_pipeline(self, job_id: int, renditions: list[dict] | None = None):
     flow = chain(
         ffprobe_metadata.si(job_id),
         validate_and_extract_metadata.si(job_id),
-        transcode_group,                 # chord-like fan-out for renditions
-        packaging_group,                 # fan-out for packaging
+        transcode_group,
+        packaging_group,
         generate_thumbnails.si(job_id),
         finalize_job.si(job_id),
     )
