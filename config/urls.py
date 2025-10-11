@@ -28,7 +28,7 @@ urlpatterns = [
         name="redoc",
     ),
     path("api/", include("core.users.urls")),
-    path("api/films/", include("core.feed.urls")),
+    path("api/feed/", include("core.feed.urls")),
     path("api/playback/", include("core.playback.urls")),
     path("api/files/", include("core.file_storage.urls"))
 ]

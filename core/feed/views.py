@@ -7,11 +7,16 @@ from loguru import logger
 from drf_spectacular.utils import extend_schema
 
 
-from .models import Feed
-from .serializers import FeedSerializer
+from .models import Feed, Short
+from .serializers import FeedSerializer, ShortSerializer
 from core.utils import mixins as global_mixins, exceptions
 from core.utils.helpers.decorators import RequestDataManipulationsDecorators
-from core.utils.permissions import IsAccountType, IsFilmOwner, FilmNotReleased
+from core.utils.permissions import (
+    IsAccountType, 
+    IsFilmOwner, 
+    IsShortOwner,
+    FilmNotReleased
+)
 
 
 @extend_schema(tags=["feed"])
@@ -43,18 +48,13 @@ class ListCreateFeed(views.APIView):
     )
     def get(self, request):
         queryset = Feed.objects.filter(owner=request.user)
-        if not queryset.exists():
-            raise exceptions.CustomException(
-                message="No films found",
-                status_code=status.HTTP_404_NOT_FOUND
-            )
         serializer = FeedSerializer.FeedRetrieve(queryset, many=True)
         # logger.info(f"Retrieved {len(serializer.data['results'])} films for the user.")
         return response.Response(data=serializer.data, status=status.HTTP_200_OK)
     
 @extend_schema(tags=["feed"])
-class RetrieveUpdateFeed(views.APIView):
-    http_method_names = ["get", "patch"]
+class RetrieveUpdateDeleteFeed(views.APIView):
+    http_method_names = ["get", "patch", "delete"]
     permission_classes = [
         IsAuthenticated, 
         IsAccountType.IsCreatorAccount, 
@@ -108,6 +108,23 @@ class RetrieveUpdateFeed(views.APIView):
             raise exceptions.CustomException(
                 "Film not found", 
                 status_code=status.HTTP_404_NOT_FOUND
+            )
+    
+    @extend_schema(
+        description="Delete a specific film",
+        request=None,
+        responses={204: None},
+    )
+    def delete(self, request, pk):
+        try:
+            feed = Feed.objects.get(id=pk, owner=request.user)
+            self.check_object_permissions(request, feed)
+            feed.delete()
+            logger.success(f"Film with ID: {pk} deleted.")
+            return response.Response(status=status.HTTP_204_NO_CONTENT)
+        except Feed.DoesNotExist:
+            raise exceptions.CustomException(
+                "Film not found", status_code=status.HTTP_404_NOT_FOUND
             )
         
         
@@ -168,3 +185,106 @@ class RemoveBookmark(views.APIView):
         return response.Response(
             data=response_data, status=status.HTTP_200_OK
         )
+
+
+@extend_schema(tags=["shorts"])
+class ListCreateShort(views.APIView):
+    http_method_names = ["post", "get"]
+    parser_classes = [JSONParser]
+    permission_classes = [IsAuthenticated, IsAccountType.IsCreatorAccount]
+
+    @extend_schema(
+        description="Create a new short",
+        request=ShortSerializer.ShortCreate,
+        responses={201: ShortSerializer.Retrieve},
+    )
+    @RequestDataManipulationsDecorators.update_request_data_with_owner_data("owner")
+    def post(self, request):
+        serializer = ShortSerializer.ShortCreate(data=request.data, context={"request": request})
+        serializer.is_valid(raise_exception=True)
+        instance = serializer.save()
+        logger.success(f"Short created with title: {instance.title}")
+        serializer = ShortSerializer.Retrieve(instance=instance)
+        return response.Response(data=serializer.data, status=status.HTTP_201_CREATED)
+
+    @extend_schema(
+        description="List shorts owned by the authenticated creator",
+        request=None,
+        responses={200: ShortSerializer.Retrieve(many=True)},
+    )
+    def get(self, request):
+        queryset = Short.objects.filter(owner=request.user)
+        serializer = ShortSerializer.Retrieve(queryset, many=True)
+        return response.Response(data=serializer.data, status=status.HTTP_200_OK)
+
+
+@extend_schema(tags=["shorts"])
+class RetrieveUpdateDeleteShort(views.APIView):
+    http_method_names = ["get", "patch", "delete"]
+    parser_classes = [JSONParser]
+    permission_classes = [
+        IsAuthenticated, 
+        IsAccountType.IsCreatorAccount, 
+        IsShortOwner
+    ]
+
+    def get_permissions(self):
+        if self.request.method == "GET":
+            return [IsAuthenticated()]
+        return super().get_permissions()
+
+    @extend_schema(
+        description="Retrieve details of a specific short by ID",
+        request=None,
+        responses={200: ShortSerializer.Retrieve},
+    )
+    def get(self, request, pk):
+        try:
+            short = Short.objects.get(id=pk)
+            serializer = ShortSerializer.Retrieve(instance=short)
+            logger.info(f"Retrieved short with ID: {pk}")
+            return response.Response(data=serializer.data, status=status.HTTP_200_OK)
+        except Short.DoesNotExist:
+            raise exceptions.CustomException(
+                "Short not found", status_code=status.HTTP_404_NOT_FOUND
+            )
+
+    @RequestDataManipulationsDecorators.update_request_data_with_owner_data("owner")
+    @extend_schema(
+        description="Update an existing short",
+        request=ShortSerializer.ShortCreate,
+        responses={200: ShortSerializer.Retrieve},
+    )
+    def patch(self, request, pk):
+        try:
+            short = Short.objects.get(id=pk, owner=request.user)
+            self.check_object_permissions(request, short)
+            serializer = ShortSerializer.Create(
+                instance=short, data=request.data, partial=True, context={"request": request}
+            )
+            serializer.is_valid(raise_exception=True)
+            instance = serializer.save()
+            logger.success(f"Short with ID: {pk} successfully updated.")
+            serializer = ShortSerializer.Retrieve(instance=instance)
+            return response.Response(data=serializer.data, status=status.HTTP_200_OK)
+        except Short.DoesNotExist:
+            raise exceptions.CustomException(
+                "Short not found", status_code=status.HTTP_404_NOT_FOUND
+            )
+
+    @extend_schema(
+        description="Delete a specific short",
+        request=None,
+        responses={204: None},
+    )
+    def delete(self, request, pk):
+        try:
+            short = Short.objects.get(id=pk, owner=request.user)
+            self.check_object_permissions(request, short)
+            short.delete()
+            logger.success(f"Short with ID: {pk} deleted.")
+            return response.Response(status=status.HTTP_204_NO_CONTENT)
+        except Short.DoesNotExist:
+            raise exceptions.CustomException(
+                "Short not found", status_code=status.HTTP_404_NOT_FOUND
+            )

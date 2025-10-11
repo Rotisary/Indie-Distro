@@ -159,4 +159,5 @@ class ShortAdmin(ModelAdmin):
 
     list_display = ["owner__first_name", "owner__last_name", "title", "release_date"]
     search_fields = ["title", "slug", "owner__email", "film__title"]
+    readonly_fields = ["date_added", "date_last_modified"]
     ordering = ["-date_added"]
