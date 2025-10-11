@@ -88,12 +88,16 @@ def validate_and_extract_metadata(self, job_id: int):
         "audio_streams": FileProcessingUtils.get_audio_streams_data(astreams)
     }
     film = job.file.film
-    # short = job.file.short
+    short = job.file.short
     if film:
         FileProcessingUtils.update_obj_fields(
             film, {"length": timedelta(duration)}
         )
-
+    if short:
+        FileProcessingUtils.update_obj_fields(
+            short, {"length": timedelta(duration)}
+        )
+        
     # update job fields
     meta = job.metadata or {}
     meta["extracted"] = extracted
@@ -108,6 +112,7 @@ def validate_and_extract_metadata(self, job_id: int):
         {
             "file_width": extracted["video_streams"][0].get("width"),
             "file_height": extracted["video_streams"][0].get("height"),
+            "file_size": extracted["size"],
             "format_name": extracted["format_name"],
             "last_error": job.error,          
             "has_audio": extracted["has_audio"],

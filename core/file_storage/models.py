@@ -28,12 +28,12 @@ class FileModel(BaseModelMixin):
         related_name="files",
         verbose_name=_("File Owner")
     )
-    film = models.ForeignKey(
+    film = models.OneToOneField(
         to="feed.Feed",
         on_delete=models.CASCADE,
         null=True,
         blank=True,
-        related_name="content_files",
+        related_name="file",
         verbose_name=_("File Film"),
         help_text=_("The film related to the file")
     )
@@ -82,6 +82,9 @@ class FileModel(BaseModelMixin):
     )
     file_height = models.IntegerField(
         _("Height of File"), null=True, blank=True
+    )
+    file_size = models.BigIntegerField(
+        _("File Size in bytes"), null=True, blank=True
     )
     format_name = models.CharField(
         _("Format Name"), max_length=64, null=True, blank=True

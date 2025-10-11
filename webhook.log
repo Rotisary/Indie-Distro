@@ -3026,3 +3026,20 @@ Traceback (most recent call last):
 django.core.exceptions.FieldError: 'date_added' cannot be specified for Short model form as it is a non-editable field. Check fields/fieldsets/exclude attributes of class ShortAdmin.
 C:\Users\olado\Documents\django-projects\Indie-Distro\core\feed\admin.py changed, reloading.
 Watching for file changes with StatReloader
+C:\Users\olado\Documents\django-projects\Indie-Distro\core\file_storage\models.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\olado\Documents\django-projects\Indie-Distro\core\file_storage\models.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\olado\Documents\django-projects\Indie-Distro\core\file_storage\models.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\olado\Documents\django-projects\Indie-Distro\core\file_storage\models.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\olado\Documents\django-projects\Indie-Distro\core\file_storage\tasks.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\olado\Documents\django-projects\Indie-Distro\core\file_storage\models.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\olado\Documents\django-projects\Indie-Distro\core\file_storage\models.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\olado\Documents\django-projects\Indie-Distro\core\feed\models.py changed, reloading.
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader

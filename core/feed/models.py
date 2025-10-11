@@ -102,14 +102,6 @@ class Feed(BaseModelMixin):
     rental_duration = models.IntegerField(
         verbose_name=_("Rental Duration(in hours)"), blank=True, null=True
     )
-    film_file = models.ForeignKey(
-        to=FileModel,
-        null=True,
-        blank=True,
-        on_delete=models.CASCADE,
-        related_name="films",
-        verbose_name=_("The File of the Film")
-    )
     bought = models.ManyToManyField(
         to="users.User",
         through="Purchase",
