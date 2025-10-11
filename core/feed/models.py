@@ -201,7 +201,7 @@ class Short(BaseModelMixin):
     film = models.ForeignKey(
         to="feed.Feed",
         on_delete=models.SET_NULL,
-        null=False,
+        null=True,
         blank=False,
         related_name="shorts",
         verbose_name=_("Film"),
