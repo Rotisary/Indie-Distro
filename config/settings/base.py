@@ -215,6 +215,11 @@ UNFOLD = {
                         "icon": "receipt_long",
                         "link": reverse_lazy("admin:feed_purchase_changelist"),
                     },
+                    {
+                        "title": _("Shorts"),
+                        "icon": "movie",
+                        "link": reverse_lazy("admin:feed_short_changelist"),
+                    },
                 ]
             },
             {
