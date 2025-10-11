@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
 from unfold.admin import ModelAdmin
-from .models import Feed, Purchase
+from .models import Feed, Purchase, Short
 
 
 @admin.register(Feed)
@@ -39,6 +39,7 @@ class FeedAdmin(ModelAdmin):
                     "length",
                     "price",
                     "rental_duration",
+                    "is_released",
                     "saved",
                 ),
             },
@@ -47,7 +48,7 @@ class FeedAdmin(ModelAdmin):
             _("Important dates"),
             {
                 "classes": ["tab"],
-                "fields": ("date_added", "date_last_modified"),
+                "fields": ("release_date", "date_added", "date_last_modified"),
             },
         ),
     )
@@ -98,4 +99,64 @@ class PurchaseAdmin(ModelAdmin):
         "film__name"
     ]
     readonly_fields = ["date_added", "date_last_modified"]
+    ordering = ["-date_added"]
+
+
+@admin.register(Short)
+class ShortAdmin(ModelAdmin):
+    fieldsets = (
+        (
+            _("Owner"),
+            {
+                "classes": ["tab"],
+                "fields": ("owner", "film", "file"),
+            },
+        ),
+        (
+            _("Meta Information"),
+            {
+                "classes": ["tab"],
+                "fields": (
+                    "title",
+                    "slug",
+                    "type",
+                ),
+            },
+        ),
+        (
+            _("Personal Info"),
+            {
+                "classes": ["tab"],
+                "fields": (
+                    "caption",
+                    "language",
+                    "length",
+                    "tags",
+                    "is_released",
+                    "saved",
+                ),
+            },
+        ),
+        (
+            _("Analytics Info"),
+            {
+                "classes": ["tab"],
+                "fields": (
+                    "views_count",
+                    "likes_count",
+                    "comments_count",
+                ),
+            },
+        ),
+        (
+            _("Important dates"),
+            {
+                "classes": ["tab"],
+                "fields": ("release_date", "date_added", "date_last_modified"),
+            },
+        ),
+    )
+
+    list_display = ["owner__first_name", "owner__last_name", "title", "release_date"]
+    search_fields = ["title", "slug", "owner__email", "film__title"]
     ordering = ["-date_added"]

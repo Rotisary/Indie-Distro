@@ -11,7 +11,8 @@ from core.utils.enums import (
     FilmGenreType, 
     FilmCategoryType,
     FilmSaleType,
-    PurchaseStatusType
+    PurchaseStatusType,
+    ShortType
 )
 from core.users.models import User
 from core.file_storage.models import FileModel
@@ -189,3 +190,94 @@ class Purchase(BaseModelMixin):
     def __str__(self):
         return f"film({self.film.id})-{self.owner.first_name}-purchase({self.id})"
 
+
+class Short(BaseModelMixin):
+    owner = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="film_shorts",
+        verbose_name=_("Owned By"),
+    )
+    film = models.ForeignKey(
+        to="feed.Feed",
+        on_delete=models.SET_NULL,
+        null=False,
+        blank=False,
+        related_name="shorts",
+        verbose_name=_("Film"),
+        help_text=_("Film this short is related to"),
+    )
+    file = models.OneToOneField(
+        to=FileModel,
+        on_delete=models.CASCADE,
+        related_name="short",
+        null=False,
+        blank=False,
+        verbose_name=_("Short Media File"),
+    )
+    title = models.CharField(_("Short Title"), max_length=225)
+    slug = models.SlugField(
+        _("Slug"),
+        max_length=255,
+        blank=True,
+        help_text=_("Auto-generated slug"),
+    )
+    type = models.CharField(
+        _("Short Type"),
+        max_length=50,
+        choices=ShortType.choices(),
+        null=False,
+        blank=False,
+    )
+    caption = models.TextField(
+        _("Caption"),
+        blank=True,
+        help_text=_("A short caption for the short"),
+    )
+    length = models.DurationField(_("Short Length (Runtime)"), null=True, blank=True)
+    language = models.CharField(
+        _("Language"),
+        max_length=2,
+        default="en",
+        help_text=_("Language code, e.g., 'en' for English"),
+    )
+    tags = ArrayField(
+        base_field=models.CharField(max_length=50),
+        default=list,
+        blank=True,
+        help_text=_("Optional list of tags for discovery"),
+    )
+    release_date = models.DateField(
+        _("Release Date"),
+        null=True,
+        blank=True,
+        help_text=_("The date this short was/will be released"),
+    )
+    is_released = models.BooleanField(
+        _("Has the short been released?"),
+        default=False,
+        null=True,
+        blank=True,
+    )
+    saved = models.ManyToManyField(
+        to=User,
+        verbose_name=_("Users Who Have Bookmarked this short"),
+        related_name="bookmarked_shorts",
+        blank=True,
+    )
+    views_count = models.BigIntegerField(default=0)
+    likes_count = models.BigIntegerField(default=0)
+    comments_count = models.BigIntegerField(default=0)
+
+    class Meta:
+        verbose_name = _("Short")
+        verbose_name_plural = _("Shorts")
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.title)
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        base = self.slug or self.title
+        return f"{base} (short)"

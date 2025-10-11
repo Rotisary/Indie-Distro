@@ -30,3 +30,9 @@ class PurchaseStatusType(BaseEnum):
     REVOKED = "revoked"
     EXPIRED = "expired"
     CHARGEBACK = "chargeback"
+
+
+class ShortType(BaseEnum):
+    TRAILER = "trailer"
+    TEASER = "teaser"
+    SNIPPET = "snippet"
