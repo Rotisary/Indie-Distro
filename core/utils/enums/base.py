@@ -17,3 +17,8 @@ class BaseEnum(Enum):
     @classmethod
     def mapping(cls):
         return dict((i.name, i.value) for i in cls)
+    
+
+class ModelNameChoice(BaseEnum):
+    FILM = "Feed"
+    SHORT = "Short"

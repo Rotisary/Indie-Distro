@@ -62,9 +62,6 @@ class FeedSerializer:
             model = Feed
             exclude = ["saved", "date_last_modified"]
 
-    class Bookmark(serializers.Serializer):
-        id = serializers.PrimaryKeyRelatedField(queryset=Feed.objects.all())
-
     
 class ShortSerializer:
     class ShortCreate(serializers.ModelSerializer):
@@ -106,3 +103,6 @@ class ShortSerializer:
         class Meta:
             model = Short
             exclude = ["saved", "date_last_modified"]
+
+    class ShortBookmark(serializers.Serializer):
+        id = serializers.PrimaryKeyRelatedField(queryset=Short.objects.all())

@@ -1,7 +1,9 @@
+from unicodedata import name
 from rest_framework import status, decorators, response, views
 from rest_framework.parsers import JSONParser
 from rest_framework.renderers import JSONRenderer
 from rest_framework.permissions import IsAuthenticated
+from django.apps import apps
 
 from loguru import logger
 from drf_spectacular.utils import extend_schema
@@ -11,6 +13,7 @@ from .models import Feed, Short
 from .serializers import FeedSerializer, ShortSerializer
 from core.utils import mixins as global_mixins, exceptions
 from core.utils.helpers.decorators import RequestDataManipulationsDecorators
+from core.utils.commons.utils import serializers
 from core.utils.permissions import (
     IsAccountType, 
     IsFilmOwner, 
@@ -67,6 +70,12 @@ class RetrieveUpdateDeleteFeed(views.APIView):
     def get_permissions(self):
         if self.request.method == "GET":
             return [IsAuthenticated(), ]
+        if self.request.method == "DELETE":
+            return [
+                IsAuthenticated(), 
+                IsAccountType.IsCreatorAccount(), 
+                IsFilmOwner(), 
+            ]
         
         return super().get_permissions()
 
@@ -88,12 +97,12 @@ class RetrieveUpdateDeleteFeed(views.APIView):
                 status_code=status.HTTP_404_NOT_FOUND
             )
     
-    @RequestDataManipulationsDecorators.update_request_data_with_owner_data("owner")
     @extend_schema(
         description="endpoint for updating details of a specific film",
         request=FeedSerializer.FeedCreate,
         responses={200: FeedSerializer.FeedRetrieve},
     )
+    @RequestDataManipulationsDecorators.update_request_data_with_owner_data("owner")
     def patch(self, request, pk):
         try:
             feed = Feed.objects.get(id=pk, owner=request.user)
@@ -126,65 +135,7 @@ class RetrieveUpdateDeleteFeed(views.APIView):
             raise exceptions.CustomException(
                 "Film not found", status_code=status.HTTP_404_NOT_FOUND
             )
-        
-        
-@extend_schema(tags=["feed"])
-class Bookmark(views.APIView):
-    http_method_names = ["post", ]
-    parser_classes = [JSONParser, ]
 
-
-    @extend_schema(
-        description="endpoint to bookmark a film",
-        request=FeedSerializer.Bookmark,
-        responses={201: None}
-    )
-    def post(self, request):
-        serializer = FeedSerializer.Bookmark(
-            data=request.data
-        )
-        serializer.is_valid(raise_exception=True)
-        feed: Feed = serializer.validated_data["id"]
-        response_data = {}
-        if request.user not in feed.saved.all():
-            feed.saved.add(request.user)
-            response_data["status"] = "success"
-        else:
-            response_data["status"] = "failed"
-
-        return response.Response(
-            data=response_data, status=status.HTTP_200_OK
-        )
-
-
-@extend_schema(tags=["feed"])
-class RemoveBookmark(views.APIView):
-    http_method_names = ["post", ]
-    parser_classes = [JSONParser, ]
-    renderer_classes = [JSONRenderer, ]
-
-
-    @extend_schema(
-        description="endpoint to un-bookmark a film",
-        request=FeedSerializer.Bookmark,
-        responses={201: None}
-    )
-    def post(self, request):
-        serializer = FeedSerializer.Bookmark(
-            data=request.data
-        )
-        serializer.is_valid(raise_exception=True)
-        feed: Feed = serializer.validated_data["id"]
-        response_data = {}
-        if request.user in feed.saved.all():
-            feed.saved.remove(request.user)
-            response_data["status"] = "success"
-        else:
-            response_data["status"] = "failed"
-
-        return response.Response(
-            data=response_data, status=status.HTTP_200_OK
-        )
 
 
 @extend_schema(tags=["shorts"])
@@ -231,6 +182,12 @@ class RetrieveUpdateDeleteShort(views.APIView):
     def get_permissions(self):
         if self.request.method == "GET":
             return [IsAuthenticated()]
+        if self.request.method == "DELETE":
+            return [
+                IsAuthenticated(), 
+                IsAccountType.IsCreatorAccount(), 
+                IsShortOwner(), 
+            ]
         return super().get_permissions()
 
     @extend_schema(
@@ -249,12 +206,12 @@ class RetrieveUpdateDeleteShort(views.APIView):
                 "Short not found", status_code=status.HTTP_404_NOT_FOUND
             )
 
-    @RequestDataManipulationsDecorators.update_request_data_with_owner_data("owner")
     @extend_schema(
         description="Update an existing short",
         request=ShortSerializer.ShortCreate,
         responses={200: ShortSerializer.Retrieve},
     )
+    @RequestDataManipulationsDecorators.update_request_data_with_owner_data("owner")
     def patch(self, request, pk):
         try:
             short = Short.objects.get(id=pk, owner=request.user)
@@ -287,4 +244,99 @@ class RetrieveUpdateDeleteShort(views.APIView):
         except Short.DoesNotExist:
             raise exceptions.CustomException(
                 "Short not found", status_code=status.HTTP_404_NOT_FOUND
+            )
+        
+
+def _get_model_by_name(name: str):
+    matches = [m for m in apps.get_models() if m.__name__.lower() == name.lower()]
+    if not matches:
+        raise LookupError(f"No model named '{name}' found.")
+    if len(matches) > 1:
+        labels = [f"{m._meta.app_label}.{m.__name__}" for m in matches]
+        raise LookupError(f"Ambiguous model name '{name}'. Candidates: {', '.join(labels)}")
+    return matches[0]      
+
+
+@extend_schema(tags=["feed"])
+class Bookmark(views.APIView):
+    """
+    This is the endpoint to bookmark any any object that can be bookmarked.
+    The model name and id of the object to be bookmarked must be provided.
+    The model must have a 'saved' ManyToManyField to the User model.
+    """
+    http_method_names = ["post", ]
+    parser_classes = [JSONParser, ]
+
+
+    @extend_schema(
+        description="endpoint to bookmark an object",
+        request=serializers.Bookmark,
+        responses={201: None}
+    )
+    def post(self, request):
+        serializer = serializers.Bookmark(
+            data=request.data
+        )
+        serializer.is_valid(raise_exception=True)
+        model_name = serializer.validated_data["model_name"]
+        model = _get_model_by_name(model_name)
+        try:
+            object = model.objects.get(id=serializer.validated_data["id"])
+            response_data = {}
+            if request.user not in object.saved.all():
+                object.saved.add(request.user)
+                response_data["status"] = "success"
+            else:
+                response_data["status"] = "failed"
+            
+            return response.Response(
+                data=response_data, status=status.HTTP_200_OK
+            )
+        except model.DoesNotExist:
+            raise exceptions.CustomException(
+                message=f"{model_name} not found", 
+                status_code=status.HTTP_404_NOT_FOUND
+            )
+
+
+
+@extend_schema(tags=["feed"])
+class RemoveBookmark(views.APIView):
+    """
+    This is the endpoint to remove a bookmark from any object that can be bookmarked.
+    The model name and id of the object to be un-bookmarked must be provided.
+    The model must have a 'saved' ManyToManyField to the User model.
+    """
+    http_method_names = ["post", ]
+    parser_classes = [JSONParser, ]
+
+
+    @extend_schema(
+        description="endpoint to un-bookmark an object",
+        request=serializers.Bookmark,
+        responses={201: None}
+    )
+    def post(self, request):
+        serializer = serializers.Bookmark(
+            data=request.data
+        )
+        serializer.is_valid(raise_exception=True)
+        model_name = serializer.validated_data["model_name"]
+        model = _get_model_by_name(model_name)
+        try:
+            object = model.objects.get(id=serializer.validated_data["id"])
+            response_data = {}
+            if request.user in object.saved.all():
+                object.saved.remove(request.user)
+                response_data["status"] = "success"
+            else:
+                response_data["status"] = "failed"
+
+            return response.Response(
+                data=response_data, status=status.HTTP_200_OK
+            )
+        except model.DoesNotExist:
+            raise exceptions.CustomException(
+                message=f"{model_name} not found", 
+                status_code=status.HTTP_404_NOT_FOUND
             )
