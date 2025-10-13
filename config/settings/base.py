@@ -65,7 +65,8 @@ CORE_APPS = [
     'core.feed.apps.FeedConfig',
     'core.utils.apps.UtilsConfig',
     'core.playback.apps.PlaybackConfig',
-    'core.file_storage.apps.FileStorageConfig'
+    'core.file_storage.apps.FileStorageConfig',
+    'core.webhook.apps.WebhookConfig'
 ]
 
 INSTALLED_APPS += CORE_APPS
