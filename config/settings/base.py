@@ -241,6 +241,17 @@ UNFOLD = {
                         "link": reverse_lazy("admin:file_storage_fileprocessingjob_changelist"),
                     },
                 ]
+            },
+            {
+                "title": _("Webhooks"),
+                "collapsible": True,
+                "items": [
+                    {
+                        "title": _("Webhook Endpoints"),
+                        "icon": "link",
+                        "link": reverse_lazy("admin:webhook_webhookendpoint_changelist"),
+                    },
+                ]
             }
         ]
     }
