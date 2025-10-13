@@ -7,6 +7,8 @@ from pathlib import Path
 from django.utils.timezone import timedelta
 from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
+from config.celery.queue import CeleryQueue
+from celery.schedules import crontab
 
 from .. import env
 
@@ -54,6 +56,7 @@ INSTALLED_APPS = [
     "corsheaders",
     "rest_framework_simplejwt",
     "rest_framework_simplejwt.token_blacklist",
+    "django_celery_beat",
 ]
 
 CORE_APPS = [
@@ -294,6 +297,18 @@ CELERY_TASK_TIME_LIMIT = 30 * 60
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 CELERY_ACKS_LATE = True
 CELERY_TASK_REJECT_ON_WORKER_LOST = True
+CELERYD_PREFETCH_MULTIPLIER = 1
+CELERY_QUEUES = CeleryQueue.queues()
+
+
+CELERY_BEAT_SCHEDULE = {
+    "reconcile-due-releases-every-minute": {
+        "task": "core.feed.tasks.reconcile_due_releases",
+        "schedule": crontab(minute="*"),
+        "options": {"queue": "beats"},
+    },
+}
+
 
 LOGGING = {
     'version': 1,
