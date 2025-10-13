@@ -73,6 +73,7 @@ class ShortSerializer:
                 "views_count",
                 "likes_count",
                 "comments_count",
+                "is_released",
                 "date_added",
                 "date_last_modified",
             ]
@@ -104,5 +105,3 @@ class ShortSerializer:
             model = Short
             exclude = ["saved", "date_last_modified"]
 
-    class ShortBookmark(serializers.Serializer):
-        id = serializers.PrimaryKeyRelatedField(queryset=Short.objects.all())
