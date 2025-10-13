@@ -272,6 +272,7 @@ SIMPLE_JWT = {
     "SLIDING_TOKEN_REFRESH_LIFETIME": timedelta(days=1),
 }
 JWT_SECRET = env.str("JWT_SECRET")
+WEBHOOK_ENC_KEY = env.str("WEBHOOK_ENC_KEY", default="")
 
 # Chatting & Caches
 SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"
