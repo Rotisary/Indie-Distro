@@ -3227,3 +3227,5 @@ C:\Users\olado\Documents\django-projects\Indie-Distro\core\feed\serializers.py c
 Watching for file changes with StatReloader
 Watching for file changes with StatReloader
 Watching for file changes with StatReloader
+Not Found: /api/films/1/
+Unauthorized: /api/feed/films/1/
