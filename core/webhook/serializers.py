@@ -20,7 +20,7 @@ class WebhookEndpointSerializer:
             read_only_fields = ["id", "date_added"]
 
         
-        def save(self, validated_data):
+        def create(self, validated_data):
             secret_key = validated_data.pop("secret_key")
             webhook_endpoint = WebhookEndpoint(**validated_data)
             webhook_endpoint.set_secret(secret_key)

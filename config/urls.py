@@ -30,7 +30,8 @@ urlpatterns = [
     path("api/", include("core.users.urls")),
     path("api/feed/", include("core.feed.urls")),
     path("api/playback/", include("core.playback.urls")),
-    path("api/files/", include("core.file_storage.urls"))
+    path("api/files/", include("core.file_storage.urls")),
+    path("api/webhook/", include("core.webhook.urls"))
 ]
 
 if not settings.PRODUCTION:
