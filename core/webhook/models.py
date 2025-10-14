@@ -31,7 +31,7 @@ class WebhookEndpoint(BaseModelMixin):
     )
     secret_encrypted = models.TextField(
         null=False, 
-        blank=False, 
+        blank=True, 
         verbose_name=_("Encrypted Secret"),
         help_text=_("Encrypted secret for verification by client")
     )
@@ -45,7 +45,6 @@ class WebhookEndpoint(BaseModelMixin):
 
     def set_secret(self, raw: str):
         self.secret_encrypted = security.encrypt_secret(raw)
-        super().save()
 
     def get_secret(self) -> str:
         return security.decrypt_secret(self.secret_encrypted)
