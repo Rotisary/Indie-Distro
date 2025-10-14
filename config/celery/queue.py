@@ -7,6 +7,7 @@ class CeleryQueue:
         EMAIL_AND_NOTIFICATION = "email-notification"
         PACKAGING = "packaging"
         TRANSCODING = "transcoding"
+        IO = "io"
 
     @staticmethod
     def queues():

@@ -7,7 +7,7 @@ from .models import Feed, Short
 from .views import _get_model_by_name
 
 
-@shared_task(bind=True, max_retries=3, default_retry_delay=60)
+@shared_task(bind=True, max_retries=3, default_retry_delay=60, queue="beats")
 def release_object(self, object_id: int, object_model_name: str = None):
     """
     Releases an object (Feed or Short) at due time.

@@ -18,7 +18,7 @@ def resolve_renditions(user_renditions: list[dict] | None) -> list[dict]:
 
 
 
-@shared_task(bind=True, max_retries=2, default_retry_delay=30, name="file_pipeline.probe")
+@shared_task(bind=True, max_retries=2, default_retry_delay=30, name="file_pipeline.probe", queue="io")
 def ffprobe_metadata(self, job_id: int):
     job = FileProcessingJob.objects.get(pk=job_id)
     if job.metadata and job.metadata.get("ffprobe"):
@@ -43,7 +43,7 @@ def ffprobe_metadata(self, job_id: int):
     return job_id
 
 
-@shared_task(bind=True, name="file_pipeline.validate_metadata")
+@shared_task(bind=True, name="file_pipeline.validate_metadata", queue="io")
 def validate_and_extract_metadata(self, job_id: int):
     job = FileProcessingJob.objects.get(pk=job_id)
     if job.metadata and job.metadata.get("extracted"):
@@ -122,7 +122,7 @@ def validate_and_extract_metadata(self, job_id: int):
     return job_id
 
 
-@shared_task(bind=True, time_limit=60*60*4, name="file_pipeline.transcode.rendition")
+@shared_task(bind=True, time_limit=60*60*4, name="file_pipeline.transcode.rendition", queue="transcoding")
 def transcode_rendition(
     self, 
     job_id: int, 
@@ -199,7 +199,7 @@ def transcode_rendition(
     return {"name": name, "mp4_key": out_key}
 
 
-@shared_task(bind=True, time_limit=60*60*2, name="file_pipeline.package.hls")
+@shared_task(bind=True, time_limit=60*60*2, name="file_pipeline.package.hls", queue="packaging")
 def package_hls(self, job_id: int):
     """
     Use ffmpeg to package HLS variants and a master playlist from produced MP4 renditions.
@@ -268,7 +268,7 @@ def package_hls(self, job_id: int):
     return {"hls_master": master_key}
 
 
-@shared_task(bind=True, time_limit=60*60*2, name="file_pipeline.package.dash")
+@shared_task(bind=True, time_limit=60*60*2, name="file_pipeline.package.dash", queue="packaging")
 def package_dash(self, job_id: int):
     """
     Use ffmpeg to package MPEG-DASH (.mpd).
@@ -333,7 +333,7 @@ def package_dash(self, job_id: int):
     return {"dash_mpd": f"{prefix}/stream.mpd"}
 
 
-@shared_task(bind=True, time_limit=30*60, name="file_pipeline.thumbnails")
+@shared_task(bind=True, time_limit=30*60, name="file_pipeline.thumbnails", queue="io")
 def generate_thumbnails(self, job_id: int):
     """
     Generate thumbnails at fixed intervals from top rendition.
@@ -388,7 +388,7 @@ def generate_thumbnails(self, job_id: int):
     return {"thumbnails": uploaded}
 
 
-@shared_task(bind=True, name="file_pipeline.finalize")
+@shared_task(bind=True, name="file_pipeline.finalize", queue="io")
 def finalize_job(self, job_id: int):
     job = FileProcessingJob.objects.get(pk=job_id)
     job.mark_completed()
@@ -414,7 +414,7 @@ def finalize_job(self, job_id: int):
     return job_id
 
 
-@shared_task(bind=True, max_retries=3, default_retry_delay=30, name="file_pipeline.start")
+@shared_task(bind=True, max_retries=3, default_retry_delay=30, name="file_pipeline.start", queue="beats")
 def start_pipeline(self, job_id: int, renditions: list[dict] | None = None):
     """
     Entry: build the chain and kick it off. Keep the chain orchestration in one place.

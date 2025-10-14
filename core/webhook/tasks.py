@@ -10,7 +10,7 @@ from core.utils.helpers.webhook import WebhookUtils
 BACKOFF = [60, 300, 900, 3600] 
 
 
-@shared_task(bind=True, max_retries=len(BACKOFF), retry_backoff=False)
+@shared_task(bind=True, max_retries=len(BACKOFF), retry_backoff=False, queue="beats")
 def deliver_webhook(
     self, 
     endpoint_id: int, 
