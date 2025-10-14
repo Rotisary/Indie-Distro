@@ -79,7 +79,7 @@ class WebhookUtils:
         event: str, 
         payload: dict,
           *, 
-        owner_id: Optional[str] = None
+        owner_id: Optional[int] = None
     ) -> int:
         """
         Enqueue deliveries to all active endpoints subscribed to 'event'.

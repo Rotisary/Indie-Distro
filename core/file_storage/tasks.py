@@ -9,9 +9,9 @@ from rest_framework import status
 
 from core.utils.helpers.file_storage import StorageClient, StorageUtils, FileProcessingUtils
 from core.file_storage.models import FileProcessingJob, FileModel
-from core.utils.enums import JobStatus, Stage, DEFAULT_RENDITIONS
+from core.utils.enums import JobStatus, Stage, DEFAULT_RENDITIONS, WebhookEvent
 from core.utils.exceptions import exceptions
-
+from core.utils.helpers.webhook import WebhookUtils
 
 def resolve_renditions(user_renditions: list[dict] | None) -> list[dict]:
     return user_renditions or DEFAULT_RENDITIONS
@@ -392,6 +392,23 @@ def generate_thumbnails(self, job_id: int):
 def finalize_job(self, job_id: int):
     job = FileProcessingJob.objects.get(pk=job_id)
     job.mark_completed()
+
+    # create webhook payload and trigger webhooks
+    payload = {
+        "status": JobStatus.COMPLETED.value,
+        "owner": job.owner.id,
+        "file": {
+            "file_id": job.file.id,
+            "file_name": job.file.original_filename,
+            "file_purpose": job.file.file_purpose,
+            "file_key": job.file.file_key,
+        },
+        "media": {
+            "media_obj_id": job.file.film.id if job.file.film else (job.file.short.id if job.file.short else None),
+            "media_type": "film" if job.file.film else "short",
+        }
+    }
+    WebhookUtils.trigger_webhooks(WebhookEvent.PROCESSING_COMPLETED.value, payload, owner_id=job.owner.id)
     StorageUtils.cleanup_job_workdir(job_id)
     logger.success(f"Processing job {job_id} completed")
     return job_id

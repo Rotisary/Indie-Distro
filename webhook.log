@@ -3256,3 +3256,4 @@ Traceback (most recent call last):
 TypeError: WebhookEndpointSerializer.WebhookListCreate.save() missing 1 required positional argument: 'validated_data'
 C:\Users\olado\Documents\django-projects\Indie-Distro\core\webhook\serializers.py changed, reloading.
 Watching for file changes with StatReloader
+Unauthorized: /api/webhook/endpoints/
