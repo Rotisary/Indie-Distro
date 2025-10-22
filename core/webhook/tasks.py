@@ -4,7 +4,7 @@ from loguru import logger
 from django.utils import timezone
 
 from .models import WebhookEndpoint
-from core.utils.helpers.webhook import WebhookUtils
+from core.utils.helpers.webhook.utils import WebhookUtils
 
 
 BACKOFF = [60, 300, 900, 3600] 
