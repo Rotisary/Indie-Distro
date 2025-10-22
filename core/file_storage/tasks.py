@@ -11,7 +11,7 @@ from core.utils.helpers.file_storage import StorageClient, StorageUtils, FilePro
 from core.file_storage.models import FileProcessingJob, FileModel
 from core.utils.enums import JobStatus, Stage, DEFAULT_RENDITIONS, WebhookEvent
 from core.utils.exceptions import exceptions
-from core.utils.helpers.webhook import WebhookUtils
+from core.utils.helpers.webhook import trigger_webhooks
 
 def resolve_renditions(user_renditions: list[dict] | None) -> list[dict]:
     return user_renditions or DEFAULT_RENDITIONS
@@ -408,7 +408,7 @@ def finalize_job(self, job_id: int):
             "media_type": "film" if job.file.film else "short",
         }
     }
-    WebhookUtils.trigger_webhooks(WebhookEvent.PROCESSING_COMPLETED.value, payload, owner_id=job.owner.id)
+    trigger_webhooks(WebhookEvent.PROCESSING_COMPLETED.value, payload, owner_id=job.owner.id)
     StorageUtils.cleanup_job_workdir(job_id)
     logger.success(f"Processing job {job_id} completed")
     return job_id

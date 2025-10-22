@@ -1,18 +1,9 @@
 from typing import Optional
 
 from django.db.models import Q
-from dataclasses import dataclass
 
 from core.webhook.models import WebhookEndpoint
 from core.webhook.tasks import deliver_webhook
-
-
-
-@dataclass
-class SendResult:
-    status_code: int | None
-    ok: bool
-    error: str | None
 
 
 def trigger_webhooks(

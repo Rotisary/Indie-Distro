@@ -1,15 +1,22 @@
 import requests
-import json, time, uuid
+import json, uuid
+from dataclasses import dataclass
+
 from requests import RequestException
 
 from django.utils import timezone
 
-
 from core.webhook.models import WebhookEndpoint
-from . import SendResult
 
 
 HEADER_NAME = "verif-key"
+
+
+@dataclass
+class SendResult:
+    status_code: int | None
+    ok: bool
+    error: str | None
 
 
 class WebhookUtils:
