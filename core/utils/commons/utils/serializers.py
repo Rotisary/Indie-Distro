@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.utils.translation import gettext_lazy as _
 
-from core.utils.enums.base import ModelNameChoice
+from core.utils.enums import ModelNameChoice
 
 
 class Bookmark(serializers.Serializer):

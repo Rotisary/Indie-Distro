@@ -1,7 +1,15 @@
 import random
+
+from django.db import models
 from django.conf import settings
+from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 from django.contrib.auth import get_user_model
+
 from faker import Faker
+
+from  .mixins import BaseModelMixin
+from .enums import KeyProcessStatus
 from core.utils.enums import UserAccountType
 
 UserModel = get_user_model()
@@ -45,3 +53,33 @@ class User:
             return User.create_random_admin_user(type_, address=address)
         return instance
 
+
+class IdempotencyKey(BaseModelMixin):
+    key = models.CharField(max_length=128, null=False, blank=False)
+    user = models.ForeignKey(
+        UserModel, 
+        on_delete=models.CASCADE, 
+        null=True, 
+        blank=True
+    )
+    request_hash = models.CharField(
+        _("Hashed Request Data"),
+        max_length=64, 
+        blank=False, 
+        null=False
+    )
+    status = models.CharField(
+        choices=KeyProcessStatus.choices(),
+        max_length=16, 
+        default=KeyProcessStatus.IN_PROGRESS.value
+    )
+    locked_until = models.DateTimeField(null=True, blank=True)
+    response_status = models.IntegerField(null=True, blank=True)
+    response_body = models.JSONField(null=True, blank=True)
+    expires_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        unique_together = (("key", "user"),)
+ 
+    def is_locked(self):
+        return bool(self.locked_until and self.locked_until > timezone.now())
