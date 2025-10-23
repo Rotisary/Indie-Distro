@@ -3274,3 +3274,43 @@ C:\Users\olado\Documents\django-projects\Indie-Distro\core\file_storage\tasks.py
 Watching for file changes with StatReloader
 C:\Users\olado\Documents\django-projects\Indie-Distro\core\utils\helpers\webhook\utils.py changed, reloading.
 Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Internal Server Error: /api/files/get_signed_url/
+Traceback (most recent call last):
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\django\views\generic\base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\core\utils\helpers\decorators\__init__.py", line 254, in function_to_execute
+    IdempotencyDecorator._persist_db(idem_key, response, now=now, expires_at=expires_at)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\core\utils\helpers\decorators\__init__.py", line 125, in _persist_db
+    idem_key.save(update_fields=[
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\django\db\models\base.py", line 880, in save
+    raise ValueError(
+ValueError: The following fields do not exist in this model, are m2m fields, primary keys, or are non-concrete fields: updated_at
+C:\Users\olado\Documents\django-projects\Indie-Distro\core\utils\helpers\decorators\__init__.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\olado\Documents\django-projects\Indie-Distro\core\utils\helpers\decorators\__init__.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\olado\Documents\django-projects\Indie-Distro\core\utils\helpers\decorators\__init__.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\olado\Documents\django-projects\Indie-Distro\core\utils\helpers\decorators\__init__.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\olado\Documents\django-projects\Indie-Distro\core\utils\helpers\decorators\__init__.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\olado\Documents\django-projects\Indie-Distro\core\utils\helpers\decorators\__init__.py changed, reloading.
+Watching for file changes with StatReloader
+Conflict: /api/files/get_signed_url/
+Bad Request: /api/files/create_file_object/

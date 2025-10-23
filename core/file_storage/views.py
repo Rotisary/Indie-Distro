@@ -13,7 +13,7 @@ from .models import FileModel, FileProcessingJob
 from .serializers import FileSerializer, SignedURLRequestSerializer
 from .tasks import start_pipeline
 from core.utils import mixins as global_mixins, exceptions
-from core.utils.helpers.decorators import RequestDataManipulationsDecorators
+from core.utils.helpers.decorators import RequestDataManipulationsDecorators, IdempotencyDecorator
 from core.utils.helpers.file_storage import FileUploadUtils
 from core.utils.permissions import IsAccountType, IsFilmOwner, FilmNotReleased
 
@@ -30,6 +30,7 @@ class GetSignedUploadURL(views.APIView):
         request=SignedURLRequestSerializer,
         responses={200: None}
     )
+    @IdempotencyDecorator.make_endpoint_idempotent(ttl=3600)
     def post(self, request, *args, **kwargs):
         serializer = SignedURLRequestSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
