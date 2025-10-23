@@ -216,7 +216,7 @@ class RetrieveUpdateDeleteShort(views.APIView):
         try:
             short = Short.objects.get(id=pk, owner=request.user)
             self.check_object_permissions(request, short)
-            serializer = ShortSerializer.Create(
+            serializer = ShortSerializer.ShortCreate(
                 instance=short, data=request.data, partial=True, context={"request": request}
             )
             serializer.is_valid(raise_exception=True)
