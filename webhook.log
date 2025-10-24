@@ -3314,3 +3314,13 @@ C:\Users\olado\Documents\django-projects\Indie-Distro\core\utils\helpers\decorat
 Watching for file changes with StatReloader
 Conflict: /api/files/get_signed_url/
 Bad Request: /api/files/create_file_object/
+Watching for file changes with StatReloader
+C:\Users\olado\Documents\django-projects\Indie-Distro\core\feed\views.py changed, reloading.
+Watching for file changes with StatReloader
+Unauthorized: /api/feed/films/
+Bad Request: /api/feed/films/all/
+Not Found: /favicon.ico
+Bad Request: /api/feed/films/1/
+C:\Users\olado\Documents\django-projects\Indie-Distro\core\feed\views.py changed, reloading.
+Watching for file changes with StatReloader
+Not Found: /redoc/

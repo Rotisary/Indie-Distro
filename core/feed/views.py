@@ -1,15 +1,16 @@
-from unicodedata import name
-from rest_framework import status, decorators, response, views
+from rest_framework import status, response, views, filters, generics
 from rest_framework.parsers import JSONParser
 from rest_framework.renderers import JSONRenderer
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.apps import apps
 
 from loguru import logger
 from drf_spectacular.utils import extend_schema
+from django_filters.rest_framework import DjangoFilterBackend
 
 
 from .models import Feed, Short
+from .filters import FilmFilter
 from .serializers import FeedSerializer, ShortSerializer
 from core.utils import mixins as global_mixins, exceptions
 from core.utils.helpers.decorators import RequestDataManipulationsDecorators
@@ -136,6 +137,16 @@ class RetrieveUpdateDeleteFeed(views.APIView):
                 "Film not found", status_code=status.HTTP_404_NOT_FOUND
             )
 
+
+@extend_schema(tags=["feed"])
+class PublicFeedList(generics.ListAPIView):
+    permission_classes = [AllowAny]
+    serializer_class = FeedSerializer.FeedRetrieve
+    queryset = Feed.objects.filter(is_released=True)
+    filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
+    filterset_class = FilmFilter
+    ordering_fields = ["release_date", "price"]
+    ordering = ["-release_date"]
 
 
 @extend_schema(tags=["shorts"])
