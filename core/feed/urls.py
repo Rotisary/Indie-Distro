@@ -7,7 +7,8 @@ from .views import (
     PublicFeedList,
     Bookmark,
     RemoveBookmark,
-    RetrieveUpdateDeleteShort
+    RetrieveUpdateDeleteShort,
+    PublicShortsList
 )
 
 urlpatterns = [
@@ -18,4 +19,5 @@ urlpatterns = [
     path("remove_bookmark/", RemoveBookmark.as_view(), name="unbookmark-film"),
     path("shorts/", ListCreateShort.as_view(), name="list-create-short"),
     path("shorts/<int:pk>/", RetrieveUpdateDeleteShort.as_view(), name="rud-short"),
+    path("shorts/all/", PublicShortsList.as_view(), name="public-short-list"),
 ]

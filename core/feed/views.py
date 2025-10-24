@@ -10,7 +10,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 
 
 from .models import Feed, Short
-from .filters import FilmFilter
+from .filters import FilmFilter, ShortFilter
 from .serializers import FeedSerializer, ShortSerializer
 from core.utils import mixins as global_mixins, exceptions
 from core.utils.helpers.decorators import RequestDataManipulationsDecorators
@@ -256,6 +256,22 @@ class RetrieveUpdateDeleteShort(views.APIView):
             raise exceptions.CustomException(
                 "Short not found", status_code=status.HTTP_404_NOT_FOUND
             )
+
+
+@extend_schema(tags=["shorts"])
+class PublicShortsList(generics.ListAPIView):
+    permission_classes = [AllowAny]
+    serializer_class = ShortSerializer.Retrieve
+    queryset = Short.objects.filter(is_released=False)
+    filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
+    filterset_class = ShortFilter
+    ordering_fields = [
+        "release_date", 
+        "views_count",
+        "likes_count",
+        "comments_count"
+    ]
+    ordering = ["-release_date"]
         
 
 def _get_model_by_name(name: str):

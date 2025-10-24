@@ -4,7 +4,6 @@ from core.utils import enums
 from .models import Feed, Short
 
 class FilmFilter(FilterSet):
-
     owner = filters.NumberFilter(field_name="owner__id", label="Filter by owner ID")
     title = filters.CharFilter(
         field_name="title", 
@@ -39,4 +38,26 @@ class FilmFilter(FilterSet):
 
     class Meta:
         model = Feed
+        fields = []
+
+
+class ShortFilter(FilterSet):
+    owner = filters.NumberFilter(field_name="owner__id", label="Filter by owner ID")
+    film = filters.NumberFilter(field_name="film__id", label="Filter by associated film ID")
+    type = filters.ChoiceFilter(
+        label="Filter by short type(Teaser, Snippet e.t.c)",
+        choices=enums.ShortType.choices()
+    )
+    search = filters.CharFilter(
+        method="filter_search", 
+        label="Search in caption and tags"
+    )
+
+    def filter_search(self, queryset, name, value):
+        return queryset.filter(
+            Q(caption__icontains=value) | Q(tags__icontains=value)
+        )
+
+    class Meta:
+        model = Short
         fields = []
