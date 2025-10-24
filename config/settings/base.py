@@ -321,8 +321,23 @@ CELERY_QUEUES = CeleryQueue.queues()
 
 
 CELERY_BEAT_SCHEDULE = {
-    "reconcile-due-releases-every-minute": {
+    "clear_out_expired_periodic_tasks": {
+        "task": "core.utils.tasks.clear_out_periodic_tasks",
+        "schedule": crontab(hour="*/2"),
+        "options": {"queue": "beats"},
+    },
+    "clear_out_all_blacklisted_tokens": {
+        "task": "core.utils.tasks.clear_out_blacklisted_tokens",
+        "schedule": crontab(hour="0,12", minute=0),
+        "options": {"queue": "beats"},
+    },
+    "reconcile-due-releases": {
         "task": "core.feed.tasks.reconcile_due_releases",
+        "schedule": crontab(minute="*"),
+        "options": {"queue": "beats"},
+    },
+    "delete_expired_idempotency_keys": {
+        "task": "core.utils.tasks.delete_expired_idempotency_keys",
         "schedule": crontab(minute="*"),
         "options": {"queue": "beats"},
     },
