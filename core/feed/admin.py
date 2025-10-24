@@ -36,7 +36,7 @@ class FeedAdmin(ModelAdmin):
                     "cast",
                     "crew",
                     "language",
-                    "length",
+                    "duration",
                     "price",
                     "rental_duration",
                     "is_released",
@@ -53,7 +53,7 @@ class FeedAdmin(ModelAdmin):
         ),
     )
 
-    list_display = ["owner__first_name", "owner__last_name", "title", "length", "price"]
+    list_display = ["owner__first_name", "owner__last_name", "title", "duration", "price"]
     search_fields = ["title", "genre", "type", "sale_type"]
     readonly_fields = ["date_added", "date_last_modified"]
     ordering = ["title"]
@@ -117,7 +117,6 @@ class ShortAdmin(ModelAdmin):
             {
                 "classes": ["tab"],
                 "fields": (
-                    "title",
                     "slug",
                     "type",
                 ),
@@ -130,7 +129,7 @@ class ShortAdmin(ModelAdmin):
                 "fields": (
                     "caption",
                     "language",
-                    "length",
+                    "duration",
                     "tags",
                     "is_released",
                     "saved",
@@ -157,7 +156,7 @@ class ShortAdmin(ModelAdmin):
         ),
     )
 
-    list_display = ["owner__first_name", "owner__last_name", "title", "release_date"]
-    search_fields = ["title", "slug", "owner__email", "film__title"]
+    list_display = ["owner__first_name", "owner__last_name", "release_date"]
+    search_fields = ["slug", "owner__email", "film__title"]
     readonly_fields = ["date_added", "date_last_modified"]
     ordering = ["-date_added"]

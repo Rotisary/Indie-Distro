@@ -17,7 +17,7 @@ class BaseFilmSerializer(serializers.ModelSerializer):
             "title",
             "plot",
             "release_date",
-            "length",
+            "duration",
             "genre",
             "type"
         ]

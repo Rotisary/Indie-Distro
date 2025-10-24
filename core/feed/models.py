@@ -51,7 +51,7 @@ class Feed(BaseModelMixin):
         null=False,
         help_text=_("The type of film e.g Series, Standalone")
     )
-    length = models.DurationField(_("Film Length(Runtime)"), null=True, blank=True)
+    duration = models.DurationField(_("Film duration(Runtime)"), null=True, blank=True)
     release_date = models.DateField(
         _("Release Date "),
         null=True,
@@ -207,7 +207,6 @@ class Short(BaseModelMixin):
         blank=False,
         verbose_name=_("Short Media File"),
     )
-    title = models.CharField(_("Short Title"), max_length=225)
     slug = models.SlugField(
         _("Slug"),
         max_length=255,
@@ -226,7 +225,7 @@ class Short(BaseModelMixin):
         blank=True,
         help_text=_("A short caption for the short"),
     )
-    length = models.DurationField(_("Short Length (Runtime)"), null=True, blank=True)
+    duration = models.DurationField(_("Short Duration (Runtime)"), null=True, blank=True)
     language = models.CharField(
         _("Language"),
         max_length=2,

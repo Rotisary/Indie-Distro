@@ -91,11 +91,11 @@ def validate_and_extract_metadata(self, job_id: int):
     short = job.file.short
     if film:
         FileProcessingUtils.update_obj_fields(
-            film, {"length": timedelta(duration)}
+            film, {"duration": timedelta(duration)}
         )
     if short:
         FileProcessingUtils.update_obj_fields(
-            short, {"length": timedelta(duration)}
+            short, {"duration": timedelta(duration)}
         )
         
     # update job fields
