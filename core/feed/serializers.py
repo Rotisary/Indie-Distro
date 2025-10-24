@@ -28,6 +28,7 @@ class FeedSerializer:
         class Meta:
             model = Feed
             exclude = [
+                "duration",
                 "slug",
                 "saved",
                 "is_released",
@@ -65,9 +66,16 @@ class FeedSerializer:
     
 class ShortSerializer:
     class ShortCreate(serializers.ModelSerializer):
+        film = serializers.PrimaryKeyRelatedField(
+            queryset=Feed.objects.all(),
+            required=True,
+            allow_null=False,
+            help_text=_("The film this short is associated with, if any.")
+        )
         class Meta:
             model = Short
             exclude = [
+                "duration",
                 "slug",
                 "saved",
                 "views_count",
@@ -97,7 +105,7 @@ class ShortSerializer:
                 raise serializers.ValidationError("You do not own the provided film.")
             return value
 
-    class Retrieve(serializers.ModelSerializer):
+    class ShortRetrieve(serializers.ModelSerializer):
         owner = BaseUserSerializer()
         film = BaseFilmSerializer()
 

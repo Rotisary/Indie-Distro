@@ -3376,3 +3376,5 @@ C:\Users\olado\Documents\django-projects\Indie-Distro\core\feed\serializers.py c
 Watching for file changes with StatReloader
 Method Not Allowed: /api/feed/shorts/
 Bad Request: /api/feed/shorts/
+Watching for file changes with StatReloader
+Bad Request: /api/feed/shorts/

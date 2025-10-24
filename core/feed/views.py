@@ -158,7 +158,7 @@ class ListCreateShort(views.APIView):
     @extend_schema(
         description="Create a new short",
         request=ShortSerializer.ShortCreate,
-        responses={201: ShortSerializer.Retrieve},
+        responses={201: ShortSerializer.ShortRetrieve},
     )
     @RequestDataManipulationsDecorators.update_request_data_with_owner_data("owner")
     def post(self, request):
@@ -166,17 +166,17 @@ class ListCreateShort(views.APIView):
         serializer.is_valid(raise_exception=True)
         instance = serializer.save()
         logger.success(f"Short created with title: {instance.title}")
-        serializer = ShortSerializer.Retrieve(instance=instance)
+        serializer = ShortSerializer.ShortRetrieve(instance=instance)
         return response.Response(data=serializer.data, status=status.HTTP_201_CREATED)
 
     @extend_schema(
         description="List shorts owned by the authenticated creator",
         request=None,
-        responses={200: ShortSerializer.Retrieve(many=True)},
+        responses={200: ShortSerializer.ShortRetrieve(many=True)},
     )
     def get(self, request):
         queryset = Short.objects.filter(owner=request.user)
-        serializer = ShortSerializer.Retrieve(queryset, many=True)
+        serializer = ShortSerializer.ShortRetrieve(queryset, many=True)
         return response.Response(data=serializer.data, status=status.HTTP_200_OK)
 
 
@@ -204,12 +204,12 @@ class RetrieveUpdateDeleteShort(views.APIView):
     @extend_schema(
         description="Retrieve details of a specific short by ID",
         request=None,
-        responses={200: ShortSerializer.Retrieve},
+        responses={200: ShortSerializer.ShortRetrieve},
     )
     def get(self, request, pk):
         try:
             short = Short.objects.get(id=pk)
-            serializer = ShortSerializer.Retrieve(instance=short)
+            serializer = ShortSerializer.ShortRetrieve(instance=short)
             logger.info(f"Retrieved short with ID: {pk}")
             return response.Response(data=serializer.data, status=status.HTTP_200_OK)
         except Short.DoesNotExist:
@@ -220,7 +220,7 @@ class RetrieveUpdateDeleteShort(views.APIView):
     @extend_schema(
         description="Update an existing short",
         request=ShortSerializer.ShortCreate,
-        responses={200: ShortSerializer.Retrieve},
+        responses={200: ShortSerializer.ShortRetrieve},
     )
     @RequestDataManipulationsDecorators.update_request_data_with_owner_data("owner")
     def patch(self, request, pk):
@@ -233,7 +233,7 @@ class RetrieveUpdateDeleteShort(views.APIView):
             serializer.is_valid(raise_exception=True)
             instance = serializer.save()
             logger.success(f"Short with ID: {pk} successfully updated.")
-            serializer = ShortSerializer.Retrieve(instance=instance)
+            serializer = ShortSerializer.ShortRetrieve(instance=instance)
             return response.Response(data=serializer.data, status=status.HTTP_200_OK)
         except Short.DoesNotExist:
             raise exceptions.CustomException(
@@ -261,7 +261,7 @@ class RetrieveUpdateDeleteShort(views.APIView):
 @extend_schema(tags=["shorts"])
 class PublicShortsList(generics.ListAPIView):
     permission_classes = [AllowAny]
-    serializer_class = ShortSerializer.Retrieve
+    serializer_class = ShortSerializer.ShortRetrieve
     queryset = Short.objects.filter(is_released=False)
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     filterset_class = ShortFilter
