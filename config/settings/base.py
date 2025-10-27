@@ -67,6 +67,7 @@ CORE_APPS = [
     'core.utils.apps.UtilsConfig',
     'core.playback.apps.PlaybackConfig',
     'core.file_storage.apps.FileStorageConfig',
+    'core.wallet.apps.WalletConfig',
     'core.webhook.apps.WebhookConfig'
 ]
 
