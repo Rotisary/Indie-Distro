@@ -3379,3 +3379,5 @@ Bad Request: /api/feed/shorts/
 Watching for file changes with StatReloader
 Bad Request: /api/feed/shorts/
 Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Not Found: /favicon.ico
