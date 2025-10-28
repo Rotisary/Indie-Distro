@@ -250,6 +250,17 @@ UNFOLD = {
                 ]
             },
             {
+                "title": _("Wallets"),
+                "collapsible": True,
+                "items": [
+                    {
+                        "title": _("Wallets"),
+                        "icon": "account_balance_wallet",
+                        "link": reverse_lazy("admin:wallet_wallet_changelist"),
+                    },
+                ]
+            },
+            {
                 "title": _("Webhooks"),
                 "collapsible": True,
                 "items": [

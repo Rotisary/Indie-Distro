@@ -1,3 +1,52 @@
-from django.contrib import admin
+from unfold.admin import ModelAdmin
 
-# Register your models here.
+from django.contrib import admin
+from django.utils.translation import gettext_lazy as _
+
+from .models import Wallet
+
+
+@admin.register(Wallet)
+class WalletAdmin(ModelAdmin):
+    fieldsets = (
+        (
+            _("User"),
+            {
+                "classes": ["tab"],
+                "fields": (
+                    "owner",
+                ),
+            },
+        ),
+        (
+            _("Meta Information"),
+            {
+                "classes": ["tab"],
+                "fields": (
+                    "account_reference",
+                    "barter_id",
+                    "virtual_account_number",
+                    "virtual_bank_name",
+                    "balance",
+                    "wallet_pin",
+                ),
+            },
+        ),
+        (
+            _("Important dates"),
+            {
+                "classes": ["tab"],
+                "fields": ("created_at", "date_added", "date_last_modified"),
+            },
+        ),
+    )
+
+    list_display = [
+        "account_reference",
+        "barter_id",
+        "balance",
+        "date_added",
+    ]
+    search_fields = ["account_reference", "barter_id"]
+    readonly_fields = ["date_added", "date_last_modified"]
+    ordering = ["-date_added"]
