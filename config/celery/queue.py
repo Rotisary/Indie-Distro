@@ -8,6 +8,7 @@ class CeleryQueue:
         PACKAGING = "packaging"
         TRANSCODING = "transcoding"
         IO = "io"
+        SERVICE = "service"
 
     @staticmethod
     def queues():

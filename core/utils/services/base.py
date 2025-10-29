@@ -69,3 +69,15 @@ class BaseService:
             raise ValueError(f"Request failed: {e}")
         
         return response
+
+
+    def delete(self, endpoint: str, timeout: int=15):
+        url = f"{self.base_url}/{endpoint}"
+        headers = self.get_headers()
+        try:
+            response = self.session.delete(url, headers=headers, timeout=timeout)
+        except requests.RequestException as e:
+            logger.error(f"Request failed: {e}")
+            raise ValueError(f"Request failed: {e}")
+        
+        return response
