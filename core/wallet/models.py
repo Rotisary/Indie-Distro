@@ -30,8 +30,8 @@ class Wallet(mixins.BaseModelMixin):
     )
     virtual_account_number = models.CharField(
         max_length=10, 
-        blank=False, 
-        null=False, 
+        blank=True, 
+        null=True, 
         verbose_name=_("Virtual Account Number")
     )
     virtual_bank_name = models.CharField(
