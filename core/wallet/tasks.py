@@ -1,6 +1,8 @@
 from celery import shared_task
 from loguru import logger
 
+from django.db import transaction
+
 from .models import Wallet
 from core.users.models import User
 from core.utils.services import FlutterwaveService
@@ -17,11 +19,12 @@ def create_wallet_for_user(self, user_id: int) -> None:
     )
 
     try:
-        Wallet.objects.create(
-            owner=user,
-            account_reference=data['account_reference'],
-            barter_id=data['barter_id'],
-        )
+        with transaction.atomic():
+            Wallet.objects.create(
+                owner=user,
+                account_reference=data['account_reference'],
+                barter_id=data['barter_id'],
+            )
     except Exception as e:
         # Rollback subaccount creation on Flutterwave if wallet creation fails
         service.delete_subaccount(account_reference=data['account_reference'])
