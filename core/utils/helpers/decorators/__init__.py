@@ -339,9 +339,9 @@ class WebhookTriggerDecorator:
     def _wrap(
         success_event: str,
         fail_event: str,
-        client_exceptions: tuple[type[BaseException], ...],        
         server_exceptions: tuple[type[BaseException], ...], 
         payload_builder: Callable,     
+        client_exceptions: tuple[type[BaseException], ...]=ValueError,        
     ):
         def inner(function):
             def function_to_execute(self, *args, **kwargs):
@@ -391,8 +391,8 @@ class WebhookTriggerDecorator:
         *,
         success_event: str = enums.WebhookEvent.PROCESSING_COMPLETED.value,
         fail_event: str = enums.WebhookEvent.PROCESSING_FAILED.value,
-        client_exceptions: tuple[type[BaseException], ...],
         server_exceptions: tuple[type[BaseException], ...],
+        client_exceptions: tuple[type[BaseException], ...]=ValueError,
     ):
         return WebhookTriggerDecorator._wrap(
             success_event=success_event,
@@ -408,8 +408,8 @@ class WebhookTriggerDecorator:
         *,
         success_event: str = enums.WebhookEvent.WALLET_CREATION_COMPLETED.value,
         fail_event: str = enums.WebhookEvent.WALLET_CREATION_FAILED.value,
-        client_exceptions: tuple[type[BaseException], ...],
         server_exceptions: tuple[type[BaseException], ...],
+        client_exceptions: tuple[type[BaseException], ...]=ValueError,
     ):
         return WebhookTriggerDecorator._wrap(
             success_event=success_event,
