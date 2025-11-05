@@ -1,11 +1,10 @@
 import boto3
 import mimetypes
-import hashlib
 import os
 import shutil
 import subprocess
 import tempfile
-from typing import Iterable, Optional, Tuple
+from typing import Iterable, Optional
 
 from loguru import logger
 
@@ -75,7 +74,12 @@ class StorageClient:
         return presigned_url
 
 
-    def upload_file_to_s3(self, local_path: str, key: str, content_type: Optional[str] = None) -> None:
+    def upload_file_to_s3(
+            self, 
+            local_path: str, 
+            key: str, 
+            content_type: Optional[str] = None,
+        ) -> None:
         assert settings.USING_MANAGED_STORAGE, "Managed storage must be enabled"
         bucket = settings.AWS_STORAGE_BUCKET_NAME
         extra = {}

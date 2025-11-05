@@ -1,6 +1,7 @@
 from loguru import logger
 
 from .base import BaseService
+from core.utils.exceptions import exceptions
 from config import env
 
 
@@ -26,10 +27,10 @@ class FlutterwaveService(BaseService):
         response = self.post(endpoint, data)
         if response.status_code != 200:
             logger.error(f"Failed to create subaccount: {response.text}")
-            raise ValueError({
-                "status_code": response.status_code,
-                "error_message": response.text
-            })
+            raise exceptions.CustomException(
+                message=response.text,
+                status_code=response.status_code
+            )
         
         logger.info(f"Subaccount created successfully")
         data = {
@@ -46,10 +47,10 @@ class FlutterwaveService(BaseService):
         response = self.post(endpoint, data)
         if response.status_code != 200:
             logger.error(f"Failed to delete subaccount: {response.text}")
-            raise ValueError({
-                "status_code": response.status_code,
-                "error_message": response.text
-            })
+            raise exceptions.CustomException(
+                message=response.text,
+                status_code=response.status_code
+            )
         
         logger.info(f"Subaccount deleted successfully")
         status = response.json()['status']

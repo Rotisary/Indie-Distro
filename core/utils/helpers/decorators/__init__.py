@@ -1,5 +1,7 @@
 import hashlib
 import json
+import inspect
+from functools import wraps
 from datetime import timedelta
 from typing import Callable, Optional
 
@@ -14,7 +16,8 @@ from rest_framework.response import Response
 from rest_framework import status as http_status
 
 from core.utils.models import IdempotencyKey
-from core.utils.enums import KeyProcessStatus
+from core.utils import enums
+from core.utils.helpers.webhook import CreateWebhookEventPayload, trigger_webhooks
 
 
 class RequestDataManipulationsDecorators:
@@ -115,8 +118,8 @@ class IdempotencyDecorator:
     @staticmethod
     def _persist_db(idem_key: IdempotencyKey, response, *, now, expires_at):
         idem_key.status = (
-            KeyProcessStatus.SUCCEEDED.value if 200 <= response.status_code < 300 
-            else KeyProcessStatus.FAILED.value
+            enums.KeyProcessStatus.SUCCEEDED.value if 200 <= response.status_code < 300 
+            else enums.KeyProcessStatus.FAILED.value
         )
         idem_key.response_status = response.status_code
         idem_key.response_body = getattr(response, "data", None)
@@ -158,14 +161,14 @@ class IdempotencyDecorator:
                         return IdempotencyDecorator._return_response("Idempotency key conflict (different payload)")
 
                     if ( 
-                        cached.get("status") == KeyProcessStatus.IN_PROGRESS.value 
+                        cached.get("status") == enums.KeyProcessStatus.IN_PROGRESS.value 
                         and cached.get("lock_until", 0) > now.timestamp()
                     ):
                         return IdempotencyDecorator._return_response("operation is still being processed")
 
                     if (
                         cached.get("status") in (
-                            KeyProcessStatus.SUCCEEDED.value, KeyProcessStatus.FAILED.value
+                            enums.KeyProcessStatus.SUCCEEDED.value, enums.KeyProcessStatus.FAILED.value
                         ) 
                         and "response_status" in cached
                     ):
@@ -189,7 +192,7 @@ class IdempotencyDecorator:
                         cache.set(
                             cache_key,
                             {
-                                "status": KeyProcessStatus.IN_PROGRESS.value,
+                                "status": enums.KeyProcessStatus.IN_PROGRESS.value,
                                 "request_hash": body_hash,
                                 "lock_until": locked_until.timestamp(),
                             }, 
@@ -210,14 +213,14 @@ class IdempotencyDecorator:
                             return IdempotencyDecorator._return_response("Idempotency key conflict (different payload)")
 
                         if ( 
-                            record.status == KeyProcessStatus.IN_PROGRESS.value
+                            record.status == enums.KeyProcessStatus.IN_PROGRESS.value
                             and record.is_locked()
                         ):
                             # Refresh cache
                             cache.set(
                                 cache_key, 
                                 {
-                                    "status": KeyProcessStatus.IN_PROGRESS.value,
+                                    "status": enums.KeyProcessStatus.IN_PROGRESS.value,
                                     "request_hash": record.request_hash,
                                     "lock_until": record.locked_until.timestamp() if record.locked_until else now.timestamp(),
                                 }, 
@@ -227,7 +230,7 @@ class IdempotencyDecorator:
 
                         if (
                             record.status in (
-                                KeyProcessStatus.SUCCEEDED.value, KeyProcessStatus.FAILED.value
+                                enums.KeyProcessStatus.SUCCEEDED.value, enums.KeyProcessStatus.FAILED.value
                             )
                             and record.response_status
                         ):
@@ -257,8 +260,8 @@ class IdempotencyDecorator:
                         cache_key, 
                         {
                             "status": (
-                                KeyProcessStatus.SUCCEEDED.value if 200 <= response.status_code < 300 
-                                else KeyProcessStatus.FAILED.value
+                                enums.KeyProcessStatus.SUCCEEDED.value if 200 <= response.status_code < 300 
+                                else enums.KeyProcessStatus.FAILED.value
                             ),
                             "request_hash": body_hash,
                             "response_status": response.status_code,
@@ -273,3 +276,145 @@ class IdempotencyDecorator:
             function_to_execute.__name__ = function.__name__
             return function_to_execute
         return inner
+    
+
+class WebhookTriggerDecorator:
+    """
+    Decorator to wrap functions that triggers webhooks based on success or failure.
+    Usage:
+      @WebhookDecorator.file_processing(
+          client_exceptions=(ValidationError,),
+          server_exceptions=(requests.RequestException, Exception),
+      )
+      def step(..., trigger_webhook: bool = False):
+          ...
+
+    Pass trigger_webhook=True at call-time to actually send webhooks.
+    """
+
+    @staticmethod
+    def _bind_view_args(function, self_obj, args, kwargs) -> dict:
+        sig = inspect.signature(function)
+        bound = sig.bind_partial(self_obj, *args, **kwargs)
+        bound.apply_defaults()
+        return dict(bound.arguments)
+    
+    @staticmethod
+    def _build_file_processing_payload():
+        def success(args):           
+            return CreateWebhookEventPayload.job_processing_completed(args["job_id"])
+        
+        def client_error(exc, args):
+            return CreateWebhookEventPayload.job_processing_failed(
+                args["job_id"], error_message=str(exc), kind="client_error" 
+            )
+        
+        def server_error(args):
+            return CreateWebhookEventPayload.job_processing_failed(
+                args["job_id"], error_message="internal server error", kind="server_error"
+            )
+        return success, client_error, server_error
+    
+
+    @staticmethod
+    def _build_wallet_creation_payload():
+        def success(args):           
+            return CreateWebhookEventPayload.wallet_creation_completed(
+                args["user_id"], data=args["data"]
+            )
+        
+        def client_error(exc, args):
+            return CreateWebhookEventPayload.wallet_creation_failed(
+                args["user_id"], error_message=str(exc), kind="client_error" 
+            )
+        
+        def server_error(args):
+            return CreateWebhookEventPayload.wallet_creation_failed(
+                args["user_id"], error_message="internal server error", kind="server_error"
+            )
+        return success, client_error, server_error
+
+
+    @staticmethod
+    def _wrap(
+        success_event: str,
+        fail_event: str,
+        client_exceptions: tuple[type[BaseException], ...],        
+        server_exceptions: tuple[type[BaseException], ...], 
+        payload_builder: Callable,     
+    ):
+        def inner(function):
+            def function_to_execute(self, *args, **kwargs):
+                context = kwargs.setdefault("context", {})
+                trigger = kwargs.pop("trigger_webhook", False)
+                if not trigger:
+                    return function(self, *args, **kwargs)
+
+                bound = WebhookTriggerDecorator._bind_view_args(function, self, args, kwargs)
+                # build arguments for payload builders
+                args = {
+                    "job_id": bound.get("job_id") or None,
+                    "user_id": bound.get("user_id") or getattr(bound.get("user"), "id", None),
+                    "data": kwargs.get("context", {}).get("wallet_data") if "context" in kwargs else None,                   
+                }
+                success, client_error, server_error = payload_builder()
+                try:
+                    response = function(self, *args, **kwargs)
+                except client_exceptions as exc:
+                    payload = client_error(exc, args)
+                    trigger_webhooks(
+                        event_type=fail_event,
+                        payload=payload
+                    )
+                    raise
+                except server_exceptions as exc:
+                    payload = server_error(args)
+                    trigger_webhooks(
+                        event_type=fail_event,
+                        payload=payload
+                    )
+                    raise
+                else:
+                    payload = success(args)
+                    trigger_webhooks(
+                        event_type=success_event,
+                        payload=payload,
+                    )
+                    return response
+            function_to_execute.__name__ = function.__name__
+            return function_to_execute
+        return inner
+
+
+    @staticmethod
+    def file_processing(
+        *,
+        success_event: str = enums.WebhookEvent.PROCESSING_COMPLETED.value,
+        fail_event: str = enums.WebhookEvent.PROCESSING_FAILED.value,
+        client_exceptions: tuple[type[BaseException], ...],
+        server_exceptions: tuple[type[BaseException], ...],
+    ):
+        return WebhookTriggerDecorator._wrap(
+            success_event=success_event,
+            fail_event=fail_event,
+            client_exceptions=client_exceptions,
+            server_exceptions=server_exceptions,
+            payload_builder=WebhookTriggerDecorator._build_file_processing_payload
+        )
+    
+
+    @staticmethod
+    def wallet_creation(
+        *,
+        success_event: str = enums.WebhookEvent.WALLET_CREATION_COMPLETED.value,
+        fail_event: str = enums.WebhookEvent.WALLET_CREATION_FAILED.value,
+        client_exceptions: tuple[type[BaseException], ...],
+        server_exceptions: tuple[type[BaseException], ...],
+    ):
+        return WebhookTriggerDecorator._wrap(
+            success_event=success_event,
+            fail_event=fail_event,
+            client_exceptions=client_exceptions,
+            server_exceptions=server_exceptions,
+            payload_builder=WebhookTriggerDecorator._build_file_processing_payload
+        )

@@ -1,12 +1,10 @@
-import subprocess
 import json
-import shutil
 import os
 
 from loguru import logger
-from typing import Any, Dict, Iterable
+from typing import Any, Dict
 
-from django.core.exceptions import FieldDoesNotExist, ValidationError
+from django.core.exceptions import FieldDoesNotExist
 from django.db import models
 from rest_framework import status
 
@@ -22,7 +20,6 @@ class FileProcessingUtils:
         Run ffprobe on source file and return parsed JSON.
         """
 
-        StorageUtils.ensure_binary_on_path("ffprobe")
         cmd = [
             "ffprobe",
             "-v", "error",

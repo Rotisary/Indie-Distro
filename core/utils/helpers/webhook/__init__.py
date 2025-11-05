@@ -5,6 +5,8 @@ from django.db.models import Q
 from core.webhook.models import WebhookEndpoint
 from core.webhook.tasks import deliver_webhook
 
+from .payload import *
+
 
 def trigger_webhooks(
     event: str, 

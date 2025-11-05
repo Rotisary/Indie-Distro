@@ -54,8 +54,7 @@ class BaseService:
             )
         except requests.RequestException as e:
             logger.error(f"Request failed: {e}")
-            raise ValueError(f"Request failed: {e}")
-        
+            raise       
         return response
 
 
@@ -66,8 +65,7 @@ class BaseService:
             response = self.session.get(url, headers=headers, params=params, timeout=timeout)
         except requests.RequestException as e:
             logger.error(f"Request failed: {e}")
-            raise ValueError(f"Request failed: {e}")
-        
+            raise      
         return response
 
 
@@ -78,6 +76,5 @@ class BaseService:
             response = self.session.delete(url, headers=headers, timeout=timeout)
         except requests.RequestException as e:
             logger.error(f"Request failed: {e}")
-            raise ValueError(f"Request failed: {e}")
-        
+            raise      
         return response
