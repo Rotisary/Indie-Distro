@@ -54,3 +54,25 @@ class FlutterwaveService(BaseService):
         logger.info(f"Subaccount deleted successfully")
         status = response.json()['status']
         return status
+    
+
+    def fetch_static_virtual_account(self, account_reference: str, wallet):
+        endpoint = f"payout-subaccounts/{account_reference}/static-account"
+        response = self.get(endpoint)
+        if response.status_code != 200:
+            logger.error(f"Failed to fetch static virtual account: {response.text}")
+            raise exceptions.CustomException(
+                message=response.text,
+                status_code=response.status_code
+            )
+        
+        logger.info(f"virtual account fetched successfully")
+        wallet.virtual_account_number = response.json()['data']['static_account']
+        wallet.virtual_bank_name = response.json()['data']['bank_name']
+        wallet.bank_code = response.json()['data']['bank_code']
+        wallet.save(update_fields=[
+            'virtual_account_number', 
+            'virtual_bank_name',
+            'bank_code'
+        ])
+        return wallet

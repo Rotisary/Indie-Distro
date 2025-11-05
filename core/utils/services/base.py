@@ -39,7 +39,10 @@ class BaseService:
 
 
     def get_headers(self) -> dict:
-        headers = {"Content-Type": "application/json"}
+        headers = {
+            "accept": "application/json",
+            "Content-Type": "application/json"
+        }
         if self.api_key:
             headers["Authorization"] = f"Bearer {self.api_key}"
         return headers
