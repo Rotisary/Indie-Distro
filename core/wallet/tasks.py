@@ -20,7 +20,7 @@ from core.utils.helpers.decorators import WebhookTriggerDecorator
     ),    
 )
 def create_wallet_for_user(
-        self, user_id: int, *, context: dict=None, trigger_webhook=False
+        self, user_id: int, *, context: dict=None
     ) -> None:
     user = User.objects.get(id=user_id)
     service = FlutterwaveService()

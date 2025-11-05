@@ -337,10 +337,10 @@ class WebhookTriggerDecorator:
 
     @staticmethod
     def _wrap(
-        success_event: str,
         fail_event: str,
         server_exceptions: tuple[type[BaseException], ...], 
-        payload_builder: Callable,     
+        payload_builder: Callable,  
+        success_event: str = None,   
         client_exceptions: tuple[type[BaseException], ...]=ValueError,        
     ):
         def inner(function):
@@ -375,11 +375,12 @@ class WebhookTriggerDecorator:
                     )
                     raise
                 else:
-                    payload = success(args)
-                    trigger_webhooks(
-                        event_type=success_event,
-                        payload=payload,
-                    )
+                    if success_event:
+                        payload = success(args)
+                        trigger_webhooks(
+                            event_type=success_event,
+                            payload=payload,
+                        )
                     return response
             function_to_execute.__name__ = function.__name__
             return function_to_execute
@@ -389,32 +390,32 @@ class WebhookTriggerDecorator:
     @staticmethod
     def file_processing(
         *,
-        success_event: str = enums.WebhookEvent.PROCESSING_COMPLETED.value,
         fail_event: str = enums.WebhookEvent.PROCESSING_FAILED.value,
         server_exceptions: tuple[type[BaseException], ...],
-        client_exceptions: tuple[type[BaseException], ...]=ValueError,
+        success_event: str = enums.WebhookEvent.PROCESSING_COMPLETED.value,
+        client_exceptions: tuple[type[BaseException], ...]=ValueError
     ):
         return WebhookTriggerDecorator._wrap(
-            success_event=success_event,
             fail_event=fail_event,
-            client_exceptions=client_exceptions,
             server_exceptions=server_exceptions,
-            payload_builder=WebhookTriggerDecorator._build_file_processing_payload
+            payload_builder=WebhookTriggerDecorator._build_file_processing_payload,
+            success_event=success_event,
+            client_exceptions=client_exceptions
         )
     
 
     @staticmethod
     def wallet_creation(
         *,
-        success_event: str = enums.WebhookEvent.WALLET_CREATION_COMPLETED.value,
         fail_event: str = enums.WebhookEvent.WALLET_CREATION_FAILED.value,
         server_exceptions: tuple[type[BaseException], ...],
-        client_exceptions: tuple[type[BaseException], ...]=ValueError,
+        success_event: str = enums.WebhookEvent.WALLET_CREATION_COMPLETED.value,
+        client_exceptions: tuple[type[BaseException], ...]=ValueError
     ):
         return WebhookTriggerDecorator._wrap(
-            success_event=success_event,
             fail_event=fail_event,
-            client_exceptions=client_exceptions,
             server_exceptions=server_exceptions,
-            payload_builder=WebhookTriggerDecorator._build_file_processing_payload
+            payload_builder=WebhookTriggerDecorator._build_file_processing_payload,
+            success_event=success_event,
+            client_exceptions=client_exceptions
         )
