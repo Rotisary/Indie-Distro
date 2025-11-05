@@ -43,8 +43,7 @@ class FlutterwaveService(BaseService):
 
     def delete_subaccount(self, account_reference: str):
         endpoint = f"payout-subaccounts/{account_reference}"
-        data = {}
-        response = self.post(endpoint, data)
+        response = self.delete(endpoint)
         if response.status_code != 200:
             logger.error(f"Failed to delete subaccount: {response.text}")
             raise exceptions.CustomException(
