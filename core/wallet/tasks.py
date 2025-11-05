@@ -12,7 +12,7 @@ from core.utils.helpers.decorators import WebhookTriggerDecorator
 
 
 @shared_task(bind=True, max_retries=3, default_retry_delay=60, queue="service")
-@WebhookTriggerDecorator.file_processing(
+@WebhookTriggerDecorator.wallet_creation(
     server_exceptions=(
         RequestException, 
         Exception, 
