@@ -40,6 +40,12 @@ class Wallet(mixins.BaseModelMixin):
         null=True, 
         verbose_name=_("Virtual Bank Name")
     )
+    virtual_bank_code = models.CharField(
+        max_length=50, 
+        blank=True, 
+        null=True, 
+        verbose_name=_("Virtual Bank Code")
+    )
     created_at = models.DateTimeField(
         null=True,
         blank=True,

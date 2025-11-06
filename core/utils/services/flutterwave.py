@@ -69,10 +69,10 @@ class FlutterwaveService(BaseService):
         logger.info(f"virtual account fetched successfully")
         wallet.virtual_account_number = response.json()['data']['static_account']
         wallet.virtual_bank_name = response.json()['data']['bank_name']
-        wallet.bank_code = response.json()['data']['bank_code']
+        wallet.virtual_bank_code = response.json()['data']['bank_code']
         wallet.save(update_fields=[
             'virtual_account_number', 
             'virtual_bank_name',
-            'bank_code'
+            'virtual_bank_code'
         ])
         return wallet
