@@ -69,9 +69,9 @@ def create_wallet_for_user(
     ),    
 )
 def fetch_virtual_account_for_wallet(
-        self, wallet_id: str
+        self, wallet_pk: str
     ) -> None:
-    wallet = Wallet.objects.get(id=wallet_id)
+    wallet = Wallet.objects.get(pk=wallet_pk)
     service = FlutterwaveService()
     try:
         service.fetch_static_virtual_account(
