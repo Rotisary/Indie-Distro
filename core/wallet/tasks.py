@@ -55,4 +55,36 @@ def create_wallet_for_user(
         except exceptions.CustomException:
             logger.error(f"Wallet creation failed for user {user.id}: {str(exc)}")
             raise 
+        logger.error(f"Wallet creation failed for user {user.id}: {str(exc)}")
         raise general_exc
+
+
+
+@shared_task(bind=True, max_retries=3, default_retry_delay=60, queue="service")
+@WebhookTriggerDecorator.wallet_creation(
+    server_exceptions=(
+        RequestException, 
+        Exception, 
+        exceptions.CustomException
+    ),    
+)
+def fetch_virtual_account_for_wallet(
+        self, wallet_id: str
+    ) -> None:
+    wallet = Wallet.objects.get(id=wallet_id)
+    service = FlutterwaveService()
+    try:
+        service.fetch_static_virtual_account(
+            account_reference=wallet.account_reference,
+            wallet=wallet
+        )
+        logger.info(f"Virtual account fetched successfully for wallet {wallet.id}")
+    except RequestException as exc:
+        logger.error(f"Virtual account fetch failed for wallet {wallet.id}: {str(exc)}")
+        raise exc
+    except exceptions.CustomException as exc:
+        logger.error(f"Virtual account fetch failed for wallet {wallet.id}: {str(exc)}")
+        raise exc
+    except Exception as exc:
+        logger.error(f"Virtual account fetch failed for wallet {wallet.id}: {str(exc)}")
+        raise exc
