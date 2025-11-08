@@ -266,7 +266,7 @@ UNFOLD = {
                 "items": [
                     {
                         "title": _("Account"),
-                        "icon": "icon-wallet",
+                        "icon": "wallet",
                         "link": reverse_lazy("admin:payment_ledgeraccount_changelist"),
                     },
                     {
@@ -276,12 +276,12 @@ UNFOLD = {
                     },
                     {
                         "title": _("Journals"),
-                        "icon": "icon-book",
+                        "icon": "book",
                         "link": reverse_lazy("admin:payment_ledgerjournal_changelist"),
                     },
                     {
                         "title": _("Entries"),
-                        "icon": "list-ordered",
+                        "icon": "list",
                         "link": reverse_lazy("admin:payment_ledgerentry_changelist"),
                     },
                 ]
