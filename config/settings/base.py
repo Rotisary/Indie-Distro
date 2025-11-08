@@ -261,6 +261,32 @@ UNFOLD = {
                 ]
             },
             {
+                "title": _("Payment"),
+                "collapsible": True,
+                "items": [
+                    {
+                        "title": _("Account"),
+                        "icon": "icon-wallet",
+                        "link": reverse_lazy("admin:payment_ledgeraccount_changelist"),
+                    },
+                    {
+                        "title": _("Transactions"),
+                        "icon": "receipt",
+                        "link": reverse_lazy("admin:payment_transaction_changelist"),
+                    },
+                    {
+                        "title": _("Journals"),
+                        "icon": "icon-book",
+                        "link": reverse_lazy("admin:payment_ledgerjournal_changelist"),
+                    },
+                    {
+                        "title": _("Entries"),
+                        "icon": "list-ordered",
+                        "link": reverse_lazy("admin:payment_ledgerentry_changelist"),
+                    },
+                ]
+            },
+            {
                 "title": _("Webhooks"),
                 "collapsible": True,
                 "items": [
