@@ -20,7 +20,7 @@ from core.utils.helpers.decorators import WebhookTriggerDecorator
     ),    
 )
 def create_wallet_for_user(
-        self, user_id: int, *, context: dict=None
+        self, user_id: int, **kwargs
     ) -> None:
     user = User.objects.get(id=user_id)
     service = FlutterwaveService()
@@ -38,7 +38,7 @@ def create_wallet_for_user(
                 barter_id=data['barter_id'],
             )
         logger.info(f"Wallet created successfully for user {user.id}")
-        context["wallet_data"] = data
+        kwargs["context"]["wallet_data"] = data
     except RequestException as exc:
         logger.error(f"Wallet creation failed for user {user.id}: {str(exc)}")
         raise exc

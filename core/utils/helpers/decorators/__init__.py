@@ -352,23 +352,24 @@ class WebhookTriggerDecorator:
 
                 bound = WebhookTriggerDecorator._bind_view_args(function, self, args, kwargs)
                 # build arguments for payload builders
-                args = {
+                bind_args = {
                     "job_id": bound.get("job_id") or None,
-                    "user_id": bound.get("user_id") or getattr(bound.get("user"), "id", None),
-                    "data": kwargs.get("context", {}).get("wallet_data") if "context" in kwargs else None,                   
+                    "user_id": bound.get("user_id") or None
                 }
                 success, client_error, server_error = payload_builder()
                 try:
                     response = function(self, *args, **kwargs)
                 except client_exceptions as exc:
-                    payload = client_error(exc, args)
+                    bind_args["data"] = kwargs.get("context", {}).get("wallet_data", None)                  
+                    payload = client_error(exc, bind_args)
                     trigger_webhooks(
                         event_type=fail_event,
                         payload=payload
                     )
                     raise
                 except server_exceptions as exc:
-                    payload = server_error(args)
+                    bind_args["data"] = kwargs.get("context", {}).get("wallet_data", None)  
+                    payload = server_error(bind_args)
                     trigger_webhooks(
                         event_type=fail_event,
                         payload=payload
@@ -376,7 +377,8 @@ class WebhookTriggerDecorator:
                     raise
                 else:
                     if success_event:
-                        payload = success(args)
+                        bind_args["data"] = kwargs.get("context", {}).get("wallet_data", None)  
+                        payload = success(bind_args)
                         trigger_webhooks(
                             event_type=success_event,
                             payload=payload,
