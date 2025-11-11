@@ -8,6 +8,7 @@ from .base import (
     AuthenticationFailed,
     DjangoCoreValidationError,
 )
+from .payment import ClientPaymentException
 
 
 def custom_exception_handler(exc, context):
@@ -51,6 +52,16 @@ def custom_exception_handler(exc, context):
                 "message": "Authentication failed",
             },
             status=status.HTTP_401_UNAUTHORIZED,
+        )
+
+    elif isinstance(exc, ClientPaymentException):
+        response = Response(
+            {
+                "status": status.HTTP_400_BAD_REQUEST,
+                "message": exc.message,
+                "errors": exc.errors
+            },
+            status=status.HTTP_400_BAD_REQUEST,
         )
 
     return response

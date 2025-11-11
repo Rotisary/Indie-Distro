@@ -3,6 +3,7 @@ from loguru import logger
 from .base import BaseService
 from core.utils.exceptions import exceptions
 from config import env
+from core.users.models import User
 
 
 class FlutterwaveService(BaseService):
@@ -76,3 +77,36 @@ class FlutterwaveService(BaseService):
             'virtual_bank_code'
         ])
         return wallet
+
+
+    def charge_nigerian_bank(self, user: User, tx_reference: str):
+        endpoint = "charges?type=mono"
+        data = {
+            "amount": 500,
+            "email": user.email,
+            "tx_ref": tx_reference,
+            "currency": "NGN",
+            "fullname": f"{user.first_name} {user.last_name}",
+            "phone_number": user.phone_number
+        }
+        response = self.post(endpoint, data=data)
+        if response.status_code != 200:
+            logger.error(f"Failed to get auth url: {response.text}")
+            raise exceptions.CustomException(
+                message=response.text,
+                status_code=response.status_code
+            )
+        elif response.json()["data"]["fraud_status"] != "ok":
+            logger.error(f"Failed to complete bank charge. Fraud detected")
+            raise exceptions.ClientPaymentException(
+                message=f"Fraud detected. Failed to complete bank charge",
+                errors="Fraud Detected"
+            )
+        
+        logger.info(f"auth url fetch successful. Nigerian account charge in progress")
+        data = {
+            "flw_ref": response.json()["data"]["flw_ref"],
+            "auth_model": response.json()["data"]["auth_model"],
+            "meta": response.json()["data"]["meta"]
+        }
+        return data

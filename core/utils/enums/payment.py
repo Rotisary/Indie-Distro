@@ -18,7 +18,7 @@ class LedgerAccountType(BaseEnum):
 class TransactionStatus(BaseEnum):
     PENDING = "Pending"
     INITIATED = "Initiated"
-    COMPLETED = "Completed"
+    SUCCESSFUL = "Successful"
     FAILED = "Failed"
     CANCELLED = "Cancelled"
     REVERSED = "Reversed"
