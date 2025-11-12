@@ -320,7 +320,7 @@ class WebhookTriggerDecorator:
     def _build_wallet_creation_payload():
         def success(args):           
             return CreateWebhookEventPayload.wallet_creation_completed(
-                args["user_id"], data=args["data"]
+                args["user_id"], data=args["meta"]["wallet"]
             )
         
         def client_error(exc, args):
@@ -330,6 +330,25 @@ class WebhookTriggerDecorator:
         
         def server_error(args):
             return CreateWebhookEventPayload.wallet_creation_failed(
+                args["user_id"], error_message="internal server error", kind="server_error"
+            )
+        return success, client_error, server_error
+    
+
+    @staticmethod
+    def _build_bank_charge_payload():
+        def success(args):           
+            return CreateWebhookEventPayload.bank_charge_initiated(
+                args["user_id"], data=args["meta"]["charge"]
+            )
+        
+        def client_error(exc, args):
+            return CreateWebhookEventPayload.bank_charge_initiation_failed(
+                args["user_id"], error_message=str(exc), kind="client_error" 
+            )
+        
+        def server_error(args):
+            return CreateWebhookEventPayload.bank_charge_initiation_failed(
                 args["user_id"], error_message="internal server error", kind="server_error"
             )
         return success, client_error, server_error
@@ -359,8 +378,7 @@ class WebhookTriggerDecorator:
                 success, client_error, server_error = payload_builder()
                 try:
                     response = function(self, *args, **kwargs)
-                except client_exceptions as exc:
-                    bind_args["data"] = kwargs.get("context", {}).get("wallet_data", None)                  
+                except client_exceptions as exc:   
                     payload = client_error(exc, bind_args)
                     trigger_webhooks(
                         event_type=fail_event,
@@ -368,7 +386,6 @@ class WebhookTriggerDecorator:
                     )
                     raise
                 except server_exceptions as exc:
-                    bind_args["data"] = kwargs.get("context", {}).get("wallet_data", None)  
                     payload = server_error(bind_args)
                     trigger_webhooks(
                         event_type=fail_event,
@@ -377,7 +394,15 @@ class WebhookTriggerDecorator:
                     raise
                 else:
                     if success_event:
-                        bind_args["data"] = kwargs.get("context", {}).get("wallet_data", None)  
+                        bind_args["meta"]["wallet"] = (
+                            kwargs.get("context", {})
+                            .get("wallet_data", None) 
+                        )  
+                        bind_args["meta"]["charge"] = (
+                            kwargs.get("context", {})
+                            .get("payment_data", None)
+                            .get("charge_data", None)
+                        )  
                         payload = success(bind_args)
                         trigger_webhooks(
                             event_type=success_event,
@@ -417,7 +442,24 @@ class WebhookTriggerDecorator:
         return WebhookTriggerDecorator._wrap(
             fail_event=fail_event,
             server_exceptions=server_exceptions,
-            payload_builder=WebhookTriggerDecorator._build_file_processing_payload,
+            payload_builder=WebhookTriggerDecorator._build_wallet_creation_payload,
+            success_event=success_event,
+            client_exceptions=client_exceptions
+        )
+
+
+    @staticmethod
+    def bank_charge(
+        *,
+        fail_event: str = enums.WebhookEvent.BANK_CHARGE_INITIATION_FAILED.value,
+        server_exceptions: tuple[type[BaseException], ...],
+        success_event: str = enums.WebhookEvent.BANK_CHARGE_INITIATED.value,
+        client_exceptions: tuple[type[BaseException], ...]=ValueError
+    ):
+        return WebhookTriggerDecorator._wrap(
+            fail_event=fail_event,
+            server_exceptions=server_exceptions,
+            payload_builder=WebhookTriggerDecorator._build_bank_charge_payload,
             success_event=success_event,
             client_exceptions=client_exceptions
         )

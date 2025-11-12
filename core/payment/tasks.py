@@ -14,7 +14,7 @@ from core.utils import enums
 
 
 @shared_task(bind=True, max_retries=3, default_retry_delay=60, queue="service")
-@WebhookTriggerDecorator.wallet_creation(
+@WebhookTriggerDecorator.bank_charge(
     client_exceptions=(
         exceptions.ClientPaymentException
     ),
@@ -25,7 +25,7 @@ from core.utils import enums
     ),  
 )
 def charge_nigerian_account(
-    self, user_id: int, tx_reference: str, **kwargs
+    self, user_id: int, amount, tx_reference: str, **kwargs
 ) -> None:
     try:
         user = User.objects.get(id=user_id)
@@ -49,6 +49,7 @@ def charge_nigerian_account(
             service = FlutterwaveService()
             data = service.charge_nigerian_bank(
                 user=user,
+                amount=amount,
                 tx_reference=tx_reference
             )
             logger.success("nigerian bank charge initiated")

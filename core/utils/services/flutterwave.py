@@ -79,10 +79,10 @@ class FlutterwaveService(BaseService):
         return wallet
 
 
-    def charge_nigerian_bank(self, user: User, tx_reference: str):
+    def charge_nigerian_bank(self, user: User, amount, tx_reference: str):
         endpoint = "charges?type=mono"
         data = {
-            "amount": 500,
+            "amount": amount,
             "email": user.email,
             "tx_ref": tx_reference,
             "currency": "NGN",

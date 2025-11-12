@@ -58,4 +58,23 @@ class CreateWebhookEventPayload:
             "kind": kind,
             "error_message": error_message
         }  
+        return payload 
+    
+
+    @staticmethod
+    def bank_charge_initiated(user_id, data: dict) -> dict:
+        payload={
+            "user_id": user_id,
+            "data": data,
+        }  
         return payload  
+
+
+    @staticmethod
+    def bank_charge_initiation_failed(user_id, error_message: str, kind: str) -> dict:
+        payload={
+            "user_id": user_id,
+            "kind": kind,
+            "error_message": error_message
+        }  
+        return payload 
