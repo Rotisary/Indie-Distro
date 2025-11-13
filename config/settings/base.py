@@ -9,6 +9,7 @@ from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from config.celery.queue import CeleryQueue
 from celery.schedules import crontab
+from core.utils import enums
 
 from .. import env
 
@@ -184,6 +185,19 @@ SPECTACULAR_SETTINGS = {
     "DESCRIPTION": "Film distribution platform for independent filmmakers",
     "VERSION": f"V{API_VERSION}",
     "SERVE_INCLUDE_SCHEMA": False,
+    "ENUM_NAME_OVERRIDES": {
+        "FilmCategoryTypeEnum": enums.FilmCategoryType.choices(),
+        "FilmPurchaseStatusEnum": enums.PurchaseStatusType.choices(),
+        "ShortTypeEnum": enums.ShortType.choices(),
+        "FileUploadPurposeEnum": enums.FilePurposeType.choices(),
+        "JobStatusEnum": enums.JobStatus.choices(),
+        "AccountTypeEnum": enums.UserAccountType.choices(),
+        "LedgerAccountTypeEnum": enums.LedgerAccountType.choices(),
+        "TransactionStatusEnum": enums.TransactionStatus.choices(),
+        "LedgerEntryTypeEnum": enums.EntryType.choices(),
+        "LedgerEntryStatusEnum": enums.EntryStatus.choices(),
+        "IdempotencyKeyProcessStatusEnum": enums.KeyProcessStatus.choices(),
+    },
 }
 
 

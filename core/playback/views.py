@@ -13,6 +13,7 @@ from core.utils.exceptions import CustomException
 from core.utils.helpers.playback import AccessUtils
 
 
+@extend_schema(tags=["Playback"])
 class RetrievePlaybackURL(views.APIView):
     http_method_names = ["post", ]
     parser_classes = [JSONParser, ]
@@ -36,7 +37,7 @@ class RetrievePlaybackURL(views.APIView):
         )
     
 
-
+@extend_schema(tags=["Playback"])
 class RefreshPlaybackToken(views.APIView):
     http_method_names = ["post", ]
     parser_classes = [JSONParser, ]

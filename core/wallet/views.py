@@ -8,9 +8,18 @@ from .models import Wallet
 from .tasks import fetch_virtual_account_for_wallet
 from core.utils import exceptions
 from core.utils.permissions import IsObjOwner
+from .serializers import FundWalletSerializer
+from core.payment.models import (
+    Transaction, 
+    LedgerAccount, 
+    LedgerEntry, 
+    LedgerJournal
+)
+# import random
+# import string
+ 
 
-
-
+@extend_schema(tags=["wallets"])
 class FetchVirtualAccount(views.APIView):
     http_method_names = ["get"]
     permission_classes = [IsAuthenticated, IsObjOwner]
@@ -18,9 +27,9 @@ class FetchVirtualAccount(views.APIView):
     @extend_schema(
         description="endpoint to add a new webhook url",
         request=None, 
-        responses={200: None}
+        responses={200: FundWalletSerializer.FetchVirtualAccountResponseSerializer()}
     )
-    def post(self, request, pk):
+    def get(self, request, pk):
         try:
             wallet = Wallet.objects.get(account_reference=pk)
             self.check_object_permissions(request, wallet)
