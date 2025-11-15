@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
 from unfold.admin import ModelAdmin
-from .models import LedgerAccount, Transaction, LedgerJournal, LedgerEntry
+from .models import LedgerAccount, Transaction, LedgerJournal, JournalEntry
 
 
 @admin.register(LedgerAccount)
@@ -97,8 +97,8 @@ class LedgerJournalAdmin(ModelAdmin):
     ordering = ["-date_added"]
 
 
-@admin.register(LedgerEntry)
-class LedgerEntryAdmin(ModelAdmin):
+@admin.register(JournalEntry)
+class JournalEntryAdmin(ModelAdmin):
     fieldsets = (
         (
             _("Personal Info"),

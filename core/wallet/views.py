@@ -12,7 +12,7 @@ from .serializers import FundWalletSerializer
 from core.payment.models import (
     Transaction, 
     LedgerAccount, 
-    LedgerEntry, 
+    JournalEntry, 
     LedgerJournal
 )
 # import random

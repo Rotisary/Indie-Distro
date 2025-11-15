@@ -31,6 +31,7 @@ urlpatterns = [
     path("api/feed/", include("core.feed.urls")),
     path("api/playback/", include("core.playback.urls")),
     path("api/files/", include("core.file_storage.urls")),
+    path("api/wallet/", include("core.wallet.urls")),
     path("api/webhook/", include("core.webhook.urls"))
 ]
 

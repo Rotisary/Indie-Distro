@@ -109,7 +109,7 @@ class LedgerJournal(BaseModelMixin):
         verbose_name_plural = _("Ledger Entries")
 
 
-class LedgerEntry(BaseModelMixin):
+class JournalEntry(BaseModelMixin):
     account = models.ForeignKey(
         to="LedgerAccount",
         null=False,
