@@ -9,15 +9,7 @@ from .tasks import fetch_virtual_account_for_wallet
 from core.utils import exceptions
 from core.utils.permissions import IsObjOwner
 from .serializers import FundWalletSerializer
-from core.payment.models import (
-    Transaction, 
-    LedgerAccount, 
-    JournalEntry, 
-    LedgerJournal
-)
-# import random
-# import string
- 
+
 
 @extend_schema(tags=["wallets"])
 class FetchVirtualAccount(views.APIView):
