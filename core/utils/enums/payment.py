@@ -33,3 +33,8 @@ class EntryStatus(BaseEnum):
 class EntryType(BaseEnum):
     CREDIT = "Credit"
     DEBIT = "Debit"
+
+
+class PaymentType(BaseEnum):
+    BANK_CHARGE = "bank_charge"
+    INTER_WALLET = "inter_wallet"  

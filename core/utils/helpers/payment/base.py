@@ -1,5 +1,7 @@
 from loguru import logger
 from decimal import Decimal
+from dataclasses import dataclass
+from requests import RequestException
 
 from core.payment.models import (
     LedgerAccount, 
@@ -10,8 +12,73 @@ from core.payment.models import (
 from core.users.models import User
 from core.utils import enums
 from core.utils.commons.utils.identifiers import ObjectIdentifiers
+from core.utils.services import FlutterwaveService
+from core.utils.exceptions import exceptions
+ 
 
 
+class PaymentHelper:
+
+    def __init__(
+            self, 
+            user: User, 
+            transaction: Transaction,
+            amount: Decimal,
+            payment_type: str,
+            *,
+            charge_type: str = None,
+        ):
+        self.user = user
+        self.payment_type = payment_type
+        self.transaction = transaction
+        self.amount = amount
+
+        if payment_type == enums.PaymentType.BANK_CHARGE:
+            if not charge_type:
+                raise ValueError("charge_type required for BANK_CHARGE")
+            self.charge_type = charge_type
+        else:
+            if charge_type:
+                raise ValueError("charge_type only allowed for BANK_CHARGE")
+            self.charge_type = None
+
+    @dataclass
+    class PaymentResponse:
+        status: str
+        data: dict = None
+        error: str = None
+        message: str = None
+
+
+    def charge_bank(self) -> PaymentResponse:
+        return getattr(self, f"charge_{self.charge_type.lower()}_account")()
+
+
+    def charge_nigerian_account(self) -> PaymentResponse:
+        try:
+            service = FlutterwaveService()
+            data = service.charge_nigerian_bank(
+                user=self.user,
+                amount=self.amount,
+                tx_reference=self.transaction.reference
+            )
+            logger.success("nigerian bank charge initiated")
+            self.transaction.status = enums.TransactionStatus.INITIATED.value
+            self.transaction.metadata = data
+            self.transaction.save(update_fields=["status", "metadata"])
+            return self.PaymentResponse(
+                status="initiated", data=data["meta"]["authorization"]
+            )
+            # kwargs["context"]["payment_data"]["charge_data"] = data["meta"]
+        except (
+            RequestException, 
+            exceptions.CustomException, 
+            exceptions.ClientPaymentException
+        ) as exc:
+            logger.error(f"nigerian account charge failed ({self.transaction.reference}): {str(exc)}")
+            return self.PaymentResponse(
+                status="failed", error=exc.errors, message=exc.message
+            )       
 
 
 class PaymentLedgerCreatorHelpers:
