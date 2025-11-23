@@ -21,3 +21,17 @@ class FundWalletSerializer:
             decimal_places=2,
             help_text=_("The amount to fund the wallet with.")
         )
+    
+    class InitiateBankChargeFundingResponseSerializer(serializers.Serializer):
+        status = serializers.CharField(
+            read_only=True, help_text=_("The status of the funding initiation")
+        )
+        data = serializers.DictField(
+            read_only=True, blank=True
+        )
+        error = serializers.CharField(
+            read_only=True, blank=True
+        )
+        message = serializers.CharField(
+            read_only=True, blank=True
+        )

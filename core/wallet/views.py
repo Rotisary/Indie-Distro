@@ -9,6 +9,9 @@ from .tasks import fetch_virtual_account_for_wallet
 from core.utils import exceptions
 from core.utils.permissions import IsObjOwner
 from .serializers import FundWalletSerializer
+from core.utils.helpers import payment
+from core.utils.helpers.decorators import RequestDataManipulationsDecorators
+from core.utils import enums
 
 
 @extend_schema(tags=["wallets"])
@@ -17,7 +20,7 @@ class FetchVirtualAccount(views.APIView):
     permission_classes = [IsAuthenticated, IsObjOwner]
 
     @extend_schema(
-        description="endpoint to add a new webhook url",
+        description="endpoint to fetch virtual account details",
         request=None, 
         responses={200: FundWalletSerializer.FetchVirtualAccountResponseSerializer()}
     )
@@ -38,3 +41,55 @@ class FetchVirtualAccount(views.APIView):
                 message="This wallet does not exist",
                 status_code=status.HTTP_404_NOT_FOUND
             )
+        
+
+class InitiateFundingWithBankCharge(views.APIView):
+    http_method_names = ["post"]
+    permission_classes = [IsAuthenticated, ]
+
+    @extend_schema(
+        description="endpoint to initiate wallet funding",
+        request=FundWalletSerializer.InitiateBankChargeFundingSerializer(), 
+        responses={200: FundWalletSerializer.InitiateBankChargeFundingResponseSerializer()}
+    )
+    @RequestDataManipulationsDecorators.update_request_data_with_owner_data("owner")
+    def post(self, request):
+        serializer = FundWalletSerializer.InitiateBankChargeFundingSerializer(request.data)
+        serializer.is_valid(raise_exception=True)
+        owner = serializer.validated_data["owner"]
+        amount = serializer.validated_data["amount"]
+        entry_lines = [
+            {
+                "user": owner,
+                "account_type": enums.LedgerAccountType.EXTERNAL_FUNDING_WITHDRAWAL.value,
+                "entry_type": enums.EntryType.DEBIT,
+                "amount": amount
+            },
+            {
+                "user": owner,
+                "account_type": enums.LedgerAccountType.USER_WALLET.value,
+                "entry_type": enums.EntryType.CREDIT,
+                "amount": amount
+            }
+        ]
+        transaction = payment.PostLedgerData.as_pending(
+            ledger_data=entry_lines,
+            description="Wallet funding via bank charge"
+        )
+        payment_helper = payment.PaymentHelper(
+            user=request.user, 
+            transaction=transaction,
+            amount=amount,
+            payment_type=enums.PaymentType.BANK_CHARGE.value, 
+            charge_type="nigerian"
+        )
+        payment_response = payment_helper.charge_bank()
+        status_code = None
+        if payment_response.status == "initiated":
+            status_code = status.HTTP_200_OK
+        else:
+            status_code = status.HTTP_502_BAD_GATEWAY
+        
+        return response.Response(
+            data=payment_response, status=status_code
+        )
