@@ -10,7 +10,10 @@ from core.utils import exceptions
 from core.utils.permissions import IsObjOwner
 from .serializers import FundWalletSerializer
 from core.utils.helpers import payment
-from core.utils.helpers.decorators import RequestDataManipulationsDecorators
+from core.utils.helpers.decorators import (
+    RequestDataManipulationsDecorators,
+    IdempotencyDecorator
+)
 from core.utils import enums
 
 
@@ -53,6 +56,7 @@ class InitiateFundingWithBankCharge(views.APIView):
         responses={200: FundWalletSerializer.InitiateBankChargeFundingResponseSerializer()}
     )
     @RequestDataManipulationsDecorators.update_request_data_with_owner_data("owner")
+    @IdempotencyDecorator.make_endpoint_idempotent(ttl=300)
     def post(self, request):
         serializer = FundWalletSerializer.InitiateBankChargeFundingSerializer(request.data)
         serializer.is_valid(raise_exception=True)
