@@ -4,3 +4,4 @@ from .file_storage import *
 from .webhook import *
 from .utils import *
 from .payment import *
+from .wallet import *
