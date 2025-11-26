@@ -26,12 +26,6 @@ class FundWalletSerializer:
         status = serializers.CharField(
             read_only=True, help_text=_("The status of the funding initiation")
         )
-        data = serializers.DictField(
-            read_only=True, blank=True
-        )
-        error = serializers.CharField(
-            read_only=True, blank=True
-        )
-        message = serializers.CharField(
-            read_only=True, blank=True
-        )
+        data = serializers.DictField(read_only=True)
+        error = serializers.CharField(read_only=True)
+        message = serializers.CharField(read_only=True)

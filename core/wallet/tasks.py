@@ -8,11 +8,11 @@ from .models import Wallet
 from core.users.models import User
 from core.utils.services import FlutterwaveService
 from core.utils.exceptions import exceptions
-from core.utils.helpers.decorators import WebhookTriggerDecorator
+from core.utils.helpers.decorators import UpdateObjectStatusDecorator
 
 
 @shared_task(bind=True, max_retries=3, default_retry_delay=60, queue="service")
-@WebhookTriggerDecorator.wallet_creation(
+@UpdateObjectStatusDecorator.wallet_creation(
     server_exceptions=(
         RequestException, 
         Exception, 
@@ -32,13 +32,13 @@ def create_wallet_for_user(
         )
 
         with transaction.atomic():
-            Wallet.objects.create(
+            wallet = Wallet.objects.create(
                 owner=user,
                 account_reference=data['account_reference'],
                 barter_id=data['barter_id'],
             )
         logger.info(f"Wallet created successfully for user {user.id}")
-        kwargs["context"]["wallet_data"] = data
+        kwargs["context"]["wallet_id"] = wallet.id
     except RequestException as exc:
         logger.error(f"Wallet creation failed for user {user.id}: {str(exc)}")
         raise exc
@@ -61,7 +61,7 @@ def create_wallet_for_user(
 
 
 @shared_task(bind=True, max_retries=3, default_retry_delay=60, queue="service")
-@WebhookTriggerDecorator.wallet_creation(
+@UpdateObjectStatusDecorator.wallet_creation(
     server_exceptions=(
         RequestException, 
         Exception, 
