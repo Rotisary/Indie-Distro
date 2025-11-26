@@ -141,6 +141,7 @@ class RetrieveFile(views.APIView):
                 status_code=status.HTTP_404_NOT_FOUND
             )
         
+        
 @extend_schema(tags=["Status Polls"])
 class JobStatusPollView(views.APIView):
     permission_classes = [IsAuthenticated]
@@ -149,7 +150,7 @@ class JobStatusPollView(views.APIView):
     def get(self, request, pk):
         cache_key = f"POLL_OBJECT_CACHE_{pk}"
         cache_instance = redis.RedisTools(
-            cache_key, ttl=settings.POLL_CACHE_TIME_LIMIT
+            cache_key, ttl=settings.POLL_CACHE_TTL
         )
         data = cache_instance.cache_value
         if not data:
