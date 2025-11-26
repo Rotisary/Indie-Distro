@@ -18,6 +18,7 @@ from core.utils.models import IdempotencyKey
 from core.utils import enums
 from core.file_storage.models import FileProcessingJob
 from core.utils.helpers import redis
+from core.wallet.models import Wallet
 
 
 class RequestDataManipulationsDecorators:
@@ -293,7 +294,7 @@ class UpdateObjectStatusDecorator:
         def _cache_job_data(job):
             cache_key = f"POLL_OBJECT_CACHE_{job.id}"
             cache_instance = redis.RedisTools(
-                cache_key, ttl=settings.POLL_CACHE_TIME_LIMIT
+                cache_key, ttl=settings.POLL_CACHE_TTL
             )
             cache_instance.cache_value = {
                 "status": job.status,
@@ -354,23 +355,63 @@ class UpdateObjectStatusDecorator:
         return success, client_error, server_error
     
 
-    # @staticmethod
-    # def _build_wallet_creation_payload():
-    #     def success(args):           
-    #         return CreateWebhookEventPayload.wallet_creation_completed(
-    #             args["user_id"], data=args["meta"]["wallet"]
-    #         )
+    @staticmethod
+    def _perform_wallet_update_func():
+        def _cache_wallet_data(wallet):
+            cache_key = f"POLL_OBJECT_CACHE_{wallet.id}"
+            cache_instance = redis.RedisTools(
+                cache_key, ttl=settings.POLL_CACHE_TTL
+            )
+            cache_instance.cache_value = {
+                "status": wallet.creation_status,
+                "owner": wallet.owner.id,
+                "wallet": {
+                    "account_reference": wallet.account_reference,
+                    "barter_id": wallet.barter_id,
+                }
+            } 
+
+        def success(args):
+            wallet = (Wallet.objects.only(
+                       "id", "owner_id",
+                       "creation_status", "account_reference", "barter_id",
+                    )
+                   .filter(id=args["wallet_id"]).first()
+                )
+            if wallet.creation_status != enums.WalletCreationStatus.COMPLETED.value:
+                wallet.creation_status = enums.WalletCreationStatus.COMPLETED.value
+                wallet.save(update_fields=["creation_status"])
+                _cache_wallet_data(wallet)  
+            
+            return True
         
-    #     def client_error(exc, args):
-    #         return CreateWebhookEventPayload.wallet_creation_failed(
-    #             args["user_id"], error_message=str(exc), kind="client_error" 
-    #         )
+        def client_error(exc, args):
+            wallet = (Wallet.objects.only(
+                       "id", "owner_id",
+                       "creation_status", "account_reference", "barter_id",
+                    )
+                   .filter(id=args["wallet_id"]).first()
+                )
+            if wallet.creation_status != enums.WalletCreationStatus.FAILED.value:
+                wallet.creation_status = enums.WalletCreationStatus.FAILED.value
+                wallet.save(update_fields=["creation_status"])
+                _cache_wallet_data(wallet)  
+            
+            return True
         
-    #     def server_error(args):
-    #         return CreateWebhookEventPayload.wallet_creation_failed(
-    #             args["user_id"], error_message="internal server error", kind="server_error"
-    #         )
-    #     return success, client_error, server_error
+        def server_error(args):
+            wallet = (Wallet.objects.only(
+                       "id", "owner_id",
+                       "creation_status", "account_reference", "barter_id",
+                    )
+                   .filter(id=args["wallet_id"]).first()
+                )
+            if wallet.creation_status != enums.WalletCreationStatus.FAILED.value:
+                wallet.creation_status = enums.WalletCreationStatus.FAILED.value
+                wallet.save(update_fields=["creation_status"])
+                _cache_wallet_data(wallet)  
+        
+        return success, client_error, server_error
     
 
     # @staticmethod
@@ -401,6 +442,7 @@ class UpdateObjectStatusDecorator:
     ):
         def inner(function):
             def function_to_execute(self, *args, **kwargs):
+                context = kwargs.setdefault("context", {})
                 bound = UpdateObjectStatusDecorator._bind_view_args(
                     function, self, args, kwargs
                 )
@@ -412,23 +454,17 @@ class UpdateObjectStatusDecorator:
                 success, client_error, server_error = perform_update_func()
                 try:
                     response = function(self, *args, **kwargs)
-                except client_exceptions as exc:   
+                except client_exceptions as exc: 
+                    bind_args["wallet_id"] = kwargs["context"].get("wallet_id", None)
                     client_error(exc, bind_args)
                     raise
                 except server_exceptions as exc:
+                    bind_args["wallet_id"] = kwargs["context"].get("wallet_id", None)
                     server_error(bind_args)
                     raise
                 else:
                     if on_success:
-                        # bind_args["meta"]["wallet"] = (
-                        #     kwargs.get("context", {})
-                        #     .get("wallet_data", None) 
-                        # )  
-                        # bind_args["meta"]["charge"] = (
-                        #     kwargs.get("context", {})
-                        #     .get("payment_data", None)
-                        #     .get("charge_data", None)
-                        # )  
+                        bind_args["wallet_id"] = kwargs["context"].get("wallet_id", None) 
                         success(bind_args)
                     return response
             function_to_execute.__name__ = function.__name__
@@ -439,11 +475,12 @@ class UpdateObjectStatusDecorator:
     @staticmethod
     def file_processing(
         *,
+        on_success: bool = False,
         server_exceptions: tuple[type[BaseException], ...],
         client_exceptions: tuple[type[BaseException], ...]=ValueError
     ):
         return UpdateObjectStatusDecorator._wrap(
-            on_success=False,
+            on_success=on_success,
             perform_update_func=UpdateObjectStatusDecorator._perform_job_update_func,
             server_exceptions=server_exceptions,
             client_exceptions=client_exceptions
@@ -453,11 +490,13 @@ class UpdateObjectStatusDecorator:
     @staticmethod
     def wallet_creation(
         *,
+        on_success: bool = True,
         server_exceptions: tuple[type[BaseException], ...],
         client_exceptions: tuple[type[BaseException], ...]=ValueError
     ):
         return UpdateObjectStatusDecorator._wrap(
-            ctype="wallet",
+            on_success=on_success,
+            perform_update_func=UpdateObjectStatusDecorator._perform_wallet_update_func,
             server_exceptions=server_exceptions,
             client_exceptions=client_exceptions
         )
