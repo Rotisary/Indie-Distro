@@ -2,6 +2,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from core.utils import mixins
+from core.utils import enums
 
 
 class Wallet(mixins.BaseModelMixin):
@@ -60,7 +61,12 @@ class Wallet(mixins.BaseModelMixin):
         blank=True
     )
     wallet_pin = models.CharField(null=True, blank=True)
-                                     
+    creation_status = models.CharField(
+        max_length=20,
+        choices=enums.WalletCreationStatus.choices(),
+        default=enums.WalletCreationStatus.PENDING.value,
+        verbose_name=_("Wallet Creation Status")
+    )
 
     class Meta:
         verbose_name = _("Wallet")

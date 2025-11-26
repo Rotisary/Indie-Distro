@@ -29,6 +29,7 @@ class WalletAdmin(ModelAdmin):
                     "virtual_bank_name",
                     "balance",
                     "wallet_pin",
+                    "creation_status",
                 ),
             },
         ),
@@ -43,6 +44,7 @@ class WalletAdmin(ModelAdmin):
 
     list_display = [
         "account_reference",
+        "creation_status",
         "barter_id",
         "balance",
         "date_added",
