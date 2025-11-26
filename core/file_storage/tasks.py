@@ -1,6 +1,4 @@
 import os
-import json
-import subprocess
 
 from celery import shared_task, chain, group
 from loguru import logger
@@ -12,7 +10,7 @@ from core.utils.helpers.file_storage import StorageClient, StorageUtils, FilePro
 from core.file_storage.models import FileProcessingJob
 from core.utils.enums import Stage, DEFAULT_RENDITIONS
 from core.utils.exceptions import exceptions
-from core.utils.helpers.decorators import WebhookTriggerDecorator
+from core.utils.helpers.decorators import UpdateObjectStatusDecorator
 
 
 def resolve_renditions(user_renditions: list[dict] | None) -> list[dict]:
@@ -20,8 +18,7 @@ def resolve_renditions(user_renditions: list[dict] | None) -> list[dict]:
 
 
 @shared_task(bind=True, max_retries=2, default_retry_delay=30, name="file_pipeline.probe", queue="io")
-@WebhookTriggerDecorator.file_processing(
-    success_event=None,
+@UpdateObjectStatusDecorator.file_processing(
     server_exceptions=(
         exceptions.CustomException,
         Exception,
@@ -52,8 +49,7 @@ def ffprobe_metadata(self, job_id: int):
 
 
 @shared_task(bind=True, name="file_pipeline.validate_metadata", queue="io")
-@WebhookTriggerDecorator.file_processing(
-    success_event=None,
+@UpdateObjectStatusDecorator.file_processing(
     server_exceptions=(
         exceptions.CustomException,
         Exception,
@@ -138,8 +134,7 @@ def validate_and_extract_metadata(self, job_id: int):
 
 
 @shared_task(bind=True, time_limit=60*60*4, name="file_pipeline.transcode.rendition", queue="transcoding")
-@WebhookTriggerDecorator.file_processing(
-    success_event=None,
+@UpdateObjectStatusDecorator.file_processing(
     server_exceptions=(
         exceptions.CustomException,
         Exception,
@@ -222,8 +217,7 @@ def transcode_rendition(
 
 
 @shared_task(bind=True, time_limit=60*60*2, name="file_pipeline.package.hls", queue="packaging")
-@WebhookTriggerDecorator.file_processing(
-    success_event=None,
+@UpdateObjectStatusDecorator.file_processing(
     server_exceptions=(
         exceptions.CustomException,
         Exception,
@@ -298,8 +292,7 @@ def package_hls(self, job_id: int):
 
 
 @shared_task(bind=True, time_limit=60*60*2, name="file_pipeline.package.dash", queue="packaging")
-@WebhookTriggerDecorator.file_processing(
-    success_event=None,
+@UpdateObjectStatusDecorator.file_processing(
     server_exceptions=(
         exceptions.CustomException,
         Exception,
@@ -370,8 +363,7 @@ def package_dash(self, job_id: int):
 
 
 @shared_task(bind=True, time_limit=30*60, name="file_pipeline.thumbnails", queue="io")
-@WebhookTriggerDecorator.file_processing(
-    success_event=None,
+@UpdateObjectStatusDecorator.file_processing(
     server_exceptions=(
         exceptions.CustomException,
         Exception,
@@ -432,7 +424,8 @@ def generate_thumbnails(self, job_id: int):
 
 
 @shared_task(bind=True, name="file_pipeline.finalize", queue="io")
-@WebhookTriggerDecorator.file_processing(
+@UpdateObjectStatusDecorator.file_processing(
+    on_success=True,
     server_exceptions=(
         exceptions.CustomException,
         Exception,
@@ -463,23 +456,22 @@ def start_pipeline(self, job_id: int, renditions: list[dict] | None = None):
             r["height"], 
             r["video_bitrate"], 
             r["audio_bitrate"],
-            trigger_webhook=True
         )
         for r in renditions
     )
 
     packaging_group = group(
-        package_hls.si(job_id, trigger_webhook=True),
-        package_dash.si(job_id, trigger_webhook=True),
+        package_hls.si(job_id),
+        package_dash.si(job_id),
     )
 
     flow = chain(
-        ffprobe_metadata.si(job_id, trigger_webhook=True),
-        validate_and_extract_metadata.si(job_id, trigger_webhook=True),
+        ffprobe_metadata.si(job_id),
+        validate_and_extract_metadata.si(job_id),
         transcode_group,
         packaging_group,
-        generate_thumbnails.si(job_id, trigger_webhook=True),
-        finalize_job.si(job_id, trigger_webhook=True),
+        generate_thumbnails.si(job_id),
+        finalize_job.si(job_id),
     )
     flow.apply_async()
     return {"status": "enqueued", "job_id": job_id, "renditions": [r["name"] for r in renditions]}
