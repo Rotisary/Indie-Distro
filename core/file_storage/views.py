@@ -3,6 +3,7 @@ from rest_framework.parsers import JSONParser
 from rest_framework.renderers import JSONRenderer
 from rest_framework.permissions import IsAuthenticated
 from django.core.cache import cache
+from django.conf import settings
 
 import mimetypes
 from loguru import logger
@@ -16,6 +17,7 @@ from core.utils import mixins as global_mixins, exceptions
 from core.utils.helpers.decorators import RequestDataManipulationsDecorators, IdempotencyDecorator
 from core.utils.helpers.file_storage import FileUploadUtils
 from core.utils.permissions import IsAccountType, IsFilmOwner, FilmNotReleased
+from core.utils.helpers import redis
 
 
 @extend_schema(tags=["Files"])
@@ -138,4 +140,41 @@ class RetrieveFile(views.APIView):
                 message="file not found",
                 status_code=status.HTTP_404_NOT_FOUND
             )
+        
+@extend_schema(tags=["Status Polls"])
+class JobStatusPollView(views.APIView):
+    permission_classes = [IsAuthenticated]
+    http_method_names = ["get"]
 
+    def get(self, request, pk):
+        cache_key = f"POLL_OBJECT_CACHE_{pk}"
+        cache_instance = redis.RedisTools(
+            cache_key, ttl=settings.POLL_CACHE_TIME_LIMIT
+        )
+        data = cache_instance.cache_value
+        if not data:
+            job = (FileProcessingJob.objects.select_related("file")
+                   .only(
+                       "id", "status", 
+                       "owner_id", 
+                       "file__id", "file__original_filename", "file__file_purpose", "file__file_key",
+                    )
+                   .filter(id=pk).first()
+                )
+            if not job:
+                raise exceptions.CustomException(
+                    message="not found",
+                    status_code=status.HTTP_404_NOT_FOUND
+                )
+            data = {
+                "status": job.status,
+                "owner": job.owner.id,
+                "file": {
+                    "file_id": job.file.id,
+                    "file_name": job.file.original_filename,
+                    "file_purpose": job.file.file_purpose,
+                    "file_key": job.file.file_key,
+                }
+            }
+
+        return  response.Response(data, status=status.HTTP_200_OK) 
