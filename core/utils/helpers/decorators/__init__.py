@@ -372,7 +372,7 @@ class UpdateObjectStatusDecorator:
                        "pk", "owner_id",
                        "creation_status", "barter_id",
                     )
-                   .filter(id=args["wallet_pk"]).first()
+                   .filter(pk=args["wallet_pk"]).first()
                 )
             if wallet.creation_status != enums.WalletCreationStatus.COMPLETED.value:
                 wallet.creation_status = enums.WalletCreationStatus.COMPLETED.value
@@ -385,7 +385,7 @@ class UpdateObjectStatusDecorator:
                        "pk", "owner_id",
                        "creation_status", "barter_id",
                     )
-                   .filter(id=args["wallet_pk"]).first()
+                   .filter(pk=args["wallet_pk"]).first()
                 )
             if wallet.creation_status != enums.WalletCreationStatus.FAILED.value:
                 wallet.creation_status = enums.WalletCreationStatus.FAILED.value
@@ -398,7 +398,7 @@ class UpdateObjectStatusDecorator:
                        "pk", "owner_id",
                        "creation_status", "barter_id",
                     )
-                   .filter(id=args["wallet_pk"]).first()
+                   .filter(pk=args["wallet_pk"]).first()
                 )
             if wallet.creation_status != enums.WalletCreationStatus.FAILED.value:
                 wallet.creation_status = enums.WalletCreationStatus.FAILED.value
@@ -432,7 +432,7 @@ class UpdateObjectStatusDecorator:
                        "virtual_account_number", "virtual_bank_name", 
                        "virtual_bank_code"
                     )
-                   .filter(id=args["wallet_pk"]).first()
+                   .filter(pk=args["wallet_pk"]).first()
                 )
             _cache_wallet_data(wallet, status="fetched")
         
@@ -442,7 +442,7 @@ class UpdateObjectStatusDecorator:
                        "virtual_account_number", "virtual_bank_name", 
                        "virtual_bank_code"
                     )
-                   .filter(id=args["wallet_pk"]).first()
+                   .filter(pk=args["wallet_pk"]).first()
                 )
             _cache_wallet_data(wallet, status="failed")
 
@@ -453,7 +453,7 @@ class UpdateObjectStatusDecorator:
                        "virtual_account_number", "virtual_bank_name", 
                        "virtual_bank_code"
                     )
-                   .filter(id=args["wallet_pk"]).first()
+                   .filter(pk=args["wallet_pk"]).first()
                 )
             _cache_wallet_data(wallet, status="fetched")  
         
