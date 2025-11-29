@@ -1,5 +1,6 @@
 from rest_framework import views, status, response
 from rest_framework.permissions import IsAuthenticated
+from django.conf import settings
 
 from loguru import logger
 from drf_spectacular.utils import extend_schema
@@ -15,6 +16,7 @@ from core.utils.helpers.decorators import (
     IdempotencyDecorator
 )
 from core.utils import enums
+from core.utils.helpers import redis
 
 
 @extend_schema(tags=["wallets"])
@@ -97,3 +99,74 @@ class InitiateFundingWithBankCharge(views.APIView):
         return response.Response(
             data=payment_response, status=status_code
         )
+    
+
+@extend_schema(tags=["Status Polls"])
+class WalletStatusPollView(views.APIView):
+    permission_classes = [IsAuthenticated]
+    http_method_names = ["get"]
+
+    def get(self, request, pk):
+        cache_key = f"POLL_OBJECT_CACHE_{pk}"
+        cache_instance = redis.RedisTools(
+            cache_key, ttl=settings.POLL_CACHE_TTL
+        )
+        data = cache_instance.cache_value
+        if not data:
+            wallet = (Wallet.objects.only(
+                       "pk", "owner_id",
+                       "creation_status", "barter_id",
+                    )
+                   .filter(pk=pk).first()
+                )
+            if not wallet:
+                raise exceptions.CustomException(
+                    message="not found",
+                    status_code=status.HTTP_404_NOT_FOUND
+                )
+            data = {
+                "status": wallet.creation_status,
+                "owner": wallet.owner.id,
+                "wallet": {
+                    "account_reference": wallet.pk,
+                    "barter_id": wallet.barter_id,
+                }
+            } 
+            cache_instance.cache_value = data
+        return  response.Response(data, status=status.HTTP_200_OK) 
+    
+
+@extend_schema(tags=["Status Polls"])
+class VirtualAccountFetchPollView(views.APIView):
+    permission_classes = [IsAuthenticated]
+    http_method_names = ["get"]
+
+    def get(self, request, pk):
+        cache_key = f"POLL_OBJECT_CACHE_{pk}"
+        cache_instance = redis.RedisTools(
+            cache_key, ttl=settings.POLL_CACHE_TTL
+        )
+        data = cache_instance.cache_value
+        if not data:
+            wallet = (Wallet.objects.only(
+                       "pk", "owner_id",
+                       "virtual_account_number", "virtual_bank_name", 
+                       "virtual_bank_code"
+                    )
+                   .filter(pk=pk).first()
+                )
+            if not wallet:
+                raise exceptions.CustomException(
+                    message="not found",
+                    status_code=status.HTTP_404_NOT_FOUND
+                )
+            data = {
+                "owner": wallet.owner.id,
+                "wallet": {
+                    "virtual_bank_name": wallet.virtual_bank_name,
+                    "virtual_bank_code": wallet.virtual_bank_code,
+                    "virtual_account_number": wallet.virtual_account_number
+                }
+            } 
+            cache_instance.cache_value = data
+        return  response.Response(data, status=status.HTTP_200_OK)
