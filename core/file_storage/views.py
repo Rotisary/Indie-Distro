@@ -177,5 +177,6 @@ class JobStatusPollView(views.APIView):
                     "file_key": job.file.file_key,
                 }
             }
+            cache_instance.cache_value = data
 
         return  response.Response(data, status=status.HTTP_200_OK) 
