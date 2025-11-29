@@ -419,7 +419,7 @@ class UpdateObjectStatusDecorator:
             cache_instance.cache_value = {
                 "status": status,
                 "owner": wallet.owner.id,
-                "wallet": {
+                "virtual_account": {
                     "virtual_bank_name": wallet.virtual_bank_name,
                     "virtual_bank_code": wallet.virtual_bank_code,
                     "virtual_account_number": wallet.virtual_account_number
