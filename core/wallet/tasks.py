@@ -38,7 +38,7 @@ def create_wallet_for_user(
                 barter_id=data['barter_id'],
             )
         logger.info(f"Wallet created successfully for user {user.id}")
-        kwargs["context"]["wallet_id"] = wallet.id
+        kwargs["context"]["wallet_id"] = wallet.pk
     except RequestException as exc:
         logger.error(f"Wallet creation failed for user {user.id}: {str(exc)}")
         raise exc
@@ -61,7 +61,7 @@ def create_wallet_for_user(
 
 
 @shared_task(bind=True, max_retries=3, default_retry_delay=60, queue="service")
-@UpdateObjectStatusDecorator.wallet_creation(
+@UpdateObjectStatusDecorator.virtual_account_fetch(
     server_exceptions=(
         RequestException, 
         Exception, 
