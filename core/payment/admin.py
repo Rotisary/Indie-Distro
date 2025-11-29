@@ -118,7 +118,7 @@ class JournalEntryAdmin(ModelAdmin):
             _("Important dates"),
             {
                 "classes": ["tab"],
-                "fields": ("entered_at", "date_added", "date_last_modified"),
+                "fields": ("completed_at", "date_added", "date_last_modified"),
             },
         ),
     )
@@ -130,8 +130,8 @@ class JournalEntryAdmin(ModelAdmin):
         "line_no", 
         "type", 
         "status", 
-        "entered_at"
+        "completed_at"
     ]
     search_fields = ["journal__transaction__reference"]
-    readonly_fields = ["date_added", "date_last_modified", "entered_at"]
+    readonly_fields = ["date_added", "date_last_modified", "completed_at"]
     ordering = ["-date_added"]

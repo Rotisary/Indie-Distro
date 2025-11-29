@@ -145,8 +145,8 @@ class JournalEntry(BaseModelMixin):
         max_digits=17,
         validators=[MinValueValidator(Decimal("0.01"))],
     )
-    entered_at = models.DateTimeField(
-        blank=True, null=True, help_text=_("Date and Time the entry was entered") 
+    completed_at = models.DateTimeField(
+        blank=True, null=True, help_text=_("Date and Time the entry was marked as completed") 
     )
 
     class Meta:
