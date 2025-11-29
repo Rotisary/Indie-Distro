@@ -4026,3 +4026,8 @@ Watching for file changes with StatReloader
 C:\Users\olado\Documents\django-projects\Indie-Distro\core\file_storage\views.py changed, reloading.
 Watching for file changes with StatReloader
 Watching for file changes with StatReloader
+Forbidden: /api/feed/films/
+Not Found: /managementfile_storage/filemodel/
+Not Found: /management
+Forbidden: /api/feed/films/
+Forbidden: /api/feed/films/
