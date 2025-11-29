@@ -296,7 +296,7 @@ UNFOLD = {
                     {
                         "title": _("Entries"),
                         "icon": "list",
-                        "link": reverse_lazy("admin:payment_ledgerentry_changelist"),
+                        "link": reverse_lazy("admin:payment_journalentry_changelist"),
                     },
                 ]
             },
