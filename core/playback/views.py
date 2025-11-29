@@ -6,7 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from loguru import logger
 from drf_spectacular.utils import extend_schema
 
-from .serializers import PurchaseIDSerializer
+from .serializers import PurchaseIDSerializer, PlaybackSerializer
 from core.feed.models import Purchase
 from core.utils.enums import PurchaseStatusType
 from core.utils.exceptions import CustomException
@@ -22,7 +22,7 @@ class RetrievePlaybackURL(views.APIView):
     @extend_schema(
         description="endpoint to get playback url for cdn",
         request=PurchaseIDSerializer,
-        responses={200, None}
+        responses={200: PlaybackSerializer.PlaybackURLRetrieveSerializer}
     )
     def post(self, request):
         serializer = PurchaseIDSerializer(data=request.data)
@@ -46,7 +46,7 @@ class RefreshPlaybackToken(views.APIView):
     @extend_schema(
         description="endpoint to get playback url for cdn",
         request=PurchaseIDSerializer,
-        responses={200, None}
+        responses={200: PlaybackSerializer.PlaybackTokenRefreshSerializer}
     )
     def post(self, request):
         serializer = PurchaseIDSerializer(data=request.data)

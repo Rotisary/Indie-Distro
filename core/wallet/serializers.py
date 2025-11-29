@@ -29,3 +29,26 @@ class FundWalletSerializer:
         data = serializers.DictField(read_only=True)
         error = serializers.CharField(read_only=True)
         message = serializers.CharField(read_only=True)
+
+
+class WalletPollSerializer:
+
+    class WalletPollResponseSerializer(serializers.Serializer):
+        status = serializers.CharField(read_only=True)
+        owner = serializers.IntegerField(read_only=True)
+        wallet = serializers.DictField(
+            read_only=True,
+            help_text=_(
+                "contains the details of the wallet that was created(account reference, barter id)"
+            )
+        )
+
+    class VirtualAccountFetchPollResponseSerializer(serializers.Serializer):
+        status = serializers.CharField(read_only=True)
+        owner = serializers.IntegerField(read_only=True)
+        virtual_account = serializers.DictField(
+            read_only=True,
+            help_text=_(
+                "contains the details of the virtual account that was fetched(bank name, code and number)"
+            )
+        )

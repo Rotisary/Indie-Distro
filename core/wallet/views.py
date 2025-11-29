@@ -9,7 +9,7 @@ from .models import Wallet
 from .tasks import fetch_virtual_account_for_wallet
 from core.utils import exceptions
 from core.utils.permissions import IsObjOwner
-from .serializers import FundWalletSerializer
+from .serializers import FundWalletSerializer, WalletPollSerializer
 from core.utils.helpers import payment
 from core.utils.helpers.decorators import (
     RequestDataManipulationsDecorators,
@@ -39,7 +39,7 @@ class FetchVirtualAccount(views.APIView):
                     "status": "in progress",
                     "message": f"Virtual account fetch for {wallet.account_reference} has started"
                 }, 
-                status=status.HTTP_200_OK
+                status=status.HTTP_202_ACCEPTED
             )
         except Wallet.DoesNotExist:
             raise exceptions.CustomException(
@@ -48,6 +48,7 @@ class FetchVirtualAccount(views.APIView):
             )
         
 
+@extend_schema(tags=["wallets"])
 class InitiateFundingWithBankCharge(views.APIView):
     http_method_names = ["post"]
     permission_classes = [IsAuthenticated, ]
@@ -92,7 +93,7 @@ class InitiateFundingWithBankCharge(views.APIView):
         payment_response = payment_helper.charge_bank()
         status_code = None
         if payment_response.status == "initiated":
-            status_code = status.HTTP_200_OK
+            status_code = status.HTTP_202_ACCEPTED
         else:
             status_code = status.HTTP_502_BAD_GATEWAY
         
@@ -106,6 +107,11 @@ class WalletStatusPollView(views.APIView):
     permission_classes = [IsAuthenticated]
     http_method_names = ["get"]
 
+    @extend_schema(
+        description="endpoint to poll wallet creation status",
+        request=None,
+        responses={200: WalletPollSerializer.WalletPollResponseSerializer}
+    )
     def get(self, request, pk):
         cache_key = f"POLL_OBJECT_CACHE_{pk}"
         cache_instance = redis.RedisTools(
@@ -141,6 +147,13 @@ class VirtualAccountFetchPollView(views.APIView):
     permission_classes = [IsAuthenticated]
     http_method_names = ["get"]
 
+    @extend_schema(
+        description="endpoint to poll virtual account fetch status",
+        request=None,
+        responses={
+            200: WalletPollSerializer.VirtualAccountFetchPollResponseSerializer
+        }
+    )
     def get(self, request, pk):
         cache_key = f"POLL_OBJECT_CACHE_{pk}"
         cache_instance = redis.RedisTools(

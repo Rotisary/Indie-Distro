@@ -11,7 +11,7 @@ from .models import FileModel
 
 
 class FileSerializer:
-    class Create(serializers.ModelSerializer):
+    class FileCreate(serializers.ModelSerializer):
         class Meta:
             model = FileModel
             exclude = [
@@ -30,8 +30,25 @@ class FileSerializer:
             fields = "__all__"
 
 
-class SignedURLRequestSerializer(serializers.Serializer):
-    file_name = serializers.CharField(required=True)
-    purpose = serializers.ChoiceField(
-        choices=FilePurposeType.choices(), required=True
+class SignedURLSerializer:
+    class SignedURLRequestSerializer(serializers.Serializer):
+        file_name = serializers.CharField(required=True)
+        purpose = serializers.ChoiceField(
+            choices=FilePurposeType.choices(), required=True
+        )
+    
+    class SignedURLResponseSerializer(serializers.Serializer):
+        file_id = serializers.CharField(read_only=True)
+        signed_url = serializers.CharField(read_only=True)
+
+
+class FileProcessingJobPollSerializer(serializers.Serializer):
+    status = serializers.CharField(read_only=True)
+    owner = serializers.IntegerField(read_only=True)
+    file = serializers.DictField(
+        read_only=True,
+        help_text=_(
+            "contains the details of the file associated with the job(id, name, purpose, key)"
+        )
     )
+        

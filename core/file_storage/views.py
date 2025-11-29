@@ -11,7 +11,7 @@ from drf_spectacular.utils import extend_schema
 
 
 from .models import FileModel, FileProcessingJob
-from .serializers import FileSerializer, SignedURLRequestSerializer
+from .serializers import FileSerializer, SignedURLSerializer, FileProcessingJobPollSerializer
 from .tasks import start_pipeline
 from core.utils import mixins as global_mixins, exceptions
 from core.utils.helpers.decorators import RequestDataManipulationsDecorators, IdempotencyDecorator
@@ -29,12 +29,14 @@ class GetSignedUploadURL(views.APIView):
 
     @extend_schema(
         description="endpoint to get signed url that would be used for S3 upload by the client",
-        request=SignedURLRequestSerializer,
-        responses={200: None}
+        request=SignedURLSerializer.SignedURLRequestSerializer,
+        responses={200: SignedURLSerializer.SignedURLResponseSerializer}
     )
     @IdempotencyDecorator.make_endpoint_idempotent(ttl=3600)
     def post(self, request, *args, **kwargs):
-        serializer = SignedURLRequestSerializer(data=request.data)
+        serializer = SignedURLSerializer.SignedURLRequestSerializer(
+            data=request.data
+        )
         serializer.is_valid(raise_exception=True)
 
         file_name = serializer.validated_data["file_name"]
@@ -70,14 +72,14 @@ class CreateFileObject(views.APIView):
 
         return mime_type
 
-    @RequestDataManipulationsDecorators.update_request_data_with_owner_data("owner")
     @extend_schema(
         description="endpoint to create file object",
-        request=FileSerializer.Create,
+        request=FileSerializer.FileCreate,
         responses={202: FileSerializer.ListRetrieve}
     )   
+    @RequestDataManipulationsDecorators.update_request_data_with_owner_data("owner")
     def post(self, request):
-        serializer = FileSerializer.Create(data=request.data)
+        serializer = FileSerializer.FileCreate(data=request.data)
         serializer.is_valid(raise_exception=True)
         file_id = serializer.validated_data["id"]
         file_name = serializer.validated_data.get("original_filename", None)
@@ -147,6 +149,11 @@ class JobStatusPollView(views.APIView):
     permission_classes = [IsAuthenticated]
     http_method_names = ["get"]
 
+    @extend_schema(
+        description="endpoint to poll the status of a file processing job",
+        request=None,
+        responses={200: FileProcessingJobPollSerializer}
+    )
     def get(self, request, pk):
         cache_key = f"POLL_OBJECT_CACHE_{pk}"
         cache_instance = redis.RedisTools(

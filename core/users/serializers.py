@@ -156,27 +156,4 @@ class AuthSerializer:
 
     class Logout(serializers.Serializer):
         refresh = serializers.CharField()
-
-
-# class WalletSerializer(serializers.HyperlinkedModelSerializer):
-#     class Meta:
-#         model = Wallet
-#         fields = ['wallet_id', 'user', 'wallet_number', 'balance', 'wallet_pin']
-#         extra_kwargs ={
-#             'wallet_id': {'read_only': True},
-#             'user': {
-#                 'view_name': 'user-detail',
-#                 'read_only': True,
-#                 'lookup_field': 'username'
-#             },
-#             'wallet_number': {'read_only': True},
-#             'wallet_pin': {'write_only': True}
-#         }
-
-
-#     def validate_wallet_pin(self, value):
-#         if len(str(value)) != 4:
-#             raise serializers.ValidationError({'error': 'pin should be 4 digits'})
-        
-#         return value
-        
+            
