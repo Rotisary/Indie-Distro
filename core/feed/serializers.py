@@ -4,8 +4,10 @@ from rest_framework import serializers
 from django.utils.translation import gettext_lazy as _
 
 from core.users.serializers import BaseUserSerializer
-from .models import Feed, Short
+from .models import Feed, Short, Purchase
 from core.file_storage.models import FileModel
+from core.utils.exceptions import exceptions
+from core.utils import enums
 
 
 class BaseFilmSerializer(serializers.ModelSerializer):
@@ -113,3 +115,51 @@ class ShortSerializer:
             model = Short
             exclude = ["saved", "date_last_modified"]
 
+
+class FilmPurchaseSerializer:
+    class CreatePurchase(serializers.ModelSerializer):
+
+        class Meta:
+            model = Purchase
+            fields = []
+
+
+        def validate(self, attrs):
+            user = self.context["request"].user
+            film = self.context.get("film")
+
+            if Purchase.objects.filter(
+                owner=user,
+                film=film, 
+                payment_status=enums.PurchasePaymentStatus.COMPLETED.value,
+                status=enums.PurchaseStatusType.ACTIVE.value
+            ).exists():
+                raise exceptions.CustomException(
+                    message="User has already purchased this film."
+                )
+
+            return attrs
+
+        def create(self, validated_data):
+            user = self.context["request"].user
+            film = self.context["film"]
+            transaction = self.context["transaction"]
+
+            purchase = Purchase.objects.create(
+                owner=user, project=film, transaction=transaction
+            )
+
+            return purchase
+    
+    class RetrievePurchase(serializers.ModelSerializer):
+        film = BaseFilmSerializer()
+        owner = BaseUserSerializer()
+        transaction_id = serializers.SerializerMethodField()
+
+        class Meta:
+            model = Purchase
+            exclude = ["date_last_modified"]
+
+        def get_transaction_id(self, obj):
+            transaction = obj.transaction
+            return transaction.reference
