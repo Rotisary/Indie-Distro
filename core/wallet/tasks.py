@@ -16,7 +16,8 @@ from core.utils.helpers.decorators import UpdateObjectStatusDecorator
     server_exceptions=(
         RequestException, 
         Exception, 
-        exceptions.CustomException
+        exceptions.CustomException,
+        exceptions.ServiceRequestException
     ),    
 )
 def create_wallet_for_user(
@@ -39,22 +40,24 @@ def create_wallet_for_user(
             )
         logger.info(f"Wallet created successfully for user {user.id}")
         kwargs["context"]["wallet_id"] = wallet.pk
-    except RequestException as exc:
+    except (
+        RequestException, 
+        exceptions.CustomException, 
+        exceptions.ServiceRequestException
+    ) as exc:
         logger.error(f"Wallet creation failed for user {user.id}: {str(exc)}")
-        raise exc
-    except exceptions.CustomException as exc:
-        logger.error(f"Wallet creation failed for user {user.id}: {str(exc)}")
-        raise exc           
+        raise exc       
     except Exception as general_exc:
         # Rollback subaccount creation on Flutterwave if wallet creation fails
         try:
             service.delete_subaccount(account_reference=data['account_reference'])
-        except RequestException as exc:
+        except (
+            RequestException, 
+            exceptions.CustomException, 
+            exceptions.ServiceRequestException
+        ) as exc:
             logger.error(f"Wallet creation failed for user {user.id}: {str(exc)}")
-            raise  
-        except exceptions.CustomException:
-            logger.error(f"Wallet creation failed for user {user.id}: {str(exc)}")
-            raise 
+            raise exc  
         logger.error(f"Wallet creation failed for user {user.id}: {str(exc)}")
         raise general_exc
 
@@ -65,7 +68,8 @@ def create_wallet_for_user(
     server_exceptions=(
         RequestException, 
         Exception, 
-        exceptions.CustomException
+        exceptions.CustomException,
+        exceptions.ServiceRequestException
     ),    
 )
 def fetch_virtual_account_for_wallet(
@@ -79,12 +83,11 @@ def fetch_virtual_account_for_wallet(
             wallet=wallet
         )
         logger.info(f"Virtual account fetched successfully for wallet {wallet.id}")
-    except RequestException as exc:
-        logger.error(f"Virtual account fetch failed for wallet {wallet.id}: {str(exc)}")
-        raise exc
-    except exceptions.CustomException as exc:
-        logger.error(f"Virtual account fetch failed for wallet {wallet.id}: {str(exc)}")
-        raise exc
-    except Exception as exc:
+    except (
+        Exception,
+        RequestException, 
+        exceptions.CustomException, 
+        exceptions.ServiceRequestException
+    ) as exc:
         logger.error(f"Virtual account fetch failed for wallet {wallet.id}: {str(exc)}")
         raise exc

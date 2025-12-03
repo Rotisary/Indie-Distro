@@ -71,7 +71,8 @@ class PaymentHelper:
             )
             # kwargs["context"]["payment_data"]["charge_data"] = data["meta"]
         except (
-            RequestException, 
+            RequestException,
+            exceptions.ServiceRequestException,
             exceptions.CustomException, 
             exceptions.ClientPaymentException
         ) as exc:
@@ -148,16 +149,3 @@ class PaymentLedgerCreatorHelpers:
             currency=currency
         )
         return entry
-
-
-class BasePaymentHelpers:
-
-    @staticmethod
-    def create_credit_and_debit_ledger_accounts(account_kwargs: dict) -> tuple:
-        sender = account_kwargs.pop("sender")
-        receiver = account_kwargs.pop("receiver")
-        account_kwargs["user"] = sender
-        debit_account = PaymentLedgerCreatorHelpers.get_or_create_ledger_account(**account_kwargs)
-        account_kwargs["user"] = receiver
-        credit_account = PaymentLedgerCreatorHelpers.get_or_create_ledger_account(**account_kwargs)
-        return debit_account, credit_account

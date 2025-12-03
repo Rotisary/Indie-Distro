@@ -5,6 +5,7 @@ from rest_framework.views import exception_handler
 from .base import (
     CustomException,
     QuerySetException,
+    ServiceRequestException,
     AuthenticationFailed,
     DjangoCoreValidationError,
 )
@@ -62,6 +63,16 @@ def custom_exception_handler(exc, context):
                 "errors": exc.errors
             },
             status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    elif isinstance(exc, ServiceRequestException):
+        response = Response(
+            {
+                "status": exc.status_code,
+                "message": exc.message,
+                "errors": exc.errors
+            },
+            status=exc.status_code,
         )
 
     return response

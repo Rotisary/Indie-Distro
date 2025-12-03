@@ -23,10 +23,14 @@ class QuerySetException(Exception):
         self.message = message
 
 
-class RequestException(Exception):
-    errors: list[str]
-    message: str
+class ServiceRequestException(Exception):
 
-    def __init__(self, errors: list[str], message: str):
+    def __init__(
+            self,
+            message: str,
+            errors: list[str] = None, 
+            status_code: int = status.HTTP_400_BAD_REQUEST
+        ):
+        self.status_code = status_code
         self.errors = errors
         self.message = message

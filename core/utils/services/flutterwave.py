@@ -2,6 +2,7 @@ from loguru import logger
 
 from .base import BaseService
 from core.utils.exceptions import exceptions
+from core.utils.exceptions.handlers import Handlers
 from config import env
 from core.users.models import User
 
@@ -26,12 +27,9 @@ class FlutterwaveService(BaseService):
             "country": country
         }
         response = self.post(endpoint, data)
-        if response.status_code != 200:
-            logger.error(f"Failed to create subaccount: {response.text}")
-            raise exceptions.CustomException(
-                message=response.text,
-                status_code=response.status_code
-            )
+        Handlers.handle_request_failure(
+            response, f"Failed to create subaccount: {response.text}"
+        )
         
         logger.info(f"Subaccount created successfully")
         data = {
@@ -45,12 +43,9 @@ class FlutterwaveService(BaseService):
     def delete_subaccount(self, account_reference: str):
         endpoint = f"payout-subaccounts/{account_reference}"
         response = self.delete(endpoint)
-        if response.status_code != 200:
-            logger.error(f"Failed to delete subaccount: {response.text}")
-            raise exceptions.CustomException(
-                message=response.text,
-                status_code=response.status_code
-            )
+        Handlers.handle_request_failure(
+            response, f"Failed to delete subaccount: {response.text}"
+        )
         
         logger.info(f"Subaccount deleted successfully")
         status = response.json()['status']
@@ -59,13 +54,10 @@ class FlutterwaveService(BaseService):
 
     def fetch_static_virtual_account(self, account_reference: str, wallet):
         endpoint = f"payout-subaccounts/{account_reference}/static-account"
-        response = self.get(endpoint)
-        if response.status_code != 200:
-            logger.error(f"Failed to fetch static virtual account: {response.text}")
-            raise exceptions.CustomException(
-                message=response.text,
-                status_code=response.status_code
-            )
+        response = self.get(endpoint) 
+        Handlers.handle_request_failure(
+            response, f"Failed to fetch static virtual account: {response.text}"
+        )
         
         logger.info(f"virtual account fetched successfully")
         wallet.virtual_account_number = response.json()['data']['static_account']
@@ -90,13 +82,11 @@ class FlutterwaveService(BaseService):
             "phone_number": user.phone_number
         }
         response = self.post(endpoint, data=data)
-        if response.status_code != 200:
-            logger.error(f"Failed to get auth url: {response.text}")
-            raise exceptions.CustomException(
-                message=response.text,
-                status_code=response.status_code
-            )
-        elif response.json()["data"]["fraud_status"] != "ok":
+        Handlers.handle_request_failure(
+            response, f"Failed to get auth url: {response.text}"
+        )
+        
+        if response.json()["data"]["fraud_status"] != "ok":
             logger.error(f"Failed to complete bank charge. Fraud detected")
             raise exceptions.ClientPaymentException(
                 message=f"Fraud detected. Failed to complete bank charge",
