@@ -78,7 +78,9 @@ class PurchaseAdmin(ModelAdmin):
                 "classes": ["tab"],
                 "fields": (
                     "id",
+                    "transaction",
                     "status",
+                    "payment_status",
                     "expiry_time",
                 ),
             },
@@ -92,11 +94,17 @@ class PurchaseAdmin(ModelAdmin):
         ),
     )
 
-    list_display = ["id", "film__id", "owner__first_name", "status"]
+    list_display = [
+        "id", 
+        "film__id", 
+        "owner__first_name", 
+        "status", 
+        "payment_status"
+    ]
     search_fields = [
         "owner__first_name", 
         "owner__last_name",
-        "film__name"
+        "film__title"
     ]
     readonly_fields = ["date_added", "date_last_modified"]
     ordering = ["-date_added"]

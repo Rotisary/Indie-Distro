@@ -7,15 +7,10 @@ from django.utils.text import slugify
 
 
 from  core.utils.mixins import BaseModelMixin
-from core.utils.enums import (
-    FilmGenreType, 
-    FilmCategoryType,
-    FilmSaleType,
-    PurchaseStatusType,
-    ShortType
-)
+from core.utils import enums
 from core.users.models import User
 from core.file_storage.models import FileModel
+from core.payment.models import Transaction
 
 
 class Feed(BaseModelMixin):
@@ -37,7 +32,7 @@ class Feed(BaseModelMixin):
     )
     genre = models.CharField(
         _("Film Genre"),
-        choices=FilmGenreType.choices(),
+        choices=enums.FilmGenreType.choices(),
         max_length=100,
         blank=False,
         null=False,
@@ -45,7 +40,7 @@ class Feed(BaseModelMixin):
     )
     type = models.CharField(
         _("Film Type"),
-        choices=FilmCategoryType.choices(),
+        choices=enums.FilmCategoryType.choices(),
         max_length=100,
         blank=False,
         null=False,
@@ -86,8 +81,8 @@ class Feed(BaseModelMixin):
         help_text="Language of the movie, e.g., 'en' for English",
     )
     sale_type = models.CharField(
-        choices=FilmSaleType.choices(), 
-        default=FilmSaleType.ONE_TIME_SALE.value,
+        choices=enums.FilmSaleType.choices(), 
+        default=enums.FilmSaleType.ONE_TIME_SALE.value,
         verbose_name=_("Sale Type"),
         blank=True,
         help_text=_("The sale type of the film,(one time sale, rental)"),     
@@ -156,10 +151,23 @@ class Purchase(BaseModelMixin):
         related_name="purchases",
         help_text=_("the film that the purchase was made for")
     )
+    transaction = models.ForeignKey(
+        to=Transaction,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=False,
+        related_name="purchases",
+        help_text=_("The transaction associated with this purchase")
+    )
+    payment_status = models.CharField(
+        choices=enums.PurchasePaymentStatus.choices(),
+        default=enums.PurchasePaymentStatus.PENDING.value,
+        verbose_name=_("Purchase Payment Status")
+    )
     status = models.CharField(
-        choices=PurchaseStatusType.choices(), 
-        default=PurchaseStatusType.REVOKED.value, 
-        verbose_name=_("The current status of the purchase")
+        choices=enums.PurchaseStatusType.choices(), 
+        default=enums.PurchaseStatusType.REVOKED.value, 
+        verbose_name=_("Purchase Status")
     )
     expiry_time = models.TimeField(
         _("Time of Expiry"), 
@@ -216,7 +224,7 @@ class Short(BaseModelMixin):
     type = models.CharField(
         _("Short Type"),
         max_length=50,
-        choices=ShortType.choices(),
+        choices=enums.ShortType.choices(),
         null=False,
         blank=False,
     )

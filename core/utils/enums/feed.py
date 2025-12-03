@@ -32,6 +32,12 @@ class PurchaseStatusType(BaseEnum):
     CHARGEBACK = "chargeback"
 
 
+class PurchasePaymentStatus(BaseEnum):
+    PENDING = "pending"
+    COMPLETED = "completed"
+    FAILED = "failed"
+
+
 class ShortType(BaseEnum):
     TRAILER = "trailer"
     TEASER = "teaser"
