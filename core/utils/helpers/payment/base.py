@@ -69,7 +69,6 @@ class PaymentHelper:
             return self.PaymentResponse(
                 status="initiated", data=data["meta"]["authorization"]
             )
-            # kwargs["context"]["payment_data"]["charge_data"] = data["meta"]
         except (
             RequestException,
             exceptions.ServiceRequestException,

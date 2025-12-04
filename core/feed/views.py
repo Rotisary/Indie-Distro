@@ -2,6 +2,7 @@ from rest_framework import status, response, views, filters, generics
 from rest_framework.parsers import JSONParser
 from rest_framework.renderers import JSONRenderer
 from rest_framework.permissions import IsAuthenticated, AllowAny
+from django.db import transaction as db_transaction
 from django.apps import apps
 
 from loguru import logger
@@ -308,21 +309,22 @@ class PurchaseFilm(views.APIView):
                 "amount": film.price
             }
         ]
-        transaction = payment.PostLedgerData.as_pending(
-            ledger_data=entry_lines,
-            description="film purchase via bank charge"
-        )
+        with db_transaction.atomic():
+            transaction = payment.PostLedgerData.as_pending(
+                ledger_data=entry_lines,
+                description="film purchase via bank charge"
+            )
 
-        serializer = FilmPurchaseSerializer.CreatePurchase(
-            data={},
-            context={
-                "request": request, 
-                "film": film,
-                "transaction": transaction
-            },
-        )
-        serializer.is_valid(raise_exception=True)
-        purchase = serializer.save()
+            serializer = FilmPurchaseSerializer.CreatePurchase(
+                data={},
+                context={
+                    "request": request, 
+                    "film": film,
+                    "transaction": transaction
+                },
+            )
+            serializer.is_valid(raise_exception=True)
+            purchase = serializer.save()
 
         payment_helper = payment.PaymentHelper(
             user=user, 
