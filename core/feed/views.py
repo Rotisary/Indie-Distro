@@ -274,6 +274,67 @@ class PublicShortsList(generics.ListAPIView):
         "comments_count"
     ]
     ordering = ["-release_date"]
+
+
+@extend_schema(tags=["purchases"])
+class PurchaseFilm(views.APIView):
+    http_method_names = ["post"]
+    parser_classes = [JSONParser]
+    permission_classes = [IsAuthenticated, ]   
+
+    @extend_schema(
+        description="Endpoint for users to purchase a film",
+        request=FilmPurchaseSerializer.CreatePurchase,
+        responses={200: FilmPurchaseSerializer},
+    )
+    def post(self, request, pk=None):
+        film = Feed.objects.get(id=pk)
+        user = request.user
+        entry_lines = [
+            {
+                "user": user,
+                "account_type": enums.LedgerAccountType.EXTERNAL_PAYMENT.value,
+                "entry_type": enums.EntryType.DEBIT,
+                "amount": film.price
+            },
+            {
+                "user": film.owner,
+                "account_type": enums.LedgerAccountType.PROVIDER_WALLET.value,
+                "entry_type": enums.EntryType.CREDIT,
+                "amount": film.price
+            }
+        ]
+        transaction = payment.PostLedgerData.as_pending(
+            ledger_data=entry_lines,
+            description="film purchase via bank charge"
+        )
+
+        serializer = FilmPurchaseSerializer.CreatePurchase(
+            data={},
+            context={
+                "request": request, 
+                "film": film,
+                "transaction": transaction
+            },
+        )
+        serializer.is_valid(raise_exception=True)
+        purchase = serializer.save()
+
+        payment_helper = payment.PaymentHelper(
+            user=user, 
+            transaction=transaction,
+            amount=film.price,
+            payment_type=enums.PaymentType.BANK_CHARGE.value, 
+            charge_type="nigerian"
+        )
+        payment_response = payment_helper.charge_bank()
+        status_code = None
+        if payment_response.status == "initiated":
+            status_code = status.HTTP_202_ACCEPTED
+        else:
+            status_code = status.HTTP_502_BAD_GATEWAY
+
+        return response.Response(data=payment_response, status=status_code)
         
 
 def _get_model_by_name(name: str):
@@ -369,75 +430,14 @@ class RemoveBookmark(views.APIView):
                 message=f"{model_name} not found", 
                 status_code=status.HTTP_404_NOT_FOUND
             )
-
-
-@extend_schema(tags=["purchases"])
-class ListCreatePurchase(views.APIView):
-    http_method_names = ["post", "get"]
-    parser_classes = [JSONParser]
-    permission_classes = [IsAuthenticated, ]   
-
-    @extend_schema(
-        description="Endpoint for users to purchase a film",
-        request=FilmPurchaseSerializer.CreatePurchase,
-        responses={200: FilmPurchaseSerializer},
-    )
-    def post(self, request, pk=None, *args, **kwargs):
-        film = Feed.objects.get(id=pk)
-        user = request.user
-        entry_lines = [
-            {
-                "user": user,
-                "account_type": enums.LedgerAccountType.EXTERNAL_PAYMENT.value,
-                "entry_type": enums.EntryType.DEBIT,
-                "amount": film.price
-            },
-            {
-                "user": film.owner,
-                "account_type": enums.LedgerAccountType.PROVIDER_WALLET.value,
-                "entry_type": enums.EntryType.CREDIT,
-                "amount": film.price
-            }
-        ]
-        transaction = payment.PostLedgerData.as_pending(
-            ledger_data=entry_lines,
-            description="film purchase via bank charge"
-        )
-
-        serializer = FilmPurchaseSerializer.CreatePurchase(
-            data=kwargs,
-            context={
-                "request": request, 
-                "film": film,
-                "transaction": transaction
-            },
-        )
-        serializer.is_valid(raise_exception=True)
-        purchase = serializer.save()
-
-        payment_helper = payment.PaymentHelper(
-            user=user, 
-            transaction=transaction,
-            amount=film.price,
-            payment_type=enums.PaymentType.BANK_CHARGE.value, 
-            charge_type="nigerian"
-        )
-        payment_response = payment_helper.charge_bank()
-        status_code = None
-        if payment_response.status == "initiated":
-            status_code = status.HTTP_202_ACCEPTED
-        else:
-            status_code = status.HTTP_502_BAD_GATEWAY
-
-        return response.Response(data=payment_response, status=status_code)
     
 
-    @extend_schema(
-        description="List all the purchases made by a user",
-        request=None,
-        responses={200: FilmPurchaseSerializer.RetrievePurchase(many=True)},
-    )
-    def get(self, request):
-        queryset = Purchase.objects.filter(owner=request.user)
-        serializer = FilmPurchaseSerializer.RetrievePurchase(queryset, many=True)
-        return response.Response(data=serializer.data, status=status.HTTP_200_OK)
+    # @extend_schema(
+    #     description="List all the purchases made by a user",
+    #     request=None,
+    #     responses={200: FilmPurchaseSerializer.RetrievePurchase(many=True)},
+    # )
+    # def get(self, request):
+    #     queryset = Purchase.objects.filter(owner=request.user)
+    #     serializer = FilmPurchaseSerializer.RetrievePurchase(queryset, many=True)
+    #     return response.Response(data=serializer.data, status=status.HTTP_200_OK)
