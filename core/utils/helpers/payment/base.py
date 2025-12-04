@@ -33,7 +33,7 @@ class PaymentHelper:
         self.transaction = transaction
         self.amount = amount
 
-        if payment_type == enums.PaymentType.BANK_CHARGE:
+        if payment_type == enums.PaymentType.BANK_CHARGE.value:
             if not charge_type:
                 raise ValueError("charge_type required for BANK_CHARGE")
             self.charge_type = charge_type
@@ -78,7 +78,36 @@ class PaymentHelper:
             logger.error(f"nigerian account charge failed ({self.transaction.reference}): {str(exc)}")
             return self.PaymentResponse(
                 status="failed", error=exc.errors, message=exc.message
-            )       
+            )
+    
+    def transfer(
+            self, beneficiary: dict, description: str, debit_subaccount: str=None, 
+        ) -> PaymentResponse:
+        try:
+            service = FlutterwaveService()
+            data = service.make_transfer(
+                beneficiary=beneficiary,
+                amount=self.amount,
+                tx_reference=self.transaction.reference,
+                description=description,
+                debit_subaccount=debit_subaccount
+            )
+            logger.success("transfer initiated")
+            self.transaction.status = enums.TransactionStatus.INITIATED.value
+            self.transaction.metadata = data
+            self.transaction.save(update_fields=["status", "metadata"])
+            return self.PaymentResponse(
+                status="initiated", data=data["meta"]
+            )
+        except (
+            RequestException,
+            exceptions.ServiceRequestException,
+            exceptions.CustomException
+        ) as exc:
+            logger.error(f"transfer initiation failed ({self.transaction.reference}): {str(exc)}")
+            return self.PaymentResponse(
+                status="failed", error=exc.errors, message=exc.message
+            )
 
 
 class PaymentLedgerCreatorHelpers:

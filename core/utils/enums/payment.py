@@ -37,4 +37,9 @@ class EntryType(BaseEnum):
 
 class PaymentType(BaseEnum):
     BANK_CHARGE = "bank_charge"
-    INTER_WALLET = "inter_wallet"  
+    TRANSFER = "transfer"  
+
+class TransferType(BaseEnum):
+    INTER_WALLET = "inter_wallet"
+    WITHDRAWAL = "withdrawal"
+    PAYOUT = "payout"

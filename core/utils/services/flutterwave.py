@@ -100,3 +100,38 @@ class FlutterwaveService(BaseService):
             "meta": response.json()["data"]["meta"]
         }
         return data
+
+
+    def make_transfer(
+            self, 
+            beneficiary: dict, 
+            amount, 
+            tx_reference: str,
+            description: str,
+            debit_subaccount: str=None
+        ):
+        endpoint = "transfers"
+        data = {
+            "account_bank": beneficiary["bank"],
+            "account_number": beneficiary["account_number"],
+            "amount": amount,
+            "debit_subaccount": debit_subaccount,
+            "beneficiary_name": f"{beneficiary.get("name", None)}",
+            "currency": "NGN",
+            "debit_currency": "NGN",
+            "reference": tx_reference,
+            "narration": description
+        }
+        response = self.post(endpoint, data=data)
+        Handlers.handle_request_failure(
+            response, f"Transfer Failed: {response.text}"
+        )
+        
+        logger.info(f"Transfer successfully initiated")
+        data = {
+            "status": response.json()["status"],
+            "requires_approval": response.json()["data"]["requires_approval"],
+            "is_approved": response.json()["data"]["is_approved"]
+        }
+        return data
+    
