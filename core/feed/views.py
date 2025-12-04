@@ -13,7 +13,10 @@ from .models import Feed, Short, Purchase
 from .filters import FilmFilter, ShortFilter
 from .serializers import FeedSerializer, ShortSerializer, FilmPurchaseSerializer
 from core.utils import mixins as global_mixins, exceptions
-from core.utils.helpers.decorators import RequestDataManipulationsDecorators
+from core.utils.helpers.decorators import (
+    RequestDataManipulationsDecorators, 
+    IdempotencyDecorator
+)
 from core.utils.helpers import payment
 from core.utils.commons.utils import serializers
 from core.utils.permissions import (
@@ -287,6 +290,7 @@ class PurchaseFilm(views.APIView):
         request=FilmPurchaseSerializer.CreatePurchase,
         responses={200: FilmPurchaseSerializer},
     )
+    @IdempotencyDecorator.make_endpoint_idempotent(ttl=300)
     def post(self, request, pk=None):
         film = Feed.objects.get(id=pk)
         user = request.user
