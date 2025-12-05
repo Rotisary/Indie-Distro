@@ -27,7 +27,9 @@ class WalletAdmin(ModelAdmin):
                     "barter_id",
                     "virtual_account_number",
                     "virtual_bank_name",
-                    "balance",
+                    "earnings_balance",
+                    "funding_balance",
+                    "total_balance",
                     "wallet_pin",
                     "creation_status",
                 ),
@@ -46,7 +48,7 @@ class WalletAdmin(ModelAdmin):
         "account_reference",
         "creation_status",
         "barter_id",
-        "balance",
+        "total_balance",
         "date_added",
     ]
     search_fields = ["account_reference", "barter_id"]

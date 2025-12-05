@@ -23,6 +23,13 @@ class QuerySetException(Exception):
         self.message = message
 
 
+class WalletException(Exception):
+
+    def __init__(self, errors: list[str], message: str):
+        self.errors = errors
+        self.message = message
+
+
 class ServiceRequestException(Exception):
 
     def __init__(

@@ -1,8 +1,11 @@
 from django.db import models
+from django.db.models import F
 from django.utils.translation import gettext_lazy as _
 
 from core.utils import mixins
 from core.utils import enums
+from core.utils.commons.utils.parsers import Parsers
+from core.utils.exceptions import exceptions
 
 
 class Wallet(mixins.BaseModelMixin):
@@ -53,7 +56,21 @@ class Wallet(mixins.BaseModelMixin):
         verbose_name=_("Flutterwave Sub-Account Creation Date"),
         help_text=_("Date when the Flutterwave sub-account was created")
     )
-    balance = models.DecimalField(
+    earnings_balance = models.DecimalField(
+        default=0,
+        max_digits=15,
+        decimal_places=2,
+        null=False,
+        blank=True
+    )
+    funding_balance = models.DecimalField(
+        default=0,
+        max_digits=15,
+        decimal_places=2,
+        null=False,
+        blank=True
+    )
+    total_balance = models.DecimalField(
         default=0,
         max_digits=15,
         decimal_places=2,
@@ -75,6 +92,56 @@ class Wallet(mixins.BaseModelMixin):
 
     def __str__(self):
         return f"{self.owner.email} wallet <{self.id}>"
+    
+    def withdraw_funds(self, amount, is_earnings=False):
+        if is_earnings:
+            self.withdraw_from_earnings(amount)
+        else:
+            self.pay_with_wallet(amount)
+
+
+    def pay_to_wallet(self, amount, is_funding=False):
+        amount = Parsers.parse_float(amount)
+
+        if amount < 0:
+            raise exceptions.WalletException(
+                ["Invalid Number"], "Must be greater than zero"
+            )
+        if is_funding:         
+            self.funding_balance = F("funding_balance") + amount
+        else:
+            self.earnings_balance = F("earnings_balance") + amount
+        self.total_balance = F("total_balance") + amount
+        self.save()
+
+
+    def pay_with_wallet(self, amount):
+        funding_balance = float(self.funding_balance)
+        amount = Parsers.parse_float(amount)
+
+        if funding_balance < amount:
+            raise exceptions.WalletException(
+                ["Insufficient funds"],
+                "Insufficient funds in wallet, fund you wallet to continue",
+            )
+
+        self.funding_balance = F("funding_balance") - amount
+        self.total_balance = F("total_balance") - amount
+        self.save()
+
+    def withdraw_from_earnings(self, amount):
+        earnings_balance = float(self.earnings_balance)
+        amount = Parsers.parse_float(amount)
+
+        if earnings_balance < amount:
+            raise exceptions.WalletException(
+                ["Insufficient funds"],
+                "Insufficient funds in wallet, fund you wallet to continue",
+            )
+
+        self.earnings_balance = F("earnings_balance") - amount
+        self.total_balance = F("total_balance") - amount
+        self.save()
 
 
 # class Bank(models.Model):

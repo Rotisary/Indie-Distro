@@ -5,6 +5,7 @@ from rest_framework.views import exception_handler
 from .base import (
     CustomException,
     QuerySetException,
+    WalletException,
     ServiceRequestException,
     AuthenticationFailed,
     DjangoCoreValidationError,
@@ -54,6 +55,17 @@ def custom_exception_handler(exc, context):
             },
             status=status.HTTP_401_UNAUTHORIZED,
         )
+
+    elif isinstance(exc, WalletException):
+        response = Response(
+            {
+                "status": status.HTTP_400_BAD_REQUEST,
+                "message": exc.message,
+                "errors": exc.errors,
+            },
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
 
     elif isinstance(exc, ClientPaymentException):
         response = Response(
