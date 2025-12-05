@@ -116,7 +116,7 @@ class FlutterwaveService(BaseService):
             "account_number": beneficiary["account_number"],
             "amount": amount,
             "debit_subaccount": debit_subaccount,
-            "beneficiary_name": f"{beneficiary.get("name", None)}",
+            "beneficiary_name": f'{beneficiary.get("name", None)}',
             "currency": "NGN",
             "debit_currency": "NGN",
             "reference": tx_reference,
