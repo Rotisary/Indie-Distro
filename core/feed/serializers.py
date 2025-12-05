@@ -118,10 +118,11 @@ class ShortSerializer:
 
 class FilmPurchaseSerializer:
     class CreatePurchase(serializers.ModelSerializer):
+        method = serializers.ChoiceField(choices=enums.PaymentType.choices())
 
         class Meta:
             model = Purchase
-            fields = []
+            fields = ["method"]
 
 
         def validate(self, attrs):
@@ -150,6 +151,16 @@ class FilmPurchaseSerializer:
             )
 
             return purchase
+    
+    class FilmPurchaseResponse(serializers.Serializer):
+        status = serializers.CharField(
+            read_only=True, help_text=_("The status of the transfer")
+        )
+        data = serializers.DictField(
+            read_only=True, help_text=_("The provider status and approval status of the transfer")
+        )
+        error = serializers.CharField(read_only=True)
+        message = serializers.CharField(read_only=True)
     
     class RetrievePurchase(serializers.ModelSerializer):
         film = BaseFilmSerializer()

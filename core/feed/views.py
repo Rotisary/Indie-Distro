@@ -289,7 +289,7 @@ class PurchaseFilm(views.APIView):
     @extend_schema(
         description="Endpoint for users to purchase a film",
         request=FilmPurchaseSerializer.CreatePurchase,
-        responses={200: FilmPurchaseSerializer},
+        responses={200: FilmPurchaseSerializer.FilmPurchaseResponse},
     )
     @IdempotencyDecorator.make_endpoint_idempotent(ttl=300)
     def post(self, request, pk=None):
@@ -316,7 +316,7 @@ class PurchaseFilm(views.APIView):
             )
 
             serializer = FilmPurchaseSerializer.CreatePurchase(
-                data={},
+                data=request.data,
                 context={
                     "request": request, 
                     "film": film,
@@ -326,14 +326,32 @@ class PurchaseFilm(views.APIView):
             serializer.is_valid(raise_exception=True)
             purchase = serializer.save()
 
-        payment_helper = payment.PaymentHelper(
-            user=user, 
-            transaction=transaction,
-            amount=film.price,
-            payment_type=enums.PaymentType.BANK_CHARGE.value, 
-            charge_type="nigerian"
-        )
-        payment_response = payment_helper.charge_bank()
+        if serializer.validated_data["method"] == enums.PaymentType.BANK_CHARGE.value:
+            payment_helper = payment.PaymentHelper(
+                user=user, 
+                transaction=transaction,
+                amount=film.price,
+                payment_type=enums.PaymentType.BANK_CHARGE.value, 
+                charge_type="nigerian"
+            )
+            payment_response = payment_helper.charge_bank()
+        else:
+            payment_helper = payment.PaymentHelper(
+                user=film.owner, 
+                transaction=transaction,
+                amount=film.price,
+                payment_type=enums.PaymentType.TRANSFER.value, 
+            )
+            beneficiary = {
+                "account_number": film.owner.wallet.barter_id,
+                "name": f"{film.owner.first_name} {film.owner.last_name}",
+            }
+            payment_response = payment_helper.transfer(
+                beneficiary=beneficiary,
+                description="Film purchase via transfer",
+                debit_subaccount=film.owner.wallet.account_reference,
+            )
+        
         status_code = None
         if payment_response.status == "initiated":
             status_code = status.HTTP_202_ACCEPTED

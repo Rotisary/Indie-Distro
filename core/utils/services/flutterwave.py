@@ -112,7 +112,7 @@ class FlutterwaveService(BaseService):
         ):
         endpoint = "transfers"
         data = {
-            "account_bank": beneficiary["bank"],
+            "account_bank": beneficiary.get("bank",  "flutterwave"),
             "account_number": beneficiary["account_number"],
             "amount": amount,
             "debit_subaccount": debit_subaccount,

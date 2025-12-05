@@ -97,7 +97,7 @@ class PaymentHelper:
             self.transaction.metadata = data
             self.transaction.save(update_fields=["status", "metadata"])
             return self.PaymentResponse(
-                status="initiated", data=data["meta"]
+                status="initiated", data=data
             )
         except (
             RequestException,
