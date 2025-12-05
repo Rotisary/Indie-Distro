@@ -1,4 +1,4 @@
-from django.db import models
+from django.db import models, transaction
 from django.db.models import F
 from django.utils.translation import gettext_lazy as _
 
@@ -98,6 +98,7 @@ class Wallet(mixins.BaseModelMixin):
             self.withdraw_from_earnings(amount)
         else:
             self.pay_with_wallet(amount)
+        
 
 
     def pay_to_wallet(self, amount, is_funding=False):
@@ -113,7 +114,9 @@ class Wallet(mixins.BaseModelMixin):
             self.earnings_balance = F("earnings_balance") + amount
         self.total_balance = F("total_balance") + amount
         self.save()
-
+        self.refresh_from_db(fields=[
+            "funding_balance", "earnings_balance", "total_balance"
+        ])
 
     def pay_with_wallet(self, amount):
         funding_balance = float(self.funding_balance)
@@ -128,6 +131,9 @@ class Wallet(mixins.BaseModelMixin):
         self.funding_balance = F("funding_balance") - amount
         self.total_balance = F("total_balance") - amount
         self.save()
+        self.refresh_from_db(fields=[
+            "funding_balance", "total_balance"
+        ])
 
     def withdraw_from_earnings(self, amount):
         earnings_balance = float(self.earnings_balance)
@@ -142,6 +148,9 @@ class Wallet(mixins.BaseModelMixin):
         self.earnings_balance = F("earnings_balance") - amount
         self.total_balance = F("total_balance") - amount
         self.save()
+        self.refresh_from_db(fields=[
+            "earnings_balance", "total_balance"
+        ])
 
 
 # class Bank(models.Model):
