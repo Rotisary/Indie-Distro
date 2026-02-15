@@ -286,6 +286,77 @@ class PurchaseFilm(views.APIView):
     parser_classes = [JSONParser]
     permission_classes = [IsAuthenticated, ]   
 
+
+    def _purchase_film_with_bank_charge(
+            request, entry_lines: list, film, user, method: str
+        ):
+
+        transaction = payment.PostLedgerData.as_pending(
+            ledger_data=entry_lines,
+            description="film purchase via bank charge"
+        )
+
+        serializer = FilmPurchaseSerializer.CreatePurchase(
+            data=request.data,
+            context={
+                "request": request, 
+                "film": film,
+                "transaction": transaction,
+                "method": method
+            },
+        )
+        serializer.is_valid(raise_exception=True)
+        purchase = serializer.save()
+
+        
+        payment_helper = payment.PaymentHelper(
+            user=user, 
+            transaction=transaction,
+            amount=film.price,
+            payment_type=enums.PaymentType.BANK_CHARGE.value, 
+            charge_type="nigerian"
+        )
+        payment_response = payment_helper.charge_bank()
+        return payment_response
+
+    def _purchase_film_with_transfer(
+            request, entry_lines: list, film, method: str
+        ):
+
+        transaction = payment.PostLedgerData.as_pending(
+            ledger_data=entry_lines,
+            description="film purchase via bank charge"
+        )
+
+        serializer = FilmPurchaseSerializer.CreatePurchase(
+            data=request.data,
+            context={
+                "request": request, 
+                "film": film,
+                "transaction": transaction,
+                "method": method
+            },
+        )
+        serializer.is_valid(raise_exception=True)
+        purchase = serializer.save()
+    
+        payment_helper = payment.PaymentHelper(
+            user=film.owner, 
+            transaction=transaction,
+            amount=film.price,
+            payment_type=enums.PaymentType.TRANSFER.value, 
+        )
+        beneficiary = {
+            "account_number": film.owner.wallet.barter_id,
+            "name": f"{film.owner.first_name} {film.owner.last_name}",
+        }
+        payment_response = payment_helper.transfer(
+            beneficiary=beneficiary,
+            description="Film purchase via transfer",
+            debit_subaccount=film.owner.wallet.account_reference,
+        )
+        return payment_response
+
     @extend_schema(
         description="Endpoint for users to purchase a film",
         request=FilmPurchaseSerializer.CreatePurchase,
@@ -295,63 +366,43 @@ class PurchaseFilm(views.APIView):
     def post(self, request, pk=None):
         film = Feed.objects.get(id=pk)
         user = request.user
+        method = request.data.get("method", None)
+        if not method:
+            raise exceptions.CustomException(
+                "missing field. a payment method must be added", status_code=status.HTTP_404_NOT_FOUND
+            )
+        
         entry_lines = [
             {
                 "user": user,
-                "account_type": enums.LedgerAccountType.EXTERNAL_PAYMENT.value,
-                "entry_type": enums.EntryType.DEBIT,
+                "entry_type": enums.EntryType.DEBIT.value,
                 "amount": film.price
             },
             {
                 "user": film.owner,
-                "account_type": enums.LedgerAccountType.PROVIDER_WALLET.value,
-                "entry_type": enums.EntryType.CREDIT,
+                "entry_type": enums.EntryType.CREDIT.value,
                 "amount": film.price
             }
         ]
         with db_transaction.atomic():
-            transaction = payment.PostLedgerData.as_pending(
-                ledger_data=entry_lines,
-                description="film purchase via bank charge"
-            )
+            if method == enums.PaymentType.BANK_CHARGE.value:
+                entry_lines[0]["account_type"] == enums.LedgerAccountType.EXTERNAL_PAYMENT.value
+                entry_lines[1]["account_type"] == enums.LedgerAccountType.PROVIDER_WALLET.value
+                payment_response = self._purchase_film_with_bank_charge(
+                    request, entry_lines, film, user, method
+                )
+            elif method == enums.PaymentType.TRANSFER.value:
+                entry_lines[0]["account_type"] == enums.LedgerAccountType.USER_WALLET.value
+                entry_lines[1]["account_type"] == enums.LedgerAccountType.USER_WALLET.value
+                payment_response = self._purchase_film_with_transfer(
+                    request, entry_lines, film, method
+                )
+            else:
+                raise exceptions.CustomException(
+                    f"invalid method type. {method} not part of allowed choices", 
+                    status_code=status.HTTP_404_NOT_FOUND
+                )  
 
-            serializer = FilmPurchaseSerializer.CreatePurchase(
-                data=request.data,
-                context={
-                    "request": request, 
-                    "film": film,
-                    "transaction": transaction
-                },
-            )
-            serializer.is_valid(raise_exception=True)
-            purchase = serializer.save()
-
-        if serializer.validated_data["method"] == enums.PaymentType.BANK_CHARGE.value:
-            payment_helper = payment.PaymentHelper(
-                user=user, 
-                transaction=transaction,
-                amount=film.price,
-                payment_type=enums.PaymentType.BANK_CHARGE.value, 
-                charge_type="nigerian"
-            )
-            payment_response = payment_helper.charge_bank()
-        else:
-            payment_helper = payment.PaymentHelper(
-                user=film.owner, 
-                transaction=transaction,
-                amount=film.price,
-                payment_type=enums.PaymentType.TRANSFER.value, 
-            )
-            beneficiary = {
-                "account_number": film.owner.wallet.barter_id,
-                "name": f"{film.owner.first_name} {film.owner.last_name}",
-            }
-            payment_response = payment_helper.transfer(
-                beneficiary=beneficiary,
-                description="Film purchase via transfer",
-                debit_subaccount=film.owner.wallet.account_reference,
-            )
-        
         status_code = None
         if payment_response.status == "initiated":
             status_code = status.HTTP_202_ACCEPTED
