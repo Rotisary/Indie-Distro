@@ -11,7 +11,8 @@ class LedgerAccountType(BaseEnum):
     USER_WALLET = "user wallet"
     PROVIDER_WALLET = "provider wallet"
     SALES_FEE = "sales fee"
-    EXTERNAL_FUNDING_WITHDRAWAL = "external funding & withdrawal"
+    FUNDING = "funding"
+    WITHDRAWAL = "withdrawal"
     EXTERNAL_PAYMENT = "external payment"
 
 
