@@ -38,6 +38,11 @@ class BaseService:
         self.session.mount("http://", adapter)      
 
 
+    @staticmethod
+    def _clean_payload(payload: dict) -> dict:
+        return {key: value for key, value in payload.items() if value is not None}
+    
+
     def get_headers(self) -> dict:
         headers = {
             "accept": "application/json",
@@ -51,9 +56,10 @@ class BaseService:
     def post(self, endpoint: str, data: dict, timeout: int=15):
         url = f"{self.base_url}/{endpoint}"
         headers = self.get_headers()
+        clean_data = self._clean_payload(data)
         try:
             response = self.session.post(
-                url, headers=headers, json=data, timeout=timeout
+                url, headers=headers, json=clean_data, timeout=timeout
             )
         except requests.RequestException as e:
             logger.error(f"Request failed: {e}")

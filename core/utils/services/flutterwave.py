@@ -106,8 +106,8 @@ class FlutterwaveService(BaseService):
             self, 
             beneficiary: dict, 
             amount, 
-            tx_reference: str,
             description: str,
+            tx_reference: str=None,
             debit_subaccount: str=None
         ):
         endpoint = "transfers"
@@ -135,3 +135,5 @@ class FlutterwaveService(BaseService):
         }
         return data
     
+    # TODO: method to move money from account into subaccounts
+    # def fund_subaccount()

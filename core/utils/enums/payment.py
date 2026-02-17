@@ -40,7 +40,7 @@ class PaymentType(BaseEnum):
     BANK_CHARGE = "bank_charge"
     TRANSFER = "transfer"  
 
-class TransferType(BaseEnum):
-    INTER_WALLET = "inter_wallet"
-    WITHDRAWAL = "withdrawal"
-    PAYOUT = "payout"
+class TransactionPurpose(BaseEnum):
+    PAYOUT = "payment"
+    PURCHASE = "purchase"
+    FUNDING = "funding"

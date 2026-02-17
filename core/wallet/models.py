@@ -2,6 +2,8 @@ from django.db import models, transaction
 from django.db.models import F
 from django.utils.translation import gettext_lazy as _
 
+from decimal import Decimal
+
 from core.utils import mixins
 from core.utils import enums
 from core.utils.commons.utils.parsers import Parsers
@@ -88,6 +90,20 @@ class Wallet(mixins.BaseModelMixin):
     class Meta:
         verbose_name = _("Wallet")
         verbose_name_plural = _("Wallets")
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(funding_balance__gte=0),
+                name="funding_balance_non_negative",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(earnings_balance__gte=0),
+                name="earnings_balance_non_negative",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(total_balance__gte=0),
+                name="total_balance_non_negative",
+            ),
+        ]
 
 
     def __str__(self):
@@ -100,63 +116,96 @@ class Wallet(mixins.BaseModelMixin):
             self.pay_with_wallet(amount)
         
 
-
     def pay_to_wallet(self, amount, is_funding=False):
-        amount = Parsers.parse_float(amount)
+        if not isinstance(amount, Decimal):
+            amount = Decimal(str(amount))
 
-        if amount < 0:
+        if amount <= 0:
             raise exceptions.WalletException(
                 ["Invalid Number"], "Must be greater than zero"
             )
-        if is_funding:         
-            self.funding_balance = F("funding_balance") + amount
-        else:
-            self.earnings_balance = F("earnings_balance") + amount
-        self.total_balance = F("total_balance") + amount
-        self.save()
+        
+        with transaction.atomic():
+            locked_wallet = (
+                Wallet.objects
+                .select_for_update()
+                .get(pk=self.pk)
+            )
+
+            if is_funding:
+                locked_wallet.funding_balance = F("funding_balance") + amount
+            else:
+                locked_wallet.earnings_balance = F("earnings_balance") + amount
+            locked_wallet.total_balance = F("total_balance") + amount
+            locked_wallet.save(update_fields=[
+                "funding_balance", "earnings_balance", "total_balance"
+            ])
+
         self.refresh_from_db(fields=[
             "funding_balance", "earnings_balance", "total_balance"
         ])
 
-    def pay_with_wallet(self, amount):
-        funding_balance = float(self.funding_balance)
-        amount = Parsers.parse_float(amount)
 
-        if funding_balance < amount:
+    def pay_with_wallet(self, amount):
+        if not isinstance(amount, Decimal):
+            amount = Decimal(str(amount))
+
+        if amount <= 0:
             raise exceptions.WalletException(
-                ["Insufficient funds"],
-                "Insufficient funds in wallet, fund you wallet to continue",
+                ["Invalid Number"], "Must be greater than zero"
             )
 
-        self.funding_balance = F("funding_balance") - amount
-        self.total_balance = F("total_balance") - amount
-        self.save()
+        with transaction.atomic():
+            locked_wallet = (
+                Wallet.objects
+                .select_for_update()
+                .get(pk=self.pk)
+            )
+
+            if locked_wallet.funding_balance < amount:
+                raise exceptions.WalletException(
+                    ["Insufficient funds"],
+                    "Insufficient funds in wallet, fund your wallet to continue",
+                )
+
+            locked_wallet.funding_balance = F("funding_balance") - amount
+            locked_wallet.total_balance = F("total_balance") - amount
+            locked_wallet.save(update_fields=["funding_balance", "total_balance"])
+
         self.refresh_from_db(fields=[
             "funding_balance", "total_balance"
         ])
 
-    def withdraw_from_earnings(self, amount):
-        earnings_balance = float(self.earnings_balance)
-        amount = Parsers.parse_float(amount)
 
-        if earnings_balance < amount:
+    def withdraw_from_earnings(self, amount):
+        if not isinstance(amount, Decimal):
+            amount = Decimal(str(amount))
+
+        if amount <= 0:
             raise exceptions.WalletException(
-                ["Insufficient funds"],
-                "Insufficient funds in wallet, fund you wallet to continue",
+                ["Invalid Number"], "Must be greater than zero"
             )
 
-        self.earnings_balance = F("earnings_balance") - amount
-        self.total_balance = F("total_balance") - amount
-        self.save()
+        with transaction.atomic():
+            locked_wallet = (
+                Wallet.objects
+                .select_for_update()
+                .get(pk=self.pk)
+            )
+
+            if locked_wallet.earnings_balance < amount:
+                raise exceptions.WalletException(
+                    ["Insufficient funds"],
+                    "Insufficient funds in wallet, fund your wallet to continue",
+                )
+
+            locked_wallet.earnings_balance = F("earnings_balance") - amount
+            locked_wallet.total_balance = F("total_balance") - amount
+            locked_wallet.save(update_fields=["earnings_balance", "total_balance"])
+
         self.refresh_from_db(fields=[
             "earnings_balance", "total_balance"
         ])
 
 
-# class Bank(models.Model):
-#     code = models.CharField(max_length=10, blank=False, null=False)
-#     name = models.CharField(max_length=225, blank=False, null=False)
-
-#     def __str__(self):
-#         return f"{self.name}"
     

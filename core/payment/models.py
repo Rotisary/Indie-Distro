@@ -74,17 +74,29 @@ class Transaction(BaseModelMixin):
         max_length=3,
         choices=enums.SupportedCurrency.choices(),
     )
+    purpose = models.CharField(
+        choices=enums.TransactionPurpose.choices(),
+        blank=False,
+        null=False,
+        help_text=_("The purpose of the transaction(funding, purchase, payout)")
+    )
     metadata = JSONField(
         _("Metadata"), 
         null=True, 
         blank=True,
         default=dict
     )
-    completed_at = models.DateTimeField(
+    successful_at = models.DateTimeField(
         null=True, 
         blank=True,
-        help_text=_("Date and Time the transaction was marked as completed") 
+        help_text=_("Date and Time the transaction was marked as successful") 
     )
+    failed_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text=_("Date and Time the transaction was marked as failed")
+    )
+
 
     class Meta:
         verbose_name = _("Transaction")

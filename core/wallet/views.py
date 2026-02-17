@@ -68,13 +68,13 @@ class InitiateFundingWithBankCharge(views.APIView):
         entry_lines = [
             {
                 "user": owner,
-                "account_type": enums.LedgerAccountType.EXTERNAL_FUNDING_WITHDRAWAL.value,
+                "account_type": enums.LedgerAccountType.FUNDING.value,
                 "entry_type": enums.EntryType.DEBIT,
                 "amount": amount
             },
             {
-                "user": owner,
-                "account_type": enums.LedgerAccountType.USER_WALLET.value,
+                "user": None,
+                "account_type": enums.LedgerAccountType.PROVIDER_WALLET.value,
                 "entry_type": enums.EntryType.CREDIT,
                 "amount": amount
             }

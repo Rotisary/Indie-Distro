@@ -59,14 +59,14 @@ class TransactionAdmin(ModelAdmin):
             _("Important dates"),
             {
                 "classes": ["tab"],
-                "fields": ("completed_at", "date_added", "date_last_modified"),
+                "fields": ("successful_at", "date_added", "date_last_modified"),
             },
         ),
     )
 
-    list_display = ["reference", "status", "currency", "completed_at"]
+    list_display = ["reference", "status", "currency", "successful_at"]
     search_fields = ["reference"]
-    readonly_fields = ["date_added", "date_last_modified", "completed_at"]
+    readonly_fields = ["date_added", "date_last_modified", "successful_at"]
     ordering = ["-date_added"]
 
 

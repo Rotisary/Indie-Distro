@@ -287,28 +287,28 @@ class PurchaseFilm(views.APIView):
     permission_classes = [IsAuthenticated, ]   
 
 
+    @staticmethod
     def _purchase_film_with_bank_charge(
             request, entry_lines: list, film, user, method: str
         ):
+        with db_transaction.atomic():
+            transaction = payment.PostLedgerData.as_pending(
+                ledger_data=entry_lines,
+                description="film purchase via bank charge"
+            )
 
-        transaction = payment.PostLedgerData.as_pending(
-            ledger_data=entry_lines,
-            description="film purchase via bank charge"
-        )
-
-        serializer = FilmPurchaseSerializer.CreatePurchase(
-            data=request.data,
-            context={
-                "request": request, 
-                "film": film,
-                "transaction": transaction,
-                "method": method
-            },
-        )
-        serializer.is_valid(raise_exception=True)
-        purchase = serializer.save()
-
-        
+            serializer = FilmPurchaseSerializer.CreatePurchase(
+                data=request.data,
+                context={
+                    "request": request, 
+                    "film": film,
+                    "transaction": transaction,
+                    "method": method
+                },
+            )
+            serializer.is_valid(raise_exception=True)
+            purchase = serializer.save()
+    
         payment_helper = payment.PaymentHelper(
             user=user, 
             transaction=transaction,
@@ -319,26 +319,28 @@ class PurchaseFilm(views.APIView):
         payment_response = payment_helper.charge_bank()
         return payment_response
 
+
+    @staticmethod
     def _purchase_film_with_transfer(
             request, entry_lines: list, film, method: str
         ):
+        with db_transaction.atomic():
+            transaction = payment.PostLedgerData.as_pending(
+                ledger_data=entry_lines,
+                description="film purchase via bank charge"
+            )
 
-        transaction = payment.PostLedgerData.as_pending(
-            ledger_data=entry_lines,
-            description="film purchase via bank charge"
-        )
-
-        serializer = FilmPurchaseSerializer.CreatePurchase(
-            data=request.data,
-            context={
-                "request": request, 
-                "film": film,
-                "transaction": transaction,
-                "method": method
-            },
-        )
-        serializer.is_valid(raise_exception=True)
-        purchase = serializer.save()
+            serializer = FilmPurchaseSerializer.CreatePurchase(
+                data=request.data,
+                context={
+                    "request": request, 
+                    "film": film,
+                    "transaction": transaction,
+                    "method": method
+                },
+            )
+            serializer.is_valid(raise_exception=True)
+            purchase = serializer.save()
     
         payment_helper = payment.PaymentHelper(
             user=film.owner, 
@@ -356,6 +358,7 @@ class PurchaseFilm(views.APIView):
             debit_subaccount=film.owner.wallet.account_reference,
         )
         return payment_response
+    
 
     @extend_schema(
         description="Endpoint for users to purchase a film",
@@ -383,25 +386,26 @@ class PurchaseFilm(views.APIView):
                 "entry_type": enums.EntryType.CREDIT.value,
                 "amount": film.price
             }
-        ]
-        with db_transaction.atomic():
-            if method == enums.PaymentType.BANK_CHARGE.value:
-                entry_lines[0]["account_type"] == enums.LedgerAccountType.EXTERNAL_PAYMENT.value
-                entry_lines[1]["account_type"] == enums.LedgerAccountType.PROVIDER_WALLET.value
-                payment_response = self._purchase_film_with_bank_charge(
-                    request, entry_lines, film, user, method
-                )
-            elif method == enums.PaymentType.TRANSFER.value:
-                entry_lines[0]["account_type"] == enums.LedgerAccountType.USER_WALLET.value
-                entry_lines[1]["account_type"] == enums.LedgerAccountType.USER_WALLET.value
-                payment_response = self._purchase_film_with_transfer(
-                    request, entry_lines, film, method
-                )
-            else:
-                raise exceptions.CustomException(
-                    f"invalid method type. {method} not part of allowed choices", 
-                    status_code=status.HTTP_404_NOT_FOUND
-                )  
+        ]   
+        if method == enums.PaymentType.BANK_CHARGE.value:
+            entry_lines[0]["account_type"] == enums.LedgerAccountType.EXTERNAL_PAYMENT.value
+            entry_lines[1]["account_type"] == enums.LedgerAccountType.PROVIDER_WALLET.value
+            payment_response = self._purchase_film_with_bank_charge(
+                request, entry_lines, film, user, method
+            )
+        elif method == enums.PaymentType.TRANSFER.value:
+            entry_lines[0]["account_type"] == enums.LedgerAccountType.USER_WALLET.value
+            entry_lines[1]["account_type"] == enums.LedgerAccountType.USER_WALLET.value
+            payment_response = self._purchase_film_with_transfer(
+                request, entry_lines, film, method
+            )
+        else:
+            raise exceptions.CustomException(
+                f"invalid method type. {method} not part of allowed choices", 
+                status_code=status.HTTP_404_NOT_FOUND
+            )
+
+        user.wallet.withdraw_funds(film.amount) 
 
         status_code = None
         if payment_response.status == "initiated":

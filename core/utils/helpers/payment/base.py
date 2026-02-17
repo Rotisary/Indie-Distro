@@ -64,7 +64,7 @@ class PaymentHelper:
             )
             logger.success("nigerian bank charge initiated")
             self.transaction.status = enums.TransactionStatus.INITIATED.value
-            self.transaction.metadata = data
+            self.transaction.metadata["charge_initiation_data"] = data.get("data", {})
             self.transaction.save(update_fields=["status", "metadata"])
             return self.PaymentResponse(
                 status="initiated", data=data["meta"]["authorization"]
@@ -76,10 +76,11 @@ class PaymentHelper:
             exceptions.ClientPaymentException
         ) as exc:
             logger.error(f"nigerian account charge failed ({self.transaction.reference}): {str(exc)}")
+            self.transaction.status = enums.TransactionStatus.FAILED.value
             return self.PaymentResponse(
                 status="failed", error=exc.errors, message=exc.message
             )
-    
+               
     def transfer(
             self, beneficiary: dict, description: str, debit_subaccount: str=None, 
         ) -> PaymentResponse:
@@ -94,7 +95,7 @@ class PaymentHelper:
             )
             logger.success("transfer initiated")
             self.transaction.status = enums.TransactionStatus.INITIATED.value
-            self.transaction.metadata = data
+            self.transaction.metadata["transfer_initiation_data"] = data.get("data", {})
             self.transaction.save(update_fields=["status", "metadata"])
             return self.PaymentResponse(
                 status="initiated", data=data
@@ -105,6 +106,7 @@ class PaymentHelper:
             exceptions.CustomException
         ) as exc:
             logger.error(f"transfer initiation failed ({self.transaction.reference}): {str(exc)}")
+            self.transaction.status = enums.TransactionStatus.FAILED.value
             return self.PaymentResponse(
                 status="failed", error=exc.errors, message=exc.message
             )
@@ -126,7 +128,7 @@ class PaymentLedgerCreatorHelpers:
 
     @staticmethod
     def create_ledger_transaction( 
-            description: str = None, currency: str="NGN"
+            tx_purpose: str, description: str = None, currency: str="NGN"
         ) -> Transaction:
         hex_id = ObjectIdentifiers.unique_hex_id()
         tx_reference = f"tx_{hex_id[:13]}"
@@ -134,7 +136,8 @@ class PaymentLedgerCreatorHelpers:
             reference=tx_reference,
             status=enums.TransactionStatus.PENDING.value,
             description=description,
-            currency=currency
+            currency=currency,
+            purpose=tx_purpose
         )
         return transaction
     
