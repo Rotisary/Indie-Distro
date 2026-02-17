@@ -77,7 +77,7 @@ class Transaction(BaseModelMixin):
     purpose = models.CharField(
         choices=enums.TransactionPurpose.choices(),
         blank=False,
-        null=False,
+        null=True,
         help_text=_("The purpose of the transaction(funding, purchase, payout)")
     )
     metadata = JSONField(
