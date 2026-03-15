@@ -134,6 +134,25 @@ class FlutterwaveService(BaseService):
             "is_approved": response.json()["data"]["is_approved"]
         }
         return data
-    
-    # TODO: method to move money from account into subaccounts
-    # def fund_subaccount()
+
+    def verify_charge(self, tx_id: str):
+        endpoint = f"transactions/{tx_id}/verify"
+        response = self.get(endpoint)
+        Handlers.handle_request_failure(
+            response, f"Failed to verify charge: {response.text}"
+        )
+        logger.info(f"Charge verification successful for tx_id={tx_id}")
+        status = response.json()["status"]
+        
+        return status
+
+    def verify_transfer(self, transfer_id: int):
+        endpoint = f"transfers/{transfer_id}"
+        response = self.get(endpoint)
+        Handlers.handle_request_failure(
+            response, f"Failed to verify transfer: {response.text}"
+        )
+        logger.info(f"Transfer verification successful for id={transfer_id}")
+        status = response.json()["status"]
+        
+        return status

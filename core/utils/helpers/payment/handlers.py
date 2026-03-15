@@ -4,7 +4,6 @@ from decimal import Decimal
 from django.db import transaction as db_transaction
 
 from core.payment.models import Transaction, JournalEntry
-from core.wallet.models import Wallet
 from core.utils import enums
 from core.utils.helpers.payment import PostLedgerData
 from .base import PaymentHelper
@@ -19,6 +18,7 @@ class PaymentHandlers:
         """
         tx_ref = data.get("tx_ref")
         flw_status = data.get("status").lower()
+        tx_id = data.get("id")
         amount = Decimal(str(data.get("charged_amount") or data.get("amount")))
 
         if not tx_ref:
@@ -42,17 +42,17 @@ class PaymentHandlers:
             if flw_status != "successful":
                 return PaymentHandlers._finalise_failed_charge(tx, data, flw_status)
 
-            # Verify with Flutterwave before proceeding
-            # if flw_id and not PaymentHandler._verify_charge(flw_id, tx.amount, tx.currency):
-            #     logger.error(f"Charge verification failed for tx {tx_ref}")
-            #     return PaymentHandler._finalise_failed_charge(tx, data, "verification_failed")
+        from core.payment.tasks import (
+            verify_charge_and_initiate_subaccount_transfer_task
+        )
 
-            PostLedgerData.as_successful(tx, data, "charge")
-
-        from core.payment.tasks import initiate_subaccount_transfer_task
-        initiate_subaccount_transfer_task.delay(tx.reference, amount)
-
-        return {"status": "success", "detail": "charge verified, transfer initiated"}
+        verify_charge_and_initiate_subaccount_transfer_task.delay(
+            tx_ref, tx_id, str(amount), data
+        )
+        return {
+            "status": "queued",
+            "detail": "charge verification and transfer queued",
+        }
     
 
     @staticmethod
@@ -63,6 +63,7 @@ class PaymentHandlers:
         tx_ref = data.get("reference")
         flw_status = data.get("status").lower()
         amount = Decimal(str(data.get("charged_amount") or data.get("amount")))
+        tx_id = data.get("id")
 
         if not tx_ref:
             logger.error("transfer.completed webhook missing reference")
@@ -83,7 +84,13 @@ class PaymentHandlers:
                 return {"status": "already_processed"}
 
             if flw_status == "successful":
-                return PaymentHandlers._finalise_successful_transfer(tx, data, amount)
+                from core.payment.tasks import verify_transfer_and_finalize_task
+
+                verify_transfer_and_finalize_task.delay(tx_ref, tx_id, str(amount), data)
+                return {
+                    "status": "queued",
+                    "detail": "transfer verification and finalisation queued",
+                }
             else:
                 return PaymentHandlers._finalise_failed_transfer(tx, data, flw_status)
     
