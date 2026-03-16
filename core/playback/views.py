@@ -31,7 +31,17 @@ class RetrievePlaybackURL(views.APIView):
 
         user = request.user
         token = AccessUtils.return_playback_token(purchase_id, user)
-        playback_url = f"https://www.cdn.example.com/?token={token}"
+
+        purchase = (
+            Purchase.objects
+            .select_related("film", "film__file")
+            .filter(id=purchase_id, owner=user)
+            .first()
+        )
+        if not purchase:
+            raise CustomException("Purchase not found", status_code=status.HTTP_404_NOT_FOUND)
+
+        playback_url = AccessUtils.build_playback_url(purchase, token)
         return response.Response(
             data={"url": playback_url}, status=status.HTTP_200_OK
         )
