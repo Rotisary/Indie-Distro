@@ -52,3 +52,32 @@ class WalletPollSerializer:
                 "contains the details of the virtual account that was fetched(bank name, code and number)"
             )
         )
+
+
+class PayoutSerializer:
+    class InitiatePayoutSerializer(serializers.Serializer):
+        amount = serializers.DecimalField(
+            required=True,
+            max_digits=17,
+            decimal_places=2,
+            help_text=_("Amount to withdraw from earnings"),
+        )
+        bank = serializers.CharField(
+            required=True,
+            help_text=_("Beneficiary bank code (Flutterwave bank identifier)"),
+        )
+        account_number = serializers.CharField(
+            required=True,
+            help_text=_("Beneficiary account number"),
+        )
+        name = serializers.CharField(
+            required=False,
+            allow_blank=True,
+            help_text=_("Beneficiary name (optional)"),
+        )
+
+    class InitiatePayoutResponseSerializer(serializers.Serializer):
+        status = serializers.CharField(read_only=True)
+        data = serializers.DictField(read_only=True)
+        error = serializers.CharField(read_only=True)
+        message = serializers.CharField(read_only=True)

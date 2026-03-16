@@ -9,7 +9,7 @@ from .models import Wallet
 from .tasks import fetch_virtual_account_for_wallet
 from core.utils import exceptions
 from core.utils.permissions import IsObjOwner
-from .serializers import FundWalletSerializer, WalletPollSerializer
+from .serializers import FundWalletSerializer, WalletPollSerializer, PayoutSerializer
 from core.utils.helpers import payment
 from core.utils.helpers.decorators import (
     RequestDataManipulationsDecorators,
@@ -69,18 +69,19 @@ class InitiateFundingWithBankCharge(views.APIView):
             {
                 "user": owner,
                 "account_type": enums.LedgerAccountType.FUNDING.value,
-                "entry_type": enums.EntryType.DEBIT,
+                "entry_type": enums.EntryType.DEBIT.value,
                 "amount": amount
             },
             {
                 "user": None,
                 "account_type": enums.LedgerAccountType.PROVIDER_WALLET.value,
-                "entry_type": enums.EntryType.CREDIT,
+                "entry_type": enums.EntryType.CREDIT.value,
                 "amount": amount
             }
         ]
         transaction = payment.PostLedgerData.as_pending(
             ledger_data=entry_lines,
+            tx_purpose=enums.TransactionPurpose.FUNDING.value,
             description="Wallet funding via bank charge"
         )
         payment_helper = payment.PaymentHelper(
@@ -183,3 +184,71 @@ class VirtualAccountFetchPollView(views.APIView):
             } 
             cache_instance.cache_value = data
         return  response.Response(data, status=status.HTTP_200_OK)
+
+
+@extend_schema(tags=["wallets"])
+class InitiatePayout(views.APIView):
+    """
+    Initiate a payout from a creator's earnings balance to a bank account.
+    Completion/failure is handled asynchronously via Flutterwave transfer webhook.
+    """
+    http_method_names = ["post"]
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        description="Initiate payout (withdraw from earnings) via transfer",
+        request=PayoutSerializer.InitiatePayoutSerializer(),
+        responses={200: PayoutSerializer.InitiatePayoutResponseSerializer()},
+    )
+    @IdempotencyDecorator.make_endpoint_idempotent(ttl=300)
+    def post(self, request):
+        serializer = PayoutSerializer.InitiatePayoutSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        amount = serializer.validated_data["amount"]
+        beneficiary = {
+            "bank": serializer.validated_data["bank"],
+            "account_number": serializer.validated_data["account_number"],
+            "name": serializer.validated_data.get("name") or f"{request.user.first_name} {request.user.last_name}",
+        }
+
+        entry_lines = [
+            {
+                "user": request.user,
+                "account_type": enums.LedgerAccountType.USER_WALLET.value,
+                "entry_type": enums.EntryType.DEBIT.value,
+                "amount": amount,
+            },
+            {
+                "user": request.user,
+                "account_type": enums.LedgerAccountType.WITHDRAWAL.value,
+                "entry_type": enums.EntryType.CREDIT.value,
+                "amount": amount,
+            },
+        ]
+
+        tx = payment.PostLedgerData.as_pending(
+            ledger_data=entry_lines,
+            tx_purpose=enums.TransactionPurpose.PAYOUT.value,
+            description="earnings payout",
+        )
+
+        payment_helper = payment.PaymentHelper(
+            user=request.user,
+            transaction=tx,
+            amount=amount,
+            payment_type=enums.PaymentType.TRANSFER.value,
+        )
+
+        payment_response = payment_helper.transfer(
+            beneficiary=beneficiary,
+            description="Earnings payout",
+            debit_subaccount=request.user.wallet.account_reference,
+        )
+
+        status_code = (
+            status.HTTP_202_ACCEPTED
+            if getattr(payment_response, "status", None) == "initiated"
+            else status.HTTP_502_BAD_GATEWAY
+        )
+        return response.Response(data=payment_response, status=status_code)

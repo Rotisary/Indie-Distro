@@ -4,7 +4,8 @@ from .views import (
     FetchVirtualAccount,
     InitiateFundingWithBankCharge,
     WalletStatusPollView,
-    VirtualAccountFetchPollView
+    VirtualAccountFetchPollView,
+    InitiatePayout,
 )
 
 
@@ -13,4 +14,5 @@ urlpatterns = [
     path('fund-with-bank-charge/', InitiateFundingWithBankCharge.as_view(), name='fund-with-bank-charge '),
     path('<str:pk>/status/', WalletStatusPollView.as_view(), name='wallet-status-poll'),
     path('<str:pk>/virtual-account/status/', VirtualAccountFetchPollView.as_view(), name='virtual-account-fetch-poll'),
+    path('payouts/initiate/', InitiatePayout.as_view(), name='initiate-payout'),
 ]
