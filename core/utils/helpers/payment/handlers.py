@@ -10,6 +10,42 @@ from .base import PaymentHelper
 
 
 class PaymentHandlers:
+    @staticmethod
+    def _mark_purchase_completed(tx: Transaction):
+        """
+        Marks a Purchase linked to this Transaction as completed/active.
+        Also sets rental expiry_time when applicable.
+        """
+        from django.utils import timezone
+        from datetime import timedelta
+
+        from core.feed.models import Purchase
+
+        purchase = (
+            Purchase.objects
+            .select_related("film")
+            .filter(transaction=tx)
+            .first()
+        )
+        if not purchase:
+            return
+
+        updates = {
+            "payment_status": enums.PurchasePaymentStatus.COMPLETED.value,
+            "status": enums.PurchaseStatusType.ACTIVE.value,
+        }
+
+        film = purchase.film
+        if (
+            film
+            and film.sale_type == enums.FilmSaleType.RENTAL.value
+            and film.rental_duration
+        ):
+            updates["expiry_time"] = timezone.now() + timedelta(hours=int(film.rental_duration))
+
+        for k, v in updates.items():
+            setattr(purchase, k, v)
+        purchase.save(update_fields=[*updates.keys(), "date_last_modified"])
 
     @staticmethod
     def handle_bank_charge(data: dict) -> dict:
@@ -123,7 +159,7 @@ class PaymentHandlers:
 
         if not debit_entry:
             logger.error(
-                f"No USER_WALLET credit entry for charge tx {charge_tx.reference}; "
+                f"No FUNDING debit entry for charge tx {charge_tx.reference}; "
                 "cannot determine user for subaccount transfer"
             )
             return {"status": "error", "detail": "missing debit entry"}
@@ -198,6 +234,7 @@ class PaymentHandlers:
             wallet.pay_to_wallet(amount, is_funding=True)
         elif tx.purpose == enums.TransactionPurpose.PURCHASE.value:
             wallet.pay_to_wallet(amount)
+            PaymentHandlers._mark_purchase_completed(tx)
         elif tx.purpose == enums.TransactionPurpose.PAYOUT.value:
             wallet.withdraw_funds(amount, is_earnings=True)
 
