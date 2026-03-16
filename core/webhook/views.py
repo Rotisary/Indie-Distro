@@ -1,8 +1,12 @@
-from rest_framework import views, status, response
-from rest_framework.permissions import IsAuthenticated
-from django.views.decorators.csrf import csrf_exempt
+import hmac
+import hashlib
+
+from django.conf import settings
 from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
+from rest_framework import views, status, response
 from rest_framework.parsers import JSONParser
+from rest_framework.permissions import IsAuthenticated
 
 from loguru import logger
 from drf_spectacular.utils import extend_schema
@@ -52,7 +56,7 @@ class WebhookEndpointUpdate(views.APIView):
         request=WebhookEndpointSerializer.WebhookUpdate, 
         responses={201: WebhookEndpointSerializer.WebhookListCreate}
     )
-    def patch(self, pk, request):
+    def patch(self, request, pk):
         instance = WebhookEndpoint.objects.get(id=pk)
         serializer = WebhookEndpointSerializer.WebhookUpdate(instance, data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -73,19 +77,26 @@ class FlutterwaveWebhook(views.APIView):
         return super().dispatch(*args, **kwargs)
 
     def post(self, request):
-        # Verify signature
-        # move this into a permission class
-        # secret = getattr(settings, "FLW_WEBHOOK_SECRET", None)
-        # sig = request.headers.get("X-Webhook-Signature") or request.headers.get("Verif-Hash")
-        # raw_body = request.body
-        # if not secret or not sig:
-        #     logger.error("Flutterwave webhook missing secret or signature header")
-        #     return response.Response(status=status.HTTP_400_BAD_REQUEST)
+        secret = getattr(settings, "FLW_WEBHOOK_SECRET", None)
+        sig = request.headers.get("X-Webhook-Signature") or request.headers.get("Verif-Hash")
+        raw_body = request.body
 
-        # calc = hmac.new(secret.encode("utf-8"), raw_body, hashlib.sha256).hexdigest()
-        # if not hmac.compare_digest(calc, sig):
-        #     logger.error("Flutterwave webhook signature mismatch")
-        #     return response.Response(status=status.HTTP_401_UNAUTHORIZED)
+        if secret and sig:
+            calc = hmac.new(
+                secret.encode("utf-8"), raw_body, hashlib.sha256
+            ).hexdigest()
+            if not hmac.compare_digest(calc, sig):
+                logger.error("Flutterwave webhook signature mismatch")
+                return response.Response(
+                    {"status": "error", "detail": "invalid signature"},
+                    status=status.HTTP_401_UNAUTHORIZED,
+                )
+        elif secret and not sig:
+            logger.error("Flutterwave webhook missing signature header")
+            return response.Response(
+                {"status": "error", "detail": "missing signature"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         payload = request.data
         event = payload.get("event")
@@ -93,12 +104,19 @@ class FlutterwaveWebhook(views.APIView):
 
         try:
             if event == "charge.completed":
-                return PaymentHandlers.handle_bank_charge(data)
+                result = PaymentHandlers.handle_bank_charge(data)
+                return response.Response(result, status=status.HTTP_200_OK)
             elif event in ("transfer.completed", "transfer.failed"):
-                return PaymentHandlers.handle_transfer(data)
+                result = PaymentHandlers.handle_transfer(data)
+                return response.Response(result, status=status.HTTP_200_OK)
             else:
                 logger.warning(f"Unhandled Flutterwave event: {event}")
-                return response.Response({"status": "ignored"}, status=status.HTTP_200_OK)
+                return response.Response(
+                    {"status": "ignored"}, status=status.HTTP_200_OK
+                )
         except Exception as exc:
             logger.exception(f"Webhook handling failed: {exc}")
-            return response.Response({"status": "error"}, status=status.HTTP_200_OK)
+            return response.Response(
+                {"status": "error", "detail": str(exc)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
