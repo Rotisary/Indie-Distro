@@ -5,6 +5,7 @@ from loguru import logger
 
 from .models import Feed, Short
 from .views import _get_model_by_name
+from core.utils.enums import PurchaseStatusType
 
 
 @shared_task(bind=True, max_retries=3, default_retry_delay=60, queue="beats")
@@ -69,3 +70,22 @@ def reconcile_due_releases():
 
     logger.info(f"reconcile_due_releases: released={released_count}")
     return released_count
+
+
+@shared_task
+def expire_due_rentals():
+    """
+    Mark rentals as expired once expiry_time is in the past.
+    """
+    from .models import Purchase
+
+    now = timezone.now()
+    qs = Purchase.objects.filter(
+        status=PurchaseStatusType.ACTIVE.value,
+        expiry_time__isnull=False,
+        expiry_time__lte=now,
+    )
+    updated = qs.update(status=PurchaseStatusType.EXPIRED.value)
+    if updated:
+        logger.info(f"expire_due_rentals: expired={updated}")
+    return updated

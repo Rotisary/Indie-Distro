@@ -342,6 +342,9 @@ SIMPLE_JWT = {
 }
 JWT_SECRET = env.str("JWT_SECRET")
 WEBHOOK_ENC_KEY = env.str("WEBHOOK_ENC_KEY", default="")
+# Flutterwave webhook Verif-Hash (optional; if set, inbound webhooks are verified)
+FLW_WEBHOOK_SECRET = env.str("FLW_WEBHOOK_SECRET", default="")
+STREAM_BASE_URL = env.str("STREAM_BASE_URL", default="")
 
 # Chatting & Caches
 SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"
@@ -391,6 +394,11 @@ CELERY_BEAT_SCHEDULE = {
     "delete_expired_idempotency_keys": {
         "task": "core.utils.tasks.delete_expired_idempotency_keys",
         "schedule": crontab(minute="*"),
+        "options": {"queue": "beats"},
+    },
+    "expire-due-rentals": {
+        "task": "core.feed.tasks.expire_due_rentals",
+        "schedule": crontab(minute="*/5"),
         "options": {"queue": "beats"},
     },
 }

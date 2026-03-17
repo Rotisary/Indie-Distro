@@ -283,11 +283,14 @@ def package_hls(self, job_id: int):
             "resolution": f"{r.get('width')}x{r.get('height')}",
         })
 
-    master_key = FileProcessingUtils.create_and_upload_master_playlist(variant_infos, hls_dir, job)
+    master_key = FileProcessingUtils.create_and_upload_master_playlist(
+        variant_infos, hls_dir, job
+    )
 
     packaging = job.packaging or {}
     packaging["hls"] = {"master": master_key, "variants": variant_infos}
     FileProcessingUtils.update_obj_fields(job, {"packaging": packaging})
+    FileProcessingUtils.update_obj_fields(job.file, {"hls_master_key": master_key})
     return {"hls_master": master_key}
 
 
@@ -359,6 +362,7 @@ def package_dash(self, job_id: int):
     packaging = job.packaging or {}
     packaging["dash"] = {"mpd": f"{prefix}/stream.mpd"}
     FileProcessingUtils.update_obj_fields(job, {"packaging": packaging})
+    FileProcessingUtils.update_obj_fields(job.file, {"dash_mpd_key": f"{prefix}/stream.mpd"})
     return {"dash_mpd": f"{prefix}/stream.mpd"}
 
 

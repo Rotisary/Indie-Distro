@@ -268,7 +268,7 @@ class RetrieveUpdateDeleteShort(views.APIView):
 class PublicShortsList(generics.ListAPIView):
     permission_classes = [AllowAny]
     serializer_class = ShortSerializer.ShortRetrieve
-    queryset = Short.objects.filter(is_released=False)
+    queryset = Short.objects.filter(is_released=True)
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     filterset_class = ShortFilter
     ordering_fields = [
@@ -294,6 +294,7 @@ class PurchaseFilm(views.APIView):
         with db_transaction.atomic():
             transaction = payment.PostLedgerData.as_pending(
                 ledger_data=entry_lines,
+                tx_purpose=enums.TransactionPurpose.PURCHASE.value,
                 description="film purchase via bank charge"
             )
 
@@ -327,7 +328,8 @@ class PurchaseFilm(views.APIView):
         with db_transaction.atomic():
             transaction = payment.PostLedgerData.as_pending(
                 ledger_data=entry_lines,
-                description="film purchase via bank charge"
+                tx_purpose=enums.TransactionPurpose.PURCHASE.value,
+                description="film purchase via transfer"
             )
 
             serializer = FilmPurchaseSerializer.CreatePurchase(
@@ -367,7 +369,12 @@ class PurchaseFilm(views.APIView):
     )
     @IdempotencyDecorator.make_endpoint_idempotent(ttl=300)
     def post(self, request, pk=None):
-        film = Feed.objects.get(id=pk)
+        try:
+            film = Feed.objects.get(id=pk)
+        except Feed.DoesNotExist:
+            raise exceptions.CustomException(
+                "Film not found", status_code=status.HTTP_404_NOT_FOUND
+            )
         user = request.user
         method = request.data.get("method", None)
         if not method:
@@ -388,14 +395,14 @@ class PurchaseFilm(views.APIView):
             }
         ]   
         if method == enums.PaymentType.BANK_CHARGE.value:
-            entry_lines[0]["account_type"] == enums.LedgerAccountType.EXTERNAL_PAYMENT.value
-            entry_lines[1]["account_type"] == enums.LedgerAccountType.PROVIDER_WALLET.value
+            entry_lines[0]["account_type"] = enums.LedgerAccountType.EXTERNAL_PAYMENT.value
+            entry_lines[1]["account_type"] = enums.LedgerAccountType.PROVIDER_WALLET.value
             payment_response = self._purchase_film_with_bank_charge(
                 request, entry_lines, film, user, method
             )
         elif method == enums.PaymentType.TRANSFER.value:
-            entry_lines[0]["account_type"] == enums.LedgerAccountType.USER_WALLET.value
-            entry_lines[1]["account_type"] == enums.LedgerAccountType.USER_WALLET.value
+            entry_lines[0]["account_type"] = enums.LedgerAccountType.USER_WALLET.value
+            entry_lines[1]["account_type"] = enums.LedgerAccountType.USER_WALLET.value
             payment_response = self._purchase_film_with_transfer(
                 request, entry_lines, film, method
             )
@@ -405,7 +412,8 @@ class PurchaseFilm(views.APIView):
                 status_code=status.HTTP_404_NOT_FOUND
             )
 
-        user.wallet.withdraw_funds(film.amount) 
+        if method == enums.PaymentType.TRANSFER.value and payment_response.status == "initiated":
+            user.wallet.withdraw_funds(film.price)
 
         status_code = None
         if payment_response.status == "initiated":
@@ -509,7 +517,6 @@ class RemoveBookmark(views.APIView):
                 message=f"{model_name} not found", 
                 status_code=status.HTTP_404_NOT_FOUND
             )
-    
 
     # @extend_schema(
     #     description="List all the purchases made by a user",

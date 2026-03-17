@@ -169,11 +169,11 @@ class Purchase(BaseModelMixin):
         default=enums.PurchaseStatusType.REVOKED.value, 
         verbose_name=_("Purchase Status")
     )
-    expiry_time = models.TimeField(
-        _("Time of Expiry"), 
-        blank=True, 
+    expiry_time = models.DateTimeField(
+        _("Expiry Time"),
+        blank=True,
         null=True,
-        help_text=_("film time of expiry for rented films")
+        help_text=_("Date and time the rental access expires (for rented films)"),
     )
 
     class Meta:
@@ -219,7 +219,7 @@ class Short(BaseModelMixin):
         _("Slug"),
         max_length=255,
         blank=True,
-        help_text=_("Auto-generated slug"),
+        help_text=_("Auto-generated slug from title"),
     )
     type = models.CharField(
         _("Short Type"),
@@ -274,9 +274,11 @@ class Short(BaseModelMixin):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(self.title)
+            base = (self.caption or "").strip()
+            if base:
+                self.slug = slugify(base[:50])
         super().save(*args, **kwargs)
 
     def __str__(self):
-        base = self.slug or self.title
+        base = self.slug or self.title or str(self.pk)
         return f"{base} (short)"

@@ -147,7 +147,7 @@ class FilmPurchaseSerializer:
             transaction = self.context["transaction"]
 
             purchase = Purchase.objects.create(
-                owner=user, project=film, transaction=transaction
+                owner=user, film=film, transaction=transaction
             )
 
             return purchase
@@ -173,4 +173,4 @@ class FilmPurchaseSerializer:
 
         def get_transaction_id(self, obj):
             transaction = obj.transaction
-            return transaction.reference
+            return transaction.reference if transaction else None

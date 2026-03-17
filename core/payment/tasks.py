@@ -45,11 +45,16 @@ def verify_charge_and_initiate_subaccount_transfer_task(
         if verification_response.lower() not in ["success", "successful"]:
             PaymentHandlers._finalise_failed_charge(tx, webhook_payload, verification_response)
             logger.error(f"Verification failed for tx {tx.reference}")
+            tx.metadata["flw_charge_verification"] = {"status": verification_response}
+            tx.save(update_fields=["metadata"])
             return {
                 "verification": verification_response,
             }
 
         PostLedgerData.as_successful(tx, webhook_payload, "charge")
+
+        tx.metadata["flw_charge_verification"] = {"status": verification_response}
+        tx.save(update_fields=["metadata"])
         initiate_subaccount_transfer_task.delay(tx_ref, amount)
         logger.info(
             f"Charge verified and subaccount transfer queued for tx={tx.reference}"
@@ -89,6 +94,8 @@ def verify_transfer_and_finalize_task(
         if verification_response.lower() not in ["success", "successful"]:
             PaymentHandlers._finalise_failed_transfer(tx, webhook_payload, verification_response)
             logger.error(f"Verification failed for tx {tx.reference}")
+            tx.metadata["flw_transfer_verification"] = {"status": verification_response}
+            tx.save(update_fields=["metadata"])
             return {
                 "verification": verification_response,
             }
@@ -96,6 +103,8 @@ def verify_transfer_and_finalize_task(
         PaymentHandlers._finalise_successful_transfer(
             tx, webhook_payload, Decimal(amount)
         )
+        tx.metadata["flw_transfer_verification"] = {"status": verification_response}
+        tx.save(update_fields=["metadata"])
         logger.info(
             f"Transfer verification and finalisation completed for tx={tx.reference}"
         )
