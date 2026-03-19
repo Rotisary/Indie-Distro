@@ -5,12 +5,15 @@ from drf_spectacular.utils import extend_schema
 
 from .serializers import PurchaseIDSerializer, PlaybackSerializer
 from core.utils.helpers.playback import AccessUtils
+from core.utils.helpers.decorators import IdempotencyDecorator
+from .throttles import RetrievePlaybackThrottle, RefreshPlaybackThrottle
 
 
 @extend_schema(tags=["Playback"])
 class RetrievePlaybackURL(views.APIView):
     http_method_names = ["post", ]
     parser_classes = [JSONParser, ]
+    throttle_classes = [RetrievePlaybackThrottle]
 
 
     @extend_schema(
@@ -18,6 +21,7 @@ class RetrievePlaybackURL(views.APIView):
         request=PurchaseIDSerializer,
         responses={200: PlaybackSerializer.PlaybackURLRetrieveSerializer}
     )
+    @IdempotencyDecorator.make_endpoint_idempotent(ttl=60, namespace="playback_url")
     def post(self, request):
         serializer = PurchaseIDSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -54,16 +58,18 @@ class RetrievePlaybackURL(views.APIView):
     
 
 @extend_schema(tags=["Playback"])
-class RefreshPlaybackToken(views.APIView):
+class RefreshPlaybackCookie(views.APIView):
     http_method_names = ["post", ]
     parser_classes = [JSONParser, ]
+    throttle_classes = [RefreshPlaybackThrottle]
 
 
     @extend_schema(
         description="endpoint to get playback url for cdn",
         request=PurchaseIDSerializer,
-        responses={200: PlaybackSerializer.PlaybackTokenRefreshSerializer}
+        responses={200: PlaybackSerializer.PlaybackCookieRefreshSerializer}
     )
+    @IdempotencyDecorator.make_endpoint_idempotent(ttl=60, namespace="playback_refresh")
     def post(self, request):
         serializer = PurchaseIDSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)

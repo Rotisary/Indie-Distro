@@ -11,5 +11,5 @@ class PlaybackSerializer:
         url = serializers.CharField(read_only=True)
         expires_at = serializers.DateTimeField(read_only=True)
     
-    class PlaybackTokenRefreshSerializer(serializers.Serializer):
+    class PlaybackCookieRefreshSerializer(serializers.Serializer):
         expires_at = serializers.DateTimeField(read_only=True)

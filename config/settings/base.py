@@ -174,7 +174,11 @@ REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
     "PAGE_SIZE": 10,
     "DEFAULT_THROTTLE_CLASSES": ["rest_framework.throttling.AnonRateThrottle"],
-    "DEFAULT_THROTTLE_RATES": {"anon": "50/minute"},
+    "DEFAULT_THROTTLE_RATES": {
+        "anon": "50/minute",
+        "playback_retrieve": env.str("PLAYBACK_RETRIEVE_THROTTLE_RATE", "30/minute"),
+        "playback_refresh": env.str("PLAYBACK_REFRESH_THROTTLE_RATE", "60/minute"),
+    },
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "EXCEPTION_HANDLER": "core.utils.exceptions.exceptions.custom_exception_handler",
 }
