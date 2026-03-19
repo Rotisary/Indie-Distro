@@ -342,9 +342,15 @@ SIMPLE_JWT = {
 }
 JWT_SECRET = env.str("JWT_SECRET")
 WEBHOOK_ENC_KEY = env.str("WEBHOOK_ENC_KEY", default="")
-# Flutterwave webhook Verif-Hash (optional; if set, inbound webhooks are verified)
 FLW_WEBHOOK_SECRET = env.str("FLW_WEBHOOK_SECRET", default="")
+
 STREAM_BASE_URL = env.str("STREAM_BASE_URL", default="")
+STREAM_COOKIE_SECRET = env.str("STREAM_COOKIE_SECRET", default="")
+STREAM_COOKIE_NAME = env.str("STREAM_COOKIE_NAME", default="stream_auth")
+STREAM_COOKIE_DOMAIN = env.str("STREAM_COOKIE_DOMAIN", default="stream.indis.live")
+STREAM_COOKIE_TTL_SECONDS = env.int("STREAM_COOKIE_TTL_SECONDS", default=900)
+STREAM_COOKIE_SECURE = env.bool("STREAM_COOKIE_SECURE", default=not DEBUG)
+STREAM_COOKIE_SAMESITE = env.str("STREAM_COOKIE_SAMESITE", default="None")
 
 # Chatting & Caches
 SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"

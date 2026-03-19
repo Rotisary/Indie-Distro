@@ -1,4 +1,11 @@
-import jwt, datetime
+import base64
+import datetime
+import hashlib
+import hmac
+import json
+import jwt
+
+from urllib.parse import urlparse
 
 from rest_framework import status
 from django.utils import timezone
@@ -16,29 +23,65 @@ class AccessUtils:
     """
 
     @staticmethod
-    def generate_playback_token(owner: int, film: int, purchase: str, session: UserSession | None):
-        """
-            method to encode user and film data in order to generate token for movie access
-        """
+    def _b64url_encode(data: bytes) -> str:
+        return base64.urlsafe_b64encode(data).rstrip(b"=").decode("ascii")
+
+
+    @staticmethod
+    def _build_stream_cookie_path(master_key: str) -> str:
+        if master_key.startswith("http://") or master_key.startswith("https://"):
+            path = urlparse(master_key).path
+        else:
+            path = f"/{master_key.lstrip('/')}"
+
+        if "/" not in path.strip("/"):
+            return "/"
+
+        return path.rsplit("/", 1)[0] + "/"
+
+
+    @staticmethod
+    def generate_stream_cookie(purchase: Purchase, session: UserSession | None):
+        ttl_seconds = int(getattr(settings, "STREAM_COOKIE_TTL_SECONDS", 900))
         now = datetime.datetime.now(datetime.timezone.utc)
+        expires_at = now + datetime.timedelta(seconds=ttl_seconds)
+
+        file = getattr(purchase.film, "file", None)
+        master_key = file and (file.hls_master_key or "")
+        if not master_key:
+            raise CustomException(
+                message="Playback not available yet",
+                status_code=status.HTTP_404_NOT_FOUND,
+            )
+
+        cookie_path = AccessUtils._build_stream_cookie_path(master_key)
         payload = {
-            "sub": str(owner),
-            "film_id": str(film),
-            "purhase_id": str(purchase),
+            "sub": str(purchase.owner_id),
+            "film_id": str(purchase.film_id),
+            "purchase_id": str(purchase.id),
             "session_id": str(session.id) if session else None,
-            # "ip_address": str(session.ip_address),
-            # "device": 
-            "aud": "stream",
-            "nbf": now,
-            "exp": now + datetime.timedelta(minutes=10),
-            "jti": f"{owner}:{film}:{session.id}" if session else f"{owner}:{film}"
+            "path": cookie_path,
+            "exp": int(expires_at.timestamp()),
         }
-        token = jwt.encode(payload, settings.JWT_SECRET, algorithm="HS256")
-        return token
+
+        payload_json = json.dumps(payload, separators=(",", ":")).encode("utf-8")
+        payload_b64 = AccessUtils._b64url_encode(payload_json)
+        secret = getattr(settings, "STREAM_COOKIE_SECRET", "")
+        if not secret:
+            raise CustomException(
+                message="Stream cookie secret not configured",
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+        signature = hmac.new(
+            secret.encode("utf-8"), payload_b64.encode("ascii"), hashlib.sha256
+        ).digest()
+        signature_b64 = AccessUtils._b64url_encode(signature)
+        cookie_value = f"{payload_b64}.{signature_b64}"
+        return cookie_value, expires_at, cookie_path
     
 
     @staticmethod
-    def return_playback_token(purchase_id: str, user: User):
+    def get_valid_purchase(purchase_id: str, user: User) -> Purchase:
         """
             returns the generated token for a verified purchase. To be reused across playback endpoints
         """
@@ -66,13 +109,25 @@ class AccessUtils:
             .order_by("-last_activity")
             .first()
         )
-        token = AccessUtils.generate_playback_token(
-            user.id, purchase.film.id, purchase_id, session
-        )
-        return token
+        return purchase
+
 
     @staticmethod
-    def build_playback_url(purchase: Purchase, token: str) -> str:
+    def return_stream_cookie(purchase_id: str, user: User):
+        purchase = AccessUtils.get_valid_purchase(purchase_id, user)
+        session = (
+            UserSession.objects
+            .filter(user=user, is_active=True)
+            .order_by("-last_activity")
+            .first()
+        )
+        cookie_value, expires_at, cookie_path = AccessUtils.generate_stream_cookie(
+            purchase, session
+        )
+        return purchase, cookie_value, expires_at, cookie_path
+
+    @staticmethod
+    def build_playback_url(purchase: Purchase) -> str:
         """
         Builds a streamable HLS URL for a purchased film.
         """
@@ -84,7 +139,7 @@ class AccessUtils:
                 status_code=status.HTTP_404_NOT_FOUND,
             )
         if master_key.startswith("http://") or master_key.startswith("https://"):
-            return f"{master_key}?token={token}"
+            return master_key
 
         base_url = (getattr(settings, "STREAM_BASE_URL", "") or "").rstrip("/")
         if not base_url and getattr(settings, "USING_MANAGED_STORAGE", False):
@@ -98,4 +153,4 @@ class AccessUtils:
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
-        return f"{base_url}/{master_key}?token={token}"
+        return f"{base_url}/{master_key}"

@@ -9,6 +9,7 @@ class PurchaseIDSerializer(serializers.Serializer):
 class PlaybackSerializer:
     class PlaybackURLRetrieveSerializer(serializers.Serializer):
         url = serializers.CharField(read_only=True)
+        expires_at = serializers.DateTimeField(read_only=True)
     
     class PlaybackTokenRefreshSerializer(serializers.Serializer):
-        token = serializers.CharField(read_only=True)
+        expires_at = serializers.DateTimeField(read_only=True)
