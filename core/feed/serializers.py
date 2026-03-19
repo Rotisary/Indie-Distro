@@ -1,6 +1,7 @@
 import datetime
 
 from rest_framework import serializers
+from django.core.validators import RegexValidator
 from django.utils.translation import gettext_lazy as _
 
 from core.users.serializers import BaseUserSerializer
@@ -119,15 +120,22 @@ class ShortSerializer:
 class FilmPurchaseSerializer:
     class CreatePurchase(serializers.ModelSerializer):
         method = serializers.ChoiceField(choices=enums.PaymentType.choices())
+        wallet_pin = serializers.CharField(
+            required=False,
+            write_only=True,
+            validators=[RegexValidator(r"^\d{4}$", "PIN must be exactly 4 digits")],
+            help_text=_("4-digit wallet PIN required for wallet transfers"),
+        )
 
         class Meta:
             model = Purchase
-            fields = ["method"]
+            fields = ["method", "wallet_pin"]
 
 
         def validate(self, attrs):
             user = self.context["request"].user
             film = self.context.get("film")
+            method = attrs.get("method")
 
             if Purchase.objects.filter(
                 owner=user,
@@ -138,6 +146,11 @@ class FilmPurchaseSerializer:
                 raise exceptions.CustomException(
                     message="User has already purchased this film."
                 )
+
+            if method == enums.PaymentType.TRANSFER.value and not attrs.get("wallet_pin"):
+                raise serializers.ValidationError({
+                    "wallet_pin": "Wallet PIN is required for wallet transfers"
+                })
 
             return attrs
 

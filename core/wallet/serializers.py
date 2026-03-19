@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django.core.validators import RegexValidator
 from django.utils.translation import gettext_lazy as _ 
 
 from core.users.models import User
@@ -62,6 +63,12 @@ class PayoutSerializer:
             decimal_places=2,
             help_text=_("Amount to withdraw from earnings"),
         )
+        wallet_pin = serializers.CharField(
+            required=True,
+            write_only=True,
+            validators=[RegexValidator(r"^\d{4}$", "PIN must be exactly 4 digits")],
+            help_text=_("4-digit wallet PIN for payout authorization"),
+        )
         bank = serializers.CharField(
             required=True,
             help_text=_("Beneficiary bank code (Flutterwave bank identifier)"),
@@ -80,4 +87,32 @@ class PayoutSerializer:
         status = serializers.CharField(read_only=True)
         data = serializers.DictField(read_only=True)
         error = serializers.CharField(read_only=True)
+        message = serializers.CharField(read_only=True)
+
+
+class WalletPinSerializer:
+    class SetPin(serializers.Serializer):
+        pin = serializers.CharField(
+            required=True,
+            write_only=True,
+            validators=[RegexValidator(r"^\d{4}$", "PIN must be exactly 4 digits")],
+            help_text=_("4-digit wallet PIN"),
+        )
+
+    class ChangePin(serializers.Serializer):
+        old_pin = serializers.CharField(
+            required=True,
+            write_only=True,
+            validators=[RegexValidator(r"^\d{4}$", "PIN must be exactly 4 digits")],
+            help_text=_("Current 4-digit wallet PIN"),
+        )
+        new_pin = serializers.CharField(
+            required=True,
+            write_only=True,
+            validators=[RegexValidator(r"^\d{4}$", "PIN must be exactly 4 digits")],
+            help_text=_("New 4-digit wallet PIN"),
+        )
+
+    class PinResponse(serializers.Serializer):
+        status = serializers.CharField(read_only=True)
         message = serializers.CharField(read_only=True)

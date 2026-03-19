@@ -381,6 +381,9 @@ class PurchaseFilm(views.APIView):
             raise exceptions.CustomException(
                 "missing field. a payment method must be added", status_code=status.HTTP_404_NOT_FOUND
             )
+
+        if method == enums.PaymentType.TRANSFER.value:
+            user.wallet.verify_pin(request.data.get("wallet_pin"))
         
         entry_lines = [
             {

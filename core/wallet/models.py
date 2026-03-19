@@ -1,6 +1,7 @@
 from django.db import models, transaction
 from django.db.models import F
 from django.utils.translation import gettext_lazy as _
+from django.contrib.auth.hashers import make_password, check_password
 
 from decimal import Decimal
 
@@ -108,6 +109,42 @@ class Wallet(mixins.BaseModelMixin):
 
     def __str__(self):
         return f"{self.owner.email} wallet <{self.id}>"
+
+    def has_pin(self):
+        return bool(self.wallet_pin)
+
+    def set_pin(self, pin: str):
+        if not pin:
+            raise exceptions.WalletException([
+                "Invalid PIN"
+            ], "PIN cannot be empty")
+        self.wallet_pin = make_password(pin)
+        self.save(update_fields=["wallet_pin"])
+
+    def verify_pin(self, pin: str) -> bool:
+        if not self.wallet_pin:
+            raise exceptions.WalletException([
+                "PIN Not Set"
+            ], "Wallet PIN has not been set yet")
+        if not pin:
+            raise exceptions.WalletException([
+                "Invalid PIN"
+            ], "PIN cannot be empty")
+
+        if "$" in self.wallet_pin:
+            if check_password(pin, self.wallet_pin):
+                return True
+            raise exceptions.WalletException([
+                "Invalid PIN"
+            ], "The PIN you provided is incorrect")
+
+        if self.wallet_pin == pin:
+            self.set_pin(pin)
+            return True
+
+        raise exceptions.WalletException([
+            "Invalid PIN"
+        ], "The PIN you provided is incorrect")
     
     def withdraw_funds(self, amount, is_earnings=False):
         if is_earnings:

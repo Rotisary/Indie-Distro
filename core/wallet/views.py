@@ -9,7 +9,12 @@ from .models import Wallet
 from .tasks import fetch_virtual_account_for_wallet
 from core.utils import exceptions
 from core.utils.permissions import IsObjOwner
-from .serializers import FundWalletSerializer, WalletPollSerializer, PayoutSerializer
+from .serializers import (
+    FundWalletSerializer, 
+    WalletPollSerializer, 
+    PayoutSerializer, 
+    WalletPinSerializer
+)
 from core.utils.helpers import payment
 from core.utils.helpers.decorators import (
     RequestDataManipulationsDecorators,
@@ -206,6 +211,7 @@ class InitiatePayout(views.APIView):
         serializer.is_valid(raise_exception=True)
 
         amount = serializer.validated_data["amount"]
+        request.user.wallet.verify_pin(serializer.validated_data.get("wallet_pin"))
         beneficiary = {
             "bank": serializer.validated_data["bank"],
             "account_number": serializer.validated_data["account_number"],
@@ -252,3 +258,62 @@ class InitiatePayout(views.APIView):
             else status.HTTP_502_BAD_GATEWAY
         )
         return response.Response(data=payment_response, status=status_code)
+
+
+@extend_schema(tags=["wallets"])
+class SetWalletPin(views.APIView):
+    http_method_names = ["post"]
+    permission_classes = [IsAuthenticated, IsObjOwner]
+
+    @extend_schema(
+        description="Set wallet PIN",
+        request=WalletPinSerializer.SetPin(),
+        responses={200: WalletPinSerializer.PinResponse()},
+    )
+    def post(self, request, pk):
+        try:
+            wallet = Wallet.objects.get(account_reference=pk)
+            self.check_object_permissions(request, wallet)
+        except Wallet.DoesNotExist:
+            raise exceptions.CustomException(
+                message="This wallet does not exist",
+                status_code=status.HTTP_404_NOT_FOUND,
+            )
+
+        serializer = WalletPinSerializer.SetPin(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        wallet.set_pin(serializer.validated_data["pin"])
+        return response.Response(
+            data={"status": "success", "message": "Wallet PIN set"},
+            status=status.HTTP_200_OK,
+        )
+
+
+@extend_schema(tags=["wallets"])
+class ChangeWalletPin(views.APIView):
+    http_method_names = ["post"]
+    permission_classes = [IsAuthenticated, IsObjOwner]
+
+    @extend_schema(
+        description="Change wallet PIN",
+        request=WalletPinSerializer.ChangePin(),
+        responses={200: WalletPinSerializer.PinResponse()},
+    )
+    def post(self, request, pk):
+        try:
+            wallet = Wallet.objects.get(account_reference=pk)
+            self.check_object_permissions(request, wallet)
+        except Wallet.DoesNotExist:
+            raise exceptions.CustomException(
+                message="This wallet does not exist",
+                status_code=status.HTTP_404_NOT_FOUND,
+            )
+
+        serializer = WalletPinSerializer.ChangePin(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        wallet.verify_pin(serializer.validated_data["old_pin"])
+        wallet.set_pin(serializer.validated_data["new_pin"])
+        return response.Response(
+            data={"status": "success", "message": "Wallet PIN updated"},
+            status=status.HTTP_200_OK,
+        )

@@ -4257,3 +4257,26 @@ C:\Users\olado\Documents\django-projects\Indie-Distro\core\utils\helpers\payment
 Watching for file changes with StatReloader
 C:\Users\olado\Documents\django-projects\Indie-Distro\core\utils\helpers\payment\__init__.py changed, reloading.
 Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Unauthorized: /api/auth/login/
+Not Found: /managementuser/account/
+Not Found: /favicon.ico
+Forbidden: /api/playback/get_url/
+C:\Users\olado\Documents\django-projects\Indie-Distro\core\wallet\models.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\olado\Documents\django-projects\Indie-Distro\core\wallet\serializers.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\olado\Documents\django-projects\Indie-Distro\core\feed\serializers.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\olado\Documents\django-projects\Indie-Distro\core\feed\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\olado\Documents\django-projects\Indie-Distro\core\wallet\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\olado\Documents\django-projects\Indie-Distro\core\wallet\urls.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\olado\Documents\django-projects\Indie-Distro\core\wallet\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\olado\Documents\django-projects\Indie-Distro\core\wallet\models.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\olado\Documents\django-projects\Indie-Distro\core\wallet\serializers.py changed, reloading.
+Watching for file changes with StatReloader
