@@ -3,28 +3,22 @@ from loguru import logger
 from requests import RequestException
 
 from django.db import transaction
+from django.utils import timezone
 
 from .models import Wallet
 from core.users.models import User
 from core.utils.services import FlutterwaveService
 from core.utils.exceptions import exceptions
-from core.utils.helpers.decorators import UpdateObjectStatusDecorator
+from core.utils import enums
+from core.websocket.utils import emit_user_event
 
 
-@shared_task(bind=True, max_retries=3, default_retry_delay=60, queue="service")
-@UpdateObjectStatusDecorator.wallet_creation(
-    server_exceptions=(
-        RequestException, 
-        Exception, 
-        exceptions.CustomException,
-        exceptions.ServiceRequestException
-    ),    
-)
-def create_wallet_for_user(
-        self, user_id: int, **kwargs
-    ) -> None:
+@shared_task(bind=True, max_retries=3, queue="service")
+def create_wallet_for_user(self, user_id: int, **kwargs) -> None:
     user = User.objects.get(id=user_id)
     service = FlutterwaveService()
+    wallet = None
+    data = None
     try:
         data = service.create_subaccount(
             account_name=f"{user.first_name} {user.last_name}",
@@ -38,40 +32,98 @@ def create_wallet_for_user(
                 account_reference=data['account_reference'],
                 barter_id=data['barter_id'],
             )
+            wallet.creation_status = enums.WalletCreationStatus.COMPLETED.value
+            wallet.save(update_fields=["creation_status", "date_last_modified"])
         logger.info(f"Wallet created successfully for user {user.id}")
-        kwargs["context"]["wallet_id"] = wallet.pk
+        wallet.emit_event(enums.WalletEventType.WALLET_CREATED)
     except (
-        RequestException, 
-        exceptions.CustomException, 
-        exceptions.ServiceRequestException
+        RequestException, exceptions.ServiceRequestException
     ) as exc:
-        logger.error(f"Wallet creation failed for user {user.id}: {str(exc)}")
-        raise exc       
+        if self.request.retries >= self.max_retries:
+            if wallet is not None:
+                wallet.creation_status = enums.WalletCreationStatus.FAILED.value
+                wallet.save(update_fields=["creation_status", "date_last_modified"])
+                logger.error(
+                    f"Wallet creation failed for wallet {wallet.id}: {str(exc)}. Max retries exceeded"
+                )
+                wallet.emit_event(enums.WalletEventType.WALLET_FAILED.value)
+            else:
+                logger.error(
+                    f"Wallet creation failed for user {user.id}: {str(exc)}. Max retries exceeded"
+                )
+                emit_user_event(
+                    user,
+                    enums.WalletEventType.WALLET_FAILED.value,
+                    {
+                        "status": enums.WalletCreationStatus.FAILED.value,
+                        "user_id": user.id,
+                        "timestamp": timezone.now().isoformat(),
+                    },
+                )
+            raise exc
+
+        if wallet is not None:
+            wallet.creation_status = enums.WalletCreationStatus.RETRYING.value
+            wallet.save(update_fields=["creation_status", "date_last_modified"])
+            logger.error(
+                f"wallet creation failed for wallet {wallet.id}: {str(exc)}. Retrying"
+            )
+            wallet.emit_event(enums.WalletEventType.WALLET_RETRYING.value)
+        else:
+            logger.error(
+                f"Wallet creation failed for user {user.id}: {str(exc)}. Retrying"
+            )
+            emit_user_event(
+                user,
+                enums.WalletEventType.WALLET_RETRYING.value,
+                {
+                    "status": enums.WalletCreationStatus.RETRYING.value,
+                    "user_id": user.id,
+                    "attempt": self.request.retries + 1,
+                    "timestamp": timezone.now().isoformat(),
+                },
+            )
+        delay = 5 * (self.request.retries + 1)
+        raise self.retry(exc=exc, countdown=delay)     
     except Exception as general_exc:
         # Rollback subaccount creation on Flutterwave if wallet creation fails
-        try:
-            service.delete_subaccount(account_reference=data['account_reference'])
-        except (
-            RequestException, 
-            exceptions.CustomException, 
-            exceptions.ServiceRequestException
-        ) as exc:
-            logger.error(f"Wallet creation failed for user {user.id}: {str(exc)}")
-            raise exc  
-        logger.error(f"Wallet creation failed for user {user.id}: {str(exc)}")
+        if data and data.get("account_reference"):
+            try:
+                service.delete_subaccount(account_reference=data['account_reference'])
+            except (
+                RequestException, exceptions.ServiceRequestException
+            ) as exc:
+                if self.request.retries >= self.max_retries:
+                    logger.error(
+                        f"Wallet deletion failed for user {user.id}: {str(exc)}. Max retries exceeded"
+                    )
+                    raise exc
+                logger.error(
+                    f"Wallet deletion failed for user {user.id}: {str(exc)}. Retrying"
+                )
+                delay = 5 * (self.request.retries + 1)
+                raise self.retry(exc=exc, countdown=delay) 
+        
+        if wallet is not None:
+            wallet.creation_status = enums.WalletCreationStatus.FAILED.value
+            wallet.save(update_fields=["creation_status", "date_last_modified"])
+            wallet.emit_event(enums.WalletEventType.WALLET_FAILED.value)
+        else:
+            emit_user_event(
+                user,
+                enums.WalletEventType.WALLET_FAILED.value,
+                {
+                    "status": enums.WalletCreationStatus.FAILED.value,
+                    "user_id": user.id,
+                    "timestamp": timezone.now().isoformat(),
+                },
+            )
+        logger.error(f"Wallet creation failed for user {user.id}: {str(general_exc)}")
         raise general_exc
 
 
 
-@shared_task(bind=True, max_retries=3, default_retry_delay=60, queue="service")
-@UpdateObjectStatusDecorator.virtual_account_fetch(
-    server_exceptions=(
-        RequestException, 
-        Exception, 
-        exceptions.CustomException,
-        exceptions.ServiceRequestException
-    ),    
-)
+@shared_task(bind=True, max_retries=3, queue="service")
 def fetch_virtual_account_for_wallet(
         self, wallet_pk: str
     ) -> None:
@@ -83,11 +135,22 @@ def fetch_virtual_account_for_wallet(
             wallet=wallet
         )
         logger.info(f"Virtual account fetched successfully for wallet {wallet.id}")
+        wallet.emit_event(enums.WalletEventType.VIRTUAL_ACCOUNT_FETCHED.value)
     except (
-        Exception,
-        RequestException, 
-        exceptions.CustomException, 
+        RequestException,  
         exceptions.ServiceRequestException
     ) as exc:
+        if self.request.retries >= self.max_retries:
+            logger.error(
+                f"Virtual account fetch failed for wallet {wallet.id}: {str(exc)}. Max retries exceeded"
+            )
+            wallet.emit_event(enums.WalletEventType.VIRTUAL_ACCOUNT_FAILED.value)
+            raise exc
+        logger.error(f"Virtual account fetch failed for wallet {wallet.id}: {str(exc)}. Retrying")
+        wallet.emit_event(enums.WalletEventType.VIRTUAL_ACCOUNT_RETRYING.value)
+        delay = 5 * (self.request.retries + 1)
+        raise self.retry(exc=exc, countdown=delay)
+    except (Exception, exceptions.CustomException) as exc:
         logger.error(f"Virtual account fetch failed for wallet {wallet.id}: {str(exc)}")
-        raise exc
+        wallet.emit_event(enums.WalletEventType.VIRTUAL_ACCOUNT_FAILED.value)
+        raise

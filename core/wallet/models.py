@@ -1,12 +1,14 @@
 from django.db import models, transaction
 from django.db.models import F
 from django.utils.translation import gettext_lazy as _
+from django.utils import timezone
 from django.contrib.auth.hashers import make_password, check_password
 
 from decimal import Decimal
 
 from core.utils import mixins
 from core.utils import enums
+from core.websocket.utils import emit_websocket_event
 from core.utils.commons.utils.parsers import Parsers
 from core.utils.exceptions import exceptions
 
@@ -109,6 +111,62 @@ class Wallet(mixins.BaseModelMixin):
 
     def __str__(self):
         return f"{self.owner.email} wallet <{self.id}>"
+
+    class EventData:
+        @staticmethod
+        def on_wallet_created(instance: "Wallet") -> dict:
+            return {
+                "type": enums.WalletEventType.WALLET_CREATED.value,
+                "data": {
+                    "status": enums.WalletCreationStatus.COMPLETED.value,
+                    "wallet_id": instance.pk,
+                    "account_reference": instance.account_reference,
+                    "barter_id": instance.barter_id,
+                    "timestamp": timezone.now().isoformat(),
+                },
+            }
+
+        @staticmethod
+        def on_wallet_failed(instance: "Wallet") -> dict:
+            return {
+                "type": enums.WalletEventType.WALLET_FAILED.value,
+                "data": {
+                    "status": enums.WalletCreationStatus.FAILED.value,
+                    "wallet_id": instance.pk,
+                    "timestamp": timezone.now().isoformat(),
+                },
+            }
+
+        @staticmethod
+        def on_virtual_account_fetched(instance: "Wallet") -> dict:
+            return {
+                "type": enums.WalletEventType.VIRTUAL_ACCOUNT_FETCHED.value,
+                "data": {
+                    "status": "fetched",
+                    "wallet_id": instance.pk,
+                    "virtual_account": {
+                        "virtual_bank_name": instance.virtual_bank_name,
+                        "virtual_bank_code": instance.virtual_bank_code,
+                        "virtual_account_number": instance.virtual_account_number,
+                    },
+                    "timestamp": timezone.now().isoformat(),
+                },
+            }
+
+        @staticmethod
+        def on_virtual_account_failed(instance: "Wallet") -> dict:
+            return {
+                "type": enums.WalletEventType.VIRTUAL_ACCOUNT_FAILED.value,
+                "data": {
+                    "status": "failed",
+                    "wallet_id": instance.pk,
+                    "timestamp": timezone.now().isoformat(),
+                },
+            }
+
+
+    def emit_event(self, event_type: str):
+        emit_websocket_event(self, event_type)
 
     def has_pin(self):
         return bool(self.wallet_pin)

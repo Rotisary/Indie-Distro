@@ -30,6 +30,12 @@ class Stage(BaseEnum):
     FINALIZE = "finalize"
 
 
+class FileProcessingEventType(BaseEnum):
+    FILE_JOB_STAGE = "file_job_stage"
+    FILE_JOB_COMPLETED = "file_job_completed"
+    FILE_JOB_FAILED = "file_job_failed"
+
+
 # Default renditions: width, height, bitrate in kbps
 DEFAULT_RENDITIONS = [
     {"name": "1080p", "width": 1920, "height": 1080, "video_bitrate": 5000, "audio_bitrate": 128},

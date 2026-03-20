@@ -1,7 +1,6 @@
 import datetime
 
 from rest_framework import serializers
-from django.utils.translation import gettext_lazy as _
 
 from core.users.serializers import BaseUserSerializer
 from core.feed.serializers import FeedSerializer
@@ -41,14 +40,3 @@ class SignedURLSerializer:
         file_id = serializers.CharField(read_only=True)
         signed_url = serializers.CharField(read_only=True)
 
-
-class FileProcessingJobPollSerializer(serializers.Serializer):
-    status = serializers.CharField(read_only=True)
-    owner = serializers.IntegerField(read_only=True)
-    file = serializers.DictField(
-        read_only=True,
-        help_text=_(
-            "contains the details of the file associated with the job(id, name, purpose, key)"
-        )
-    )
-        

@@ -8,6 +8,7 @@ from django.db.models import JSONField
 
 from core.utils.mixins import BaseModelMixin
 from core.utils import enums
+from core.websocket.utils import emit_websocket_event
 from core.users.models import User
 
 
@@ -217,6 +218,54 @@ class FileProcessingJob(BaseModelMixin):
         verbose_name_plural = _("File Processing Jobs")
 
 
+    class EventData:
+        @staticmethod
+        def on_file_job_stage(instance: "FileProcessingJob") -> dict:
+            return {
+                "type": enums.FileProcessingEventType.FILE_JOB_STAGE.value,
+                "data": {
+                    "job_id": instance.id,
+                    "status": instance.status,
+                    "stage": instance.current_stage,
+                    "file_id": instance.file.id,
+                    "file_name": instance.file.original_filename,
+                    "timestamp": timezone.now().isoformat(),
+                },
+            }
+
+        @staticmethod
+        def on_file_job_completed(instance: "FileProcessingJob") -> dict:
+            return {
+                "type": enums.FileProcessingEventType.FILE_JOB_COMPLETED.value,
+                "data": {
+                    "job_id": instance.id,
+                    "status": instance.status,
+                    "stage": instance.current_stage,
+                    "file_id": instance.file.id,
+                    "file_name": instance.file.original_filename,
+                    "timestamp": timezone.now().isoformat(),
+                },
+            }
+
+        @staticmethod
+        def on_file_job_failed(instance: "FileProcessingJob") -> dict:
+            return {
+                "type": enums.FileProcessingEventType.FILE_JOB_FAILED.value,
+                "data": {
+                    "job_id": instance.id,
+                    "status": instance.status,
+                    "stage": instance.current_stage,
+                    "file_id": instance.file.id,
+                    "file_name": instance.file.original_filename,
+                    "error": instance.error,
+                    "timestamp": timezone.now().isoformat(),
+                },
+            }
+
+    def emit_event(self, event_type: str):
+        emit_websocket_event(self, event_type)
+
+
     def mark_stage(self, stage: str, data: dict = None):
         self.current_stage = stage
         self.status = enums.JobStatus.RUNNING.value
@@ -227,18 +276,21 @@ class FileProcessingJob(BaseModelMixin):
         }
         self.stages = s
         self.save(update_fields=["current_stage", "status", "stages", "date_last_modified"])
+        self.emit_event(enums.FileProcessingEventType.FILE_JOB_STAGE.value)
 
 
     def mark_failed(self, message: str):
         self.status = enums.JobStatus.FAILED.value
         self.error = message
         self.save(update_fields=["status", "error", "date_last_modified"])
+        self.emit_event(enums.FileProcessingEventType.FILE_JOB_FAILED.value)
 
 
     def mark_completed(self):
         self.status = enums.JobStatus.COMPLETED.value
         self.current_stage = enums.Stage.FINALIZE.value
         self.save(update_fields=["status", "current_stage", "date_last_modified"])
+        self.emit_event(enums.FileProcessingEventType.FILE_JOB_COMPLETED.value)
 
 
     def __str__(self):
