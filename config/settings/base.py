@@ -42,6 +42,7 @@ ALLOWED_HOSTS = env.list(
 
 INSTALLED_APPS = [
     # django default apps
+    "daphne",
     "unfold",
     "unfold.contrib.filters",
     "django.contrib.admin",
@@ -59,6 +60,7 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt.token_blacklist",
     "django_celery_beat",
     "django_filters",
+    "channels",
 ]
 
 CORE_APPS = [
@@ -69,7 +71,8 @@ CORE_APPS = [
     'core.playback.apps.PlaybackConfig',
     'core.file_storage.apps.FileStorageConfig',
     'core.wallet.apps.WalletConfig',
-    'core.webhook.apps.WebhookConfig'
+    'core.webhook.apps.WebhookConfig',
+    'core.websocket.apps.WebsocketConfig'
 ]
 
 INSTALLED_APPS += CORE_APPS
@@ -105,6 +108,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'config.wsgi.application'
+ASGI_APPLICATION = "config.asgi.application"
 AUTH_USER_MODEL = "users.User"
 
 # Password validation
@@ -362,6 +366,16 @@ SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"
 
 REDIS_HOST = env.str("REDIS_HOST", default="localhost")
 REDIS_PORT = env.int("REDIS_PORT", default=6379)
+REDIS_URL = f"redis://{REDIS_HOST}:{REDIS_PORT}"
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [REDIS_URL],
+        },
+    }
+}
 
 CACHES = {
     "default": {

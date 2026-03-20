@@ -32,7 +32,8 @@ urlpatterns = [
     path("api/playback/", include("core.playback.urls")),
     path("api/files/", include("core.file_storage.urls")),
     path("api/wallet/", include("core.wallet.urls")),
-    path("api/webhook/", include("core.webhook.urls"))
+    path("api/webhook/", include("core.webhook.urls")),
+    path("api/websocket/", include("core.websocket.urls")),
 ]
 
 if not settings.PRODUCTION:
