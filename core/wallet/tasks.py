@@ -14,7 +14,7 @@ from core.websocket.utils import emit_user_event
 
 
 @shared_task(bind=True, max_retries=3, queue="service")
-def create_wallet_for_user(self, user_id: int, **kwargs) -> None:
+def create_wallet_for_user(self, user_id: int) -> None:
     user = User.objects.get(id=user_id)
     service = FlutterwaveService()
     wallet = None
@@ -40,49 +40,33 @@ def create_wallet_for_user(self, user_id: int, **kwargs) -> None:
         RequestException, exceptions.ServiceRequestException
     ) as exc:
         if self.request.retries >= self.max_retries:
-            if wallet is not None:
-                wallet.creation_status = enums.WalletCreationStatus.FAILED.value
-                wallet.save(update_fields=["creation_status", "date_last_modified"])
-                logger.error(
-                    f"Wallet creation failed for wallet {wallet.id}: {str(exc)}. Max retries exceeded"
-                )
-                wallet.emit_event(enums.WalletEventType.WALLET_FAILED.value)
-            else:
-                logger.error(
-                    f"Wallet creation failed for user {user.id}: {str(exc)}. Max retries exceeded"
-                )
-                emit_user_event(
-                    user,
-                    enums.WalletEventType.WALLET_FAILED.value,
-                    {
-                        "status": enums.WalletCreationStatus.FAILED.value,
-                        "user_id": user.id,
-                        "timestamp": timezone.now().isoformat(),
-                    },
-                )
-            raise exc
-
-        if wallet is not None:
-            wallet.creation_status = enums.WalletCreationStatus.RETRYING.value
-            wallet.save(update_fields=["creation_status", "date_last_modified"])
             logger.error(
-                f"wallet creation failed for wallet {wallet.id}: {str(exc)}. Retrying"
-            )
-            wallet.emit_event(enums.WalletEventType.WALLET_RETRYING.value)
-        else:
-            logger.error(
-                f"Wallet creation failed for user {user.id}: {str(exc)}. Retrying"
+                f"Wallet creation failed for user {user.id}: {str(exc)}. Max retries exceeded"
             )
             emit_user_event(
                 user,
-                enums.WalletEventType.WALLET_RETRYING.value,
+                enums.WalletEventType.WALLET_FAILED.value,
                 {
-                    "status": enums.WalletCreationStatus.RETRYING.value,
+                    "status": enums.WalletCreationStatus.FAILED.value,
                     "user_id": user.id,
-                    "attempt": self.request.retries + 1,
                     "timestamp": timezone.now().isoformat(),
                 },
             )
+            raise exc
+
+        logger.error(
+            f"Wallet creation failed for user {user.id}: {str(exc)}. Retrying"
+        )
+        emit_user_event(
+            user,
+            enums.WalletEventType.WALLET_RETRYING.value,
+            {
+                "status": enums.WalletCreationStatus.RETRYING.value,
+                "user_id": user.id,
+                "attempt": self.request.retries + 1,
+                "timestamp": timezone.now().isoformat(),
+            },
+        )
         delay = 5 * (self.request.retries + 1)
         raise self.retry(exc=exc, countdown=delay)     
     except Exception as general_exc:
@@ -104,20 +88,15 @@ def create_wallet_for_user(self, user_id: int, **kwargs) -> None:
                 delay = 5 * (self.request.retries + 1)
                 raise self.retry(exc=exc, countdown=delay) 
         
-        if wallet is not None:
-            wallet.creation_status = enums.WalletCreationStatus.FAILED.value
-            wallet.save(update_fields=["creation_status", "date_last_modified"])
-            wallet.emit_event(enums.WalletEventType.WALLET_FAILED.value)
-        else:
-            emit_user_event(
-                user,
-                enums.WalletEventType.WALLET_FAILED.value,
-                {
-                    "status": enums.WalletCreationStatus.FAILED.value,
-                    "user_id": user.id,
-                    "timestamp": timezone.now().isoformat(),
-                },
-            )
+        emit_user_event(
+            user,
+            enums.WalletEventType.WALLET_FAILED.value,
+            {
+                "status": enums.WalletCreationStatus.FAILED.value,
+                "user_id": user.id,
+                "timestamp": timezone.now().isoformat(),
+            },
+        )
         logger.error(f"Wallet creation failed for user {user.id}: {str(general_exc)}")
         raise general_exc
 

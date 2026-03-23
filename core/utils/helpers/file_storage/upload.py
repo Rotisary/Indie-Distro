@@ -14,10 +14,8 @@ from .base import StorageClient, StorageUtils
 class FileUploadUtils:
     """Utility class for handling file uploads to S3."""
 
-
-
     @staticmethod
-    def save_file_metadata_in_memory(owner, file_id, file_key, expires_in=settings.PRESIGNED_UPLOAD_TTL):
+    def save_file_metadata_in_memory(owner, file_id, file_key: str, expires_in=settings.PRESIGNED_UPLOAD_TTL) -> str:
         """
         Store file metadata in cache for a limited time. This is useful for tracking file uploads.
         """
@@ -32,8 +30,7 @@ class FileUploadUtils:
     
 
     @staticmethod
-    def get_file_key(owner, file_name, purpose):
-
+    def get_file_key(owner, file_name: str, purpose: str) -> dict:
         """Generate a unique file key for S3 storage."""
 
         owner_email = owner.email.lower()
@@ -50,6 +47,7 @@ class FileUploadUtils:
 
         file_key = f"uploads/{owner_email}/{purpose}/{file_id}{extension}"
         FileUploadUtils.save_file_metadata_in_memory(owner, file_id, file_key)
+        logger.info(f"file key generated for filr {file_name}: {file_key}")
         data = {
             "file_id": file_id,
             "file_key": file_key
@@ -59,11 +57,10 @@ class FileUploadUtils:
     
 
     @staticmethod
-    def generate_presigned_upload_url(file_key, file_name, expires_in=settings.PRESIGNED_UPLOAD_TTL):
+    def generate_presigned_upload_url(file_key: str, file_name: str, expires_in=settings.PRESIGNED_UPLOAD_TTL):
         """
         Generate a pre-signed URL for uploading to S3.
         file_key: the S3 key (path inside bucket)
-        mime_type: MIME type (e.g. 'video/mp4')
         expires_in: link validity in seconds
         """
 

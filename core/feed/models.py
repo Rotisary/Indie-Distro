@@ -30,13 +30,16 @@ class Feed(BaseModelMixin):
     plot = models.TextField(
         _("Film Plot"), null=False, blank=False, help_text=_("A quick plot of the film")
     )
-    genre = models.CharField(
-        _("Film Genre"),
-        choices=enums.FilmGenreType.choices(),
-        max_length=100,
+    genre = ArrayField(
+        base_field=models.CharField(
+            max_length=100,
+            choices=enums.FilmGenreType.choices(),
+        ),
+        verbose_name=_("Film Genre"),
         blank=False,
         null=False,
-        help_text=_("The genre that the film falls under")
+        default=list,
+        help_text=_("The genres that the film falls under"),
     )
     type = models.CharField(
         _("Film Type"),

@@ -33,7 +33,7 @@ from core.utils import enums
 class ListCreateFeed(views.APIView):
     http_method_names = ["post", "get"]
     parser_classes = [JSONParser, ]
-    permission_classes = [IsAuthenticated, IsAccountType.IsCreatorAccount, ]
+    permission_classes = [IsAuthenticated, IsAccountType.IsCreatorAccount ]
 
 
     @extend_schema(
@@ -94,11 +94,15 @@ class RetrieveUpdateDeleteFeed(views.APIView):
     )
     def get(self, request, pk):
         try: 
-            feed = Feed.objects.get(id=pk)          
-            serializer = FeedSerializer.FeedRetrieve(instance=feed)
+            feed = Feed.objects.get(id=pk) 
+            if request.user == feed.owner:         
+                serializer = FeedSerializer.FeedOwnerRetrieve(instance=feed)
+            else:
+                serializer = FeedSerializer.FeedRetrieve(instance=feed)
             logger.info(f"Retrieved film with ID: {pk}")
             return response.Response(data=serializer.data, status=status.HTTP_200_OK)
         except Feed.DoesNotExist:
+            logger.error(f"Failed to retrive film with ID: {pk}. Not Found")
             raise exceptions.CustomException(
                 "Film not found", 
                 status_code=status.HTTP_404_NOT_FOUND
@@ -121,6 +125,7 @@ class RetrieveUpdateDeleteFeed(views.APIView):
             serializer = FeedSerializer.FeedRetrieve(instance=instance)
             return response.Response(data=serializer.data, status=status.HTTP_200_OK)
         except Feed.DoesNotExist:
+            logger.error(f"Failed to update film with ID: {pk}. Not Found")
             raise exceptions.CustomException(
                 "Film not found", 
                 status_code=status.HTTP_404_NOT_FOUND
@@ -139,6 +144,7 @@ class RetrieveUpdateDeleteFeed(views.APIView):
             logger.success(f"Film with ID: {pk} deleted.")
             return response.Response(status=status.HTTP_204_NO_CONTENT)
         except Feed.DoesNotExist:
+            logger.error(f"Failed to delete film with ID: {pk}. Not Found")
             raise exceptions.CustomException(
                 "Film not found", status_code=status.HTTP_404_NOT_FOUND
             )

@@ -59,12 +59,19 @@ class FeedSerializer:
             return value
         
     
-    class FeedRetrieve(serializers.ModelSerializer):
+    class FeedOwnerRetrieve(serializers.ModelSerializer):
         owner = BaseUserSerializer()
 
         class Meta:
             model = Feed
             exclude = ["saved", "date_last_modified"]
+    
+    class FeedRetrieve(serializers.ModelSerializer):
+        owner = BaseUserSerializer()
+
+        class Meta:
+            model = Feed
+            exclude = ["bought", "saved", "date_last_modified"]
 
     
 class ShortSerializer:

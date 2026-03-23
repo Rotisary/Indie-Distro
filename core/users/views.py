@@ -20,18 +20,6 @@ from core.utils import exceptions
 from utils.permissions import IsGuestUser
 
 
-
-# from core.users.models import User, Wallet, Bank
-# from core.users.api.serializers import (
-#     UserSerializer, 
-#     UserUpdateSerializer, 
-#     PasswordChangeSerializer, 
-#     WalletSerializer
-# )
-# # from paylink.custom_permissions import WalletHasPin
-
-# import requests
-
 class CreateUser(views.APIView):
     http_method_names = ['post']
     permission_classes = [IsGuestUser, ]
@@ -205,43 +193,3 @@ class TokenRefresh(views.APIView):
             raise exceptions.CustomException(
                 message="Session not found.",
             )
-
-
-# @api_view(['PUT', ])
-# @permission_classes([IsAuthenticated, ])
-# @parser_classes([JSONParser, MultiPartParser])
-# def update_wallet_view(request, id):
-#     try:
-#         wallet = Wallet.objects.get(wallet_id=id)
-
-#         if request.user != wallet.user:
-#             raise PermissionDenied
-#         else:
-#             if request.method == "PUT":
-#                 data = {}
-#                 serializer = WalletSerializer(wallet, 
-#                                             data=request.data, 
-#                                             partial=True, 
-#                                             context={'request': request})
-#                 if serializer.is_valid(raise_exception=True):
-#                     serializer.save()
-#                     data['success'] = 'your wallet is ready' 
-#                     return Response(data=data, status=status.HTTP_200_OK)
-#             return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-#     except Wallet.DoesNotExist:
-#         raise NotFound(detail='wallet does not exist')
-    
-
-# @api_view(['GET', ])
-# @permission_classes([IsAuthenticated, WalletHasPin])
-# @parser_classes([JSONRenderer, BrowsableAPIRenderer])
-# def wallet_view(request, wallet_id):
-#     try:
-#         wallet = Wallet.objects.get(user=request.user)
-
-#         if request.method == "GET":
-#             serializer = WalletSerializer(wallet, context={'request': request})
-#             return Response(data=serializer.data, status=status.HTTP_200_OK)
-#         return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-#     except Wallet.DoesNotExist:
-#         raise NotFound(detail='wallet does not exist')

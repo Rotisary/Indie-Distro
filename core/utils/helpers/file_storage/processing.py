@@ -15,7 +15,7 @@ from core.utils import exceptions
 class FileProcessingUtils:
 
     @staticmethod
-    def ffprobe_get_json(file):
+    def ffprobe_get_json(file, **kwargs):
         """
         Run ffprobe on source file and return parsed JSON.
         """
@@ -28,11 +28,13 @@ class FileProcessingUtils:
             "-print_format", "json",
             file,
         ]       
-        stdout = StorageUtils.run_cmd(cmd)
+        stdout = StorageUtils.run_cmd(cmd, **kwargs)
         try:
             return json.loads(stdout)
         except json.JSONDecodeError:
-            logger.error("ffprobe returned invalid JSON: {}", stdout[:200])
+            message = "ffprobe returned invalid JSON: {}", stdout[:200]
+            logger.error(message)
+            StorageUtils._handle_job_failure(kwargs, message)
             raise exceptions.CustomException(
                 message="ffprobe returned invalid JSON",
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -101,7 +103,7 @@ class FileProcessingUtils:
         return astream_data
     
     @staticmethod
-    def upload_packaging_outputs(dir: str, prefix: str, content_type: str=None) -> bool:
+    def upload_packaging_outputs(dir: str, prefix: str, content_type: str=None, **kwargs) -> bool:
         """
         Upload the output files from HLS and DASH packaging to S3
         """
@@ -110,7 +112,7 @@ class FileProcessingUtils:
             key = f"{prefix}/{fn}"
             client = StorageClient()
             content_type = content_type or StorageClient.get_mime_type(fn)
-            client.upload_file_to_s3(local_path, key, content_type)
+            client.upload_file_to_s3(local_path, key, content_type, **kwargs)
         return True
     
     @staticmethod
@@ -130,5 +132,7 @@ class FileProcessingUtils:
 
         master_key = f"processed/{job.owner.email}/{job.id}/hls/{job.file.id}/master.m3u8"
         client = StorageClient()
-        client.upload_file_to_s3(master_local, master_key, "application/vnd.apple.mpegurl")
+        client.upload_file_to_s3(
+            master_local, master_key, "application/vnd.apple.mpegurl", job=job
+        )
         return master_key

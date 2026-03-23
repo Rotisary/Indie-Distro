@@ -23,7 +23,7 @@ def ffprobe_metadata(self, job_id: int):
         return job_id
 
     job.mark_stage(Stage.PROBE.value)
-    StorageUtils.ensure_binary_on_path("ffprobe")
+    StorageUtils.ensure_binary_on_path("ffprobe", job=job)
     client = StorageClient()
     job_dir = StorageUtils.get_job_workdir(job_id)
     src_dir = StorageUtils.ensure_dir(os.path.join(job_dir, "source"))
@@ -33,7 +33,7 @@ def ffprobe_metadata(self, job_id: int):
     if not os.path.exists(local_src):
         client.download_file_from_s3(job.source_key, local_src)
 
-    ffprobe_json = FileProcessingUtils.ffprobe_get_json(local_src)
+    ffprobe_json = FileProcessingUtils.ffprobe_get_json(local_src, job=job)
     job.metadata = {"ffprobe": ffprobe_json}
     FileProcessingUtils.update_obj_fields(
         job, {"metadata": {"ffprobe": ffprobe_json}}
@@ -136,7 +136,7 @@ def transcode_rendition(
     job = FileProcessingJob.objects.get(pk=job_id)
     job.mark_stage(Stage.TRANSCODE.value, {"rendition": name})
 
-    StorageUtils.ensure_binary_on_path("ffmpeg")
+    StorageUtils.ensure_binary_on_path("ffmpeg", job=job)
 
     existing = job.renditions or []
     if existing:
@@ -152,7 +152,7 @@ def transcode_rendition(
 
     # Ensure local source exists (download once)
     if not os.path.exists(local_src):
-        client.download_file_from_s3(job.source_key, local_src)
+        client.download_file_from_s3(job.source_key, local_src, job=job)
     local_out = os.path.join(mp4_dir, f"{name}.mp4")
     
     # Baseline H.264 + AAC MP4
@@ -175,7 +175,7 @@ def transcode_rendition(
         "-sc_threshold", "0",
         local_out,
     ]
-    StorageUtils.run_cmd(cmd, timeout=60*60*4)
+    StorageUtils.run_cmd(cmd, timeout=60*60*4, job=job)
 
     # Upload processed file to s3
     out_key = f"processed/{job.owner.email}/{job.id}/mp4/{job.file.id}/{name}.mp4"
@@ -205,7 +205,7 @@ def package_hls(self, job_id: int):
     job = FileProcessingJob.objects.get(pk=job_id)
     job.mark_stage(Stage.PACKAGE_HLS.value)
 
-    StorageUtils.ensure_binary_on_path("ffmpeg")
+    StorageUtils.ensure_binary_on_path("ffmpeg", job=job)
 
     existing = (job.packaging or {}).get("hls") or {}
     if existing.get("master"):
@@ -230,7 +230,7 @@ def package_hls(self, job_id: int):
 
         # Ensure local source exists (download once)
         if not os.path.exists(local_mp4):
-            client.download_file_from_s3(r["mp4_key"], local_mp4)
+            client.download_file_from_s3(r["mp4_key"], local_mp4, job=job)
 
         variant_dir = StorageUtils.ensure_dir(os.path.join(hls_dir, f"hls_{name}"))
         variant_m3u8 = os.path.join(variant_dir, f"{name}.m3u8")
@@ -245,11 +245,11 @@ def package_hls(self, job_id: int):
             "-hls_segment_filename", os.path.join(variant_dir, f"{name}_%04d.ts"),
             variant_m3u8,
         ]
-        StorageUtils.run_cmd(cmd, timeout=60*60)
+        StorageUtils.run_cmd(cmd, timeout=60*60, job=job)
 
         # Upload variant playlist + segments
         prefix = f"processed/{job.owner.email}/{job.id}/hls/{job.file.id}/{name}"
-        FileProcessingUtils.upload_packaging_outputs(variant_dir, prefix)
+        FileProcessingUtils.upload_packaging_outputs(variant_dir, prefix, job=job)
 
         variant_infos.append({
             "name": name,
@@ -277,7 +277,7 @@ def package_dash(self, job_id: int):
     job = FileProcessingJob.objects.get(pk=job_id)
     job.mark_stage(Stage.PACKAGE_DASH.value)
 
-    StorageUtils.ensure_binary_on_path("ffmpeg")
+    StorageUtils.ensure_binary_on_path("ffmpeg", job=job)
     existing = (job.packaging or {}).get("dash") or {}
     if existing.get("mpd"):
         return {"dash_mpd": existing["mpd"]}
@@ -298,7 +298,7 @@ def package_dash(self, job_id: int):
         name = r["name"]
         local_mp4 = os.path.join(mp4_dir, f"{name}.mp4")
         if not os.path.exists(local_mp4):
-            client.download_file_from_s3(r["mp4_key"], local_mp4)
+            client.download_file_from_s3(r["mp4_key"], local_mp4, job=job)
         local_inputs.append(local_mp4)
 
     local_mpd = "stream.mpd"
@@ -322,7 +322,7 @@ def package_dash(self, job_id: int):
         "-adaptation_sets", "id=0,streams=v id=1,streams=a",
         local_mpd,
     ]
-    StorageUtils.run_cmd(cmd, timeout=60*60, cwd=dash_dir)
+    StorageUtils.run_cmd(cmd, timeout=60*60, cwd=dash_dir, job=job)
 
     # Upload all DASH outputs
     prefix = f"processed/{job.owner.email}/{job.id}/dash/{job.file.id}"
@@ -343,7 +343,7 @@ def generate_thumbnails(self, job_id: int):
     job = FileProcessingJob.objects.get(pk=job_id)
     job.mark_stage(Stage.THUMBNAILS.value)
 
-    StorageUtils.ensure_binary_on_path("ffmpeg")
+    StorageUtils.ensure_binary_on_path("ffmpeg", job=job)
     existing = job.thumbnails or []
     if existing:
         return {"thumbnails": existing}
@@ -363,7 +363,7 @@ def generate_thumbnails(self, job_id: int):
 
     top_rend_mp4 = os.path.join(mp4_dir, f"{name}.mp4")
     if not os.path.exists(top_rend_mp4):
-        client.download_file_from_s3(top_rend["mp4_key"],  top_rend_mp4)
+        client.download_file_from_s3(top_rend["mp4_key"],  top_rend_mp4, job=job)
     
     local_thumb_dir = StorageUtils.ensure_dir(os.path.join(thumbnail_dir, "thumbs"))
 
@@ -375,7 +375,7 @@ def generate_thumbnails(self, job_id: int):
         "-frames:v", "5",
         os.path.join(local_thumb_dir, "thumb_%03d.jpg"),
     ]
-    StorageUtils.run_cmd(cmd, timeout=30*60)
+    StorageUtils.run_cmd(cmd, timeout=30*60, job=job)
 
     uploaded = []
     # upload generated thumbnail files to s3 and save their keys to a list
@@ -383,7 +383,7 @@ def generate_thumbnails(self, job_id: int):
     for fn in sorted(os.listdir(local_thumb_dir)):
         local_path = os.path.join(local_thumb_dir, fn)
         key = f"{prefix}/{fn}"
-        client.upload_file_to_s3(local_path, key, "image/jpeg")
+        client.upload_file_to_s3(local_path, key, "image/jpeg", job=job)
         uploaded.append(key)
 
     FileProcessingUtils.update_obj_fields(job, {"thumbnails": uploaded})
@@ -401,9 +401,9 @@ def finalize_job(self, job_id: int):
 
 
 @shared_task(bind=True, max_retries=3, default_retry_delay=30, name="file_pipeline.start", queue="beats")
-def start_pipeline(self, job_id: int, renditions: list[dict] | None = None):
+def start_pipeline(self, job_id: int, renditions: list[dict] = None):
     """
-    Entry: build the chain and kick it off. Keep the chain orchestration in one place.
+    Entry point into the file processing pipeline. Chains all tasks together
     """
     renditions = resolve_renditions(renditions)
 

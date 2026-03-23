@@ -54,7 +54,7 @@ class FeedAdmin(ModelAdmin):
     )
 
     list_display = ["owner__first_name", "owner__last_name", "title", "duration", "price"]
-    search_fields = ["title", "genre", "type", "sale_type"]
+    search_fields = ["title", "type", "sale_type"]
     readonly_fields = ["date_added", "date_last_modified"]
     ordering = ["title"]
 

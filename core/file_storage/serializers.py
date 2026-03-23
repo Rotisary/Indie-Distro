@@ -15,8 +15,13 @@ class FileSerializer:
             model = FileModel
             exclude = [
                 "processing_status",
+                "last_processed_at",
                 "is_verified",
-                "file_key"
+                "file_key",
+                "hls_master_key",
+                "dash_mpd_key",
+                "has_audio",
+                "last_error"
             ]
     
           

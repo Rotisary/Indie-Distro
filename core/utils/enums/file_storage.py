@@ -14,6 +14,7 @@ class FilePurposeType(BaseEnum):
 class JobStatus(BaseEnum):
     PENDING = "pending"
     RUNNING = "running"
+    RETRYING = "retrying"
     FAILED = "failed"
     COMPLETED = "completed"
 
@@ -32,6 +33,7 @@ class Stage(BaseEnum):
 
 class FileProcessingEventType(BaseEnum):
     FILE_JOB_STAGE = "file_job_stage"
+    FILE_JOB_RETRYING = "file_job_retrying"
     FILE_JOB_COMPLETED = "file_job_completed"
     FILE_JOB_FAILED = "file_job_failed"
 

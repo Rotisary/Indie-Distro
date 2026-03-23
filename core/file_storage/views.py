@@ -20,9 +20,9 @@ from core.utils.permissions import IsAccountType, IsFilmOwner, FilmNotReleased
 
 @extend_schema(tags=["Files"])
 class GetSignedUploadURL(views.APIView):
-    http_method_names = ["post", ]
-    parser_classes = [JSONParser, ]
-    renderer_classes = [JSONRenderer, ]
+    http_method_names = ["post"]
+    parser_classes = [JSONParser]
+    renderer_classes = [JSONRenderer]
 
 
     @extend_schema(
@@ -57,9 +57,9 @@ class CreateFileObject(views.APIView):
         Client makes a call to this endpoint after direct upload to S3 is completed. 
         Client sends file metadata in post data to create File object in server database
     """
-    http_method_names = ["post", ]
-    parser_classes = [JSONParser, ]
-    renderer_classes = [JSONRenderer, ]
+    http_method_names = ["post"]
+    parser_classes = [JSONParser]
+    renderer_classes = [JSONRenderer]
 
 
     @staticmethod
@@ -107,6 +107,7 @@ class CreateFileObject(views.APIView):
             source_key=file.file_key
         )
         start_pipeline.delay(job.id)
+        logger.info(f"processing pipeline started for file {file.id}. key {file.file_key}")
 
         serializer = FileSerializer.ListRetrieve(instance=file)
         return response.Response(

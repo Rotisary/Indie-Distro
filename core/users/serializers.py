@@ -54,6 +54,7 @@ class UserSerializer:
                 "phone_number",
                 "is_phone_number_verified",
                 "is_email_verified",
+                "is_creator",
                 "bio",
                 "gender",
                 "dob",

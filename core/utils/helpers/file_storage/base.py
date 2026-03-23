@@ -4,14 +4,22 @@ import os
 import shutil
 import subprocess
 import tempfile
+import time
 from typing import Iterable, Optional
 
 from loguru import logger
+from botocore.exceptions import (
+    ConnectTimeoutError,
+    EndpointConnectionError,
+    ReadTimeoutError,
+    ConnectionClosedError,
+)
 
 from rest_framework import status
 from django.conf import settings
 
 from core.utils import exceptions
+from core.file_storage.models import FileProcessingJob
 
 # Register common streaming types; for use in file processing
 mimetypes.init()
@@ -79,6 +87,7 @@ class StorageClient:
             local_path: str, 
             key: str, 
             content_type: Optional[str] = None,
+            **kwargs
         ) -> None:
         assert settings.USING_MANAGED_STORAGE, "Managed storage must be enabled"
         bucket = settings.AWS_STORAGE_BUCKET_NAME
@@ -86,18 +95,42 @@ class StorageClient:
         if content_type:
             extra["ContentType"] = content_type
 
-        try:
+        def _upload():
             logger.info(f"Uploading {local_path} -> s3://{bucket}/{key}")
-            self.s3_client.upload_file(local_path, bucket, key, ExtraArgs=extra or None)
+            self.s3_client.upload_file(
+                local_path, bucket, key, ExtraArgs=extra or None
+            )
+
+        def _on_retry(exc, attempt, delay):
+            logger.warning(
+                f"Upload retry {attempt} in {delay}s for s3://{bucket}/{key}: {exc}"
+            )
+
+        try:
+            StorageUtils._retry_operation(
+                _upload,
+                retries=2,
+                delays=(10, 15),
+                retry_on=(
+                    EndpointConnectionError,
+                    ConnectTimeoutError,
+                    ReadTimeoutError,
+                    ConnectionClosedError,
+                ),
+                on_retry=_on_retry,
+                job=kwargs.get("job"),
+            )
         except Exception as e:
-            logger.error(f"upload failed for {local_path} -> s3://{bucket}/{key}: {e}")
+            message = f"upload failed for {local_path} -> s3://{bucket}/{key}: {e}"
+            logger.error(message)
+            StorageUtils._handle_job_failure(kwargs, message)
             raise exceptions.CustomException(
                 message="upload to storage failed",
                 status_code=status.HTTP_502_BAD_GATEWAY,
             )
 
 
-    def download_file_from_s3(self, key: str, local_path: str) -> str:
+    def download_file_from_s3(self, key: str, local_path: str, **kwargs) -> str:
         """
         Download an object from S3/Spaces to a local file path (creates parent dirs).
         Returns the local_path on success.
@@ -105,31 +138,96 @@ class StorageClient:
         assert settings.USING_MANAGED_STORAGE, "Managed storage must be enabled"
         bucket = settings.AWS_STORAGE_BUCKET_NAME
         os.makedirs(os.path.dirname(local_path), exist_ok=True)
-        try:
+        def _download():
             logger.info(f"Downloading s3://{bucket}/{key} -> {local_path}")
             self.s3_client.download_file(bucket, key, local_path)
+
+        def _on_retry(exc, attempt, delay):
+            logger.warning(
+                f"Download retry {attempt} in {delay}s for s3://{bucket}/{key}: {exc}"
+            )
+
+        try:
+            StorageUtils._retry_operation(
+                _download,
+                retries=2,
+                delays=(10, 15),
+                retry_on=(
+                    EndpointConnectionError,
+                    ConnectTimeoutError,
+                    ReadTimeoutError,
+                    ConnectionClosedError,
+                ),
+                on_retry=_on_retry,
+                job=kwargs.get("job"),
+            )
             return local_path
         except Exception as e:
-            logger.error(f"download failed for s3://{bucket}/{key}: {e}")
+            message = f"download failed for s3://{bucket}/{key}: {e}"
+            logger.error(message)
+            StorageUtils._handle_job_failure(kwargs, message)
             raise exceptions.CustomException(
-                message="download from storage failed",
+                message=message,
                 status_code=status.HTTP_502_BAD_GATEWAY,
             )
     
 
 class StorageUtils:
+    "Utility helpers for managed storage processes"
 
     @staticmethod
-    def ensure_binary_on_path(binary: str):
+    def _retry_operation(
+        func,
+        *,
+        retries: int,
+        delays: Iterable[int],
+        retry_on: tuple,
+        on_retry=None,
+        job: FileProcessingJob = None,
+    ):
+        attempt = 0
+        while True:
+            try:
+                return func()
+            except retry_on as exc:
+                if attempt >= retries:
+                    raise
+                delay_list = list(delays)
+                delay = 0
+                if delay_list:
+                    delay = delay_list[min(attempt, len(delay_list) - 1)]
+                attempt += 1
+                if job is not None:
+                    job.mark_retrying(attempt=attempt, reason=str(exc))
+                if on_retry:
+                    on_retry(exc, attempt, delay)
+                if delay:
+                    time.sleep(delay)
+
+    @staticmethod
+    def _handle_job_failure(kwargs: dict, message: str) -> None:
+        job: FileProcessingJob = kwargs.get("job", None)
+        if job is not None:
+            job.mark_failed(message)
+
+    @staticmethod
+    def ensure_binary_on_path(binary: str, **kwargs):
         if shutil.which(binary) is None:
-            logger.error("{} binary not found on PATH", binary)
+            message = f"{binary} not available on server"
+            logger.error(message)
+            StorageUtils._handle_job_failure(kwargs, message)
             raise exceptions.CustomException(
-                message=f"{binary} not available on server",
+                message=message,
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
         
     @staticmethod
-    def run_cmd(cmd: Iterable[str], timeout: int = 3600, cwd: Optional[str] = None) -> str:
+    def run_cmd(
+        cmd: Iterable[str], 
+        timeout: int = 3600, 
+        cwd: Optional[str] = None, 
+        **kwargs
+    ) -> str:
         """
         Run a command safely; return (stdout, stderr). Raise on failure.
         """
@@ -137,8 +235,8 @@ class StorageUtils:
         logger.info(f"Running command: {cmd}")
         if cwd:
             logger.info(f"Working directory: {cwd}")
-        try:
-            response = subprocess.run(
+        def _run():
+            return subprocess.run(
                 list(cmd),
                 capture_output=True,
                 text=True,
@@ -146,25 +244,46 @@ class StorageUtils:
                 timeout=timeout,
                 cwd=cwd,
             )
+
+        def _on_retry(exc, attempt, delay):
+            logger.warning(
+                f"Command retry {attempt} in {delay}s: {cmd} ({exc})"
+            )
+
+        try:
+            response = StorageUtils._retry_operation(
+                _run,
+                retries=2,
+                delays=(10, 15),
+                retry_on=(subprocess.TimeoutExpired,),
+                on_retry=_on_retry,
+                job=kwargs.get("job"),
+            )
             return response.stdout or ""
         except subprocess.CalledProcessError as e:
-            logger.error(
+            message = (
                 "command failed: returncode={}, stderr={}",
                 getattr(e, "returncode", None),
                 getattr(e, "stderr", None),
             )
+            logger.error(message)
+            StorageUtils._handle_job_failure(kwargs, message)
             raise exceptions.CustomException(
                 message="command processing failed",
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
         except subprocess.TimeoutExpired as e:
-            logger.error(f"command timed out after {timeout} seconds: {e}")
+            message = f"command timed out after {timeout} seconds: {e}"
+            logger.error(message)
+            StorageUtils._handle_job_failure(kwargs, message)
             raise exceptions.CustomException(
-                message="command timed out",
+                message=message,
                 status_code=status.HTTP_504_GATEWAY_TIMEOUT,
             )
         except Exception as e:
-            logger.exception(f"unexpected error running command: {e}")
+            message = f"unexpected error running command: {e}"
+            logger.exception(message)
+            StorageUtils._handle_job_failure(kwargs, message)
             raise exceptions.CustomException(
                 message="unexpected error running command",
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

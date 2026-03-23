@@ -10,9 +10,13 @@ class FilmFilter(FilterSet):
         lookup_expr="icontains", 
         label="Filter by title of the movie(basic search, case-insensitive match)"
     )
-    genre = filters.ChoiceFilter(
-        label="Filter by genre(Action, Comedy e.t.c)",
-        choices=enums.FilmGenreType.choices()
+    genre = filters.CharFilter(
+        method="filter_genre",
+        label="Filter by genre list (comma-separated)",
+    )
+    genre_mode = filters.CharFilter(
+        method="filter_genre",
+        label="Genre filter mode: any|all",
     )
     type = filters.ChoiceFilter(
         label="Filter by film type(Standalone, Series e.t.c)",
@@ -35,6 +39,17 @@ class FilmFilter(FilterSet):
     price = filters.NumberFilter(field_name="price")
     price__gte = filters.NumberFilter(field_name="price", lookup_expr="gte")
     price__lte = filters.NumberFilter(field_name="price", lookup_expr="lte")
+
+    def filter_genre(self, queryset, name, value):
+        raw = value or ""
+        genres = [v.strip() for v in raw.split(",") if v.strip()]
+        if not genres:
+            return queryset
+
+        mode = (self.data.get("genre_mode") or "any").lower()
+        if mode == "all":
+            return queryset.filter(genre__contains=genres)
+        return queryset.filter(genre__overlap=genres)
 
     class Meta:
         model = Feed

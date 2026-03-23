@@ -5,25 +5,13 @@ from django.contrib.auth.models import (
     AbstractBaseUser,
     PermissionsMixin,
 )
-from django.contrib.postgres.fields import ArrayField
 from django.utils.translation import gettext_lazy as _
-from django.db.models.signals import post_save
-from django.dispatch import receiver
-from django.conf import settings
-
-from rest_framework.authtoken.models import Token
-# from users.api.external_requests import create_flw_subaccount
 
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from core.utils import enums
 from core.utils import mixins
-# from core.utils.commons.utils.parsers import Parsers
-# from core.utils.exceptions import WalletException
 
-
-import random
-import string
 
 class UserManager(BaseUserManager):
     use_in_migrations = True

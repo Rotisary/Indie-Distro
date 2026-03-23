@@ -1,5 +1,3 @@
-import os, uuid
-
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
@@ -117,15 +115,6 @@ class FileModel(BaseModelMixin):
     def file_type(self):
         mimetype = self.mime_type
         return mimetype and mimetype.split("/")[0]
-    
-
-    # @property
-    # def file_src(self):
-    #     return (
-    #         self.file.url
-    #         if settings.USING_MANAGED_STORAGE
-    #         else os.path.join(settings.BASE_DIR, self.file.path)
-    #     )
     
 
     def __str__(self):
@@ -248,6 +237,20 @@ class FileProcessingJob(BaseModelMixin):
             }
 
         @staticmethod
+        def on_file_job_retrying(instance: "FileProcessingJob") -> dict:
+            return {
+                "type": enums.FileProcessingEventType.FILE_JOB_RETRYING.value,
+                "data": {
+                    "job_id": instance.id,
+                    "status": instance.status,
+                    "stage": instance.current_stage,
+                    "file_id": instance.file.id,
+                    "file_name": instance.file.original_filename,
+                    "timestamp": timezone.now().isoformat(),
+                },
+            }
+
+        @staticmethod
         def on_file_job_failed(instance: "FileProcessingJob") -> dict:
             return {
                 "type": enums.FileProcessingEventType.FILE_JOB_FAILED.value,
@@ -284,6 +287,21 @@ class FileProcessingJob(BaseModelMixin):
         self.error = message
         self.save(update_fields=["status", "error", "date_last_modified"])
         self.emit_event(enums.FileProcessingEventType.FILE_JOB_FAILED.value)
+
+
+    def mark_retrying(self, attempt: int = None, reason: str = None):
+        self.status = enums.JobStatus.RETRYING.value
+        s = self.stages or {}
+        stage = self.current_stage or enums.Stage.PROBE.value
+        s[stage] = {
+            **(s.get(stage) or {}),
+            "retry_attempt": attempt,
+            "retry_reason": reason,
+            "ts": timezone.now().isoformat(),
+        }
+        self.stages = s
+        self.save(update_fields=["status", "stages", "date_last_modified"])
+        self.emit_event(enums.FileProcessingEventType.FILE_JOB_RETRYING.value)
 
 
     def mark_completed(self):
