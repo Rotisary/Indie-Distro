@@ -126,7 +126,7 @@ class ShortSerializer:
 
 class FilmPurchaseSerializer:
     class CreatePurchase(serializers.ModelSerializer):
-        method = serializers.ChoiceField(choices=enums.PaymentType.choices())
+        method = serializers.ChoiceField(choices=enums.PaymentType.choices(), required=True)
         wallet_pin = serializers.CharField(
             required=False,
             write_only=True,
@@ -165,9 +165,10 @@ class FilmPurchaseSerializer:
             user = self.context["request"].user
             film = self.context["film"]
             transaction = self.context["transaction"]
+            method = validated_data["method"]
 
             purchase = Purchase.objects.create(
-                owner=user, film=film, transaction=transaction
+                owner=user, film=film, transaction=transaction, method=method
             )
 
             return purchase

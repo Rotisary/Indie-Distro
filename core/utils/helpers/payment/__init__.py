@@ -40,7 +40,9 @@ class PostLedgerData:
             journal__transaction=tx,
             status=enums.EntryStatus.PENDING.value,
         )
-        updated = entries.update(status=enums.EntryStatus.COMPLETED.value)
+        updated = entries.update(
+            status=enums.EntryStatus.COMPLETED.value, completed_at=timezone.now()
+        )
 
         tx.status = enums.TransactionStatus.SUCCESSFUL.value
         tx.successful_at = timezone.now()

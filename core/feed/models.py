@@ -172,6 +172,12 @@ class Purchase(BaseModelMixin):
         default=enums.PurchaseStatusType.REVOKED.value, 
         verbose_name=_("Purchase Status")
     )
+    method = models.CharField(
+        choices=enums.PaymentType.choices(),
+        blank=True,
+        null=True,
+        verbose_name=_("Purchase Method")
+    )
     expiry_time = models.DateTimeField(
         _("Expiry Time"),
         blank=True,

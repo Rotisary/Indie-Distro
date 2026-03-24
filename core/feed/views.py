@@ -24,7 +24,8 @@ from core.utils.permissions import (
     IsAccountType, 
     IsFilmOwner, 
     IsShortOwner,
-    FilmNotReleased
+    FilmNotReleased,
+    ShortNotReleased
 )
 from core.utils import enums
 
@@ -199,7 +200,8 @@ class RetrieveUpdateDeleteShort(views.APIView):
     permission_classes = [
         IsAuthenticated, 
         IsAccountType.IsCreatorAccount, 
-        IsShortOwner
+        IsShortOwner,
+        ShortNotReleased
     ]
 
     def get_permissions(self):
@@ -295,7 +297,7 @@ class PurchaseFilm(views.APIView):
 
     @staticmethod
     def _purchase_film_with_bank_charge(
-            request, entry_lines: list, film, user, method: str
+            request, entry_lines: list, film, user
         ):
         with db_transaction.atomic():
             transaction = payment.PostLedgerData.as_pending(
@@ -310,7 +312,6 @@ class PurchaseFilm(views.APIView):
                     "request": request, 
                     "film": film,
                     "transaction": transaction,
-                    "method": method
                 },
             )
             serializer.is_valid(raise_exception=True)

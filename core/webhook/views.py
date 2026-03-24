@@ -78,23 +78,20 @@ class FlutterwaveWebhook(views.APIView):
 
     def post(self, request):
         secret = getattr(settings, "FLW_WEBHOOK_SECRET", None)
-        sig = request.headers.get("X-Webhook-Signature") or request.headers.get("Verif-Hash")
+        flw_hash = request.headers.get("Verif-Hash")
         raw_body = request.body
 
-        if secret and sig:
-            calc = hmac.new(
-                secret.encode("utf-8"), raw_body, hashlib.sha256
-            ).hexdigest()
-            if not hmac.compare_digest(calc, sig):
-                logger.error("Flutterwave webhook signature mismatch")
+        if secret and flw_hash:
+            if secret != flw_hash:
+                logger.error("Flutterwave webhook hash mismatch")
                 return response.Response(
-                    {"status": "error", "detail": "invalid signature"},
+                    {"status": "error", "detail": "invalid verification hash"},
                     status=status.HTTP_401_UNAUTHORIZED,
                 )
-        elif secret and not sig:
-            logger.error("Flutterwave webhook missing signature header")
+        elif secret and not flw_hash:
+            logger.error("Flutterwave webhook missing verification hash header")
             return response.Response(
-                {"status": "error", "detail": "missing signature"},
+                {"status": "error", "detail": "missing verification hash"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 

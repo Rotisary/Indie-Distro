@@ -73,7 +73,7 @@ class PaymentHandlers:
                 enums.TransactionStatus.FAILED.value,
             ):
                 logger.info(f"charge.completed: tx {tx_ref} already {tx.status}")
-                return {"status": "already_processed"}
+                return {"status": "already_processed", "detail": "charge already processed"}
 
             if flw_status != "successful":
                 return PaymentHandlers._finalise_failed_charge(tx, data, flw_status)
@@ -159,7 +159,7 @@ class PaymentHandlers:
 
         if not debit_entry:
             logger.error(
-                f"No FUNDING debit entry for charge tx {charge_tx.reference}; "
+                f"No debit entry for charge tx {charge_tx.reference}; "
                 "cannot determine user for subaccount transfer"
             )
             return {"status": "error", "detail": "missing debit entry"}

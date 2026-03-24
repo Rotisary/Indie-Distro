@@ -135,8 +135,10 @@ class RetrieveFile(views.APIView):
         try:
             file = FileModel.objects.get(id=pk)
             serializer = FileSerializer.ListRetrieve(instance=file)
+            logger.success(f"file {file.id} retrieved successfully")
             return response.Response(data=serializer.data, status=status.HTTP_200_OK)
         except FileModel.DoesNotExist:
+            logger.error(f"file with id {pk} not found")
             raise exceptions.CustomException(
                 message="file not found",
                 status_code=status.HTTP_404_NOT_FOUND

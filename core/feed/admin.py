@@ -81,6 +81,7 @@ class PurchaseAdmin(ModelAdmin):
                     "transaction",
                     "status",
                     "payment_status",
+                    "method",
                     "expiry_time",
                 ),
             },

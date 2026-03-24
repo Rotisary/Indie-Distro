@@ -14,7 +14,6 @@ def initiate_subaccount_transfer_task(self, charge_tx_ref: str, amount: str):
     """
     Trigger the subaccount transfer flow after a verified successful charge.
     """
-    from core.payment.models import Transaction
     from core.utils.helpers.payment.handlers import PaymentHandlers
 
     try:
@@ -43,18 +42,15 @@ def verify_charge_and_initiate_subaccount_transfer_task(
         verification_response = service.verify_charge(tx_id)
 
         if verification_response.lower() not in ["success", "successful"]:
-            PaymentHandlers._finalise_failed_charge(tx, webhook_payload, verification_response)
+            error_data = {"webhook": webhook_payload, "verif_status": verification_response}
+            PaymentHandlers._finalise_failed_charge(tx, error_data, verification_response)
             logger.error(f"Verification failed for tx {tx.reference}")
-            tx.metadata["flw_charge_verification"] = {"status": verification_response}
-            tx.save(update_fields=["metadata"])
             return {
                 "verification": verification_response,
             }
 
-        PostLedgerData.as_successful(tx, webhook_payload, "charge")
-
-        tx.metadata["flw_charge_verification"] = {"status": verification_response}
-        tx.save(update_fields=["metadata"])
+        success_data = {"webhook": webhook_payload, "verif_status": verification_response}
+        PostLedgerData.as_successful(tx, success_data, "charge")
         initiate_subaccount_transfer_task.delay(tx_ref, amount)
         logger.info(
             f"Charge verified and subaccount transfer queued for tx={tx.reference}"
@@ -62,7 +58,7 @@ def verify_charge_and_initiate_subaccount_transfer_task(
         return {
             "verification": verification_response,
         }
-    except (exceptions.ServiceRequestException, exceptions.ClientPaymentException) as exc:
+    except exceptions.ServiceRequestException as exc:
         logger.error(
             f"Verification error for charge tx_ref={tx_ref}: {str(exc)}"
         )
