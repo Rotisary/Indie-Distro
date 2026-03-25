@@ -2,8 +2,12 @@ from rest_framework import serializers
 from django.utils.translation import gettext_lazy as _
 
 
-class PurchaseIDSerializer(serializers.Serializer):
-    purchase_id = serializers.UUIDField(required=True, write_only=True)
+class FilmIDSerializer(serializers.Serializer):
+    film_id = serializers.IntegerField(required=True, write_only=True)
+
+
+class ShortIDSerializer(serializers.Serializer):
+    short_id = serializers.IntegerField(required=True, write_only=True)
 
 
 class PlaybackSerializer:
