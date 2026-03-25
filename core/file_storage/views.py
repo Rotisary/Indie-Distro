@@ -15,7 +15,7 @@ from .tasks import start_pipeline
 from core.utils import mixins as global_mixins, exceptions
 from core.utils.helpers.decorators import RequestDataManipulationsDecorators, IdempotencyDecorator
 from core.utils.helpers.file_storage import FileUploadUtils
-from core.utils.permissions import IsAccountType, IsFilmOwner, FilmNotReleased
+from core.utils.permissions import IsAccountType, FileMediaNotReleased
 
 
 @extend_schema(tags=["Files"])
@@ -143,5 +143,36 @@ class RetrieveFile(views.APIView):
                 message="file not found",
                 status_code=status.HTTP_404_NOT_FOUND
             )
+
+
+@extend_schema(tags=["Files"])
+class DeleteFile(views.APIView):
+    http_method_names = ["delete"]
+    permission_classes = [
+        IsAuthenticated, 
+        IsAccountType.IsCreatorAccount, 
+        FileMediaNotReleased
+    ]
+
+
+    @extend_schema(
+        description="delete a file object if related film/short is not released",
+        request=None,
+        responses={204: None}
+    )
+    def delete(self, request, pk):
+        try:
+            file = FileModel.objects.get(id=pk, owner=request.user)
+        except FileModel.DoesNotExist:
+            logger.error(f"file with id {pk} not found")
+            raise exceptions.CustomException(
+                message="file not found",
+                status_code=status.HTTP_404_NOT_FOUND,
+            )
+
+        self.check_object_permissions(request, file)
+        file.delete()
+        logger.success(f"file {file.id} deleted successfully")
+        return response.Response(status=status.HTTP_204_NO_CONTENT)
         
         
