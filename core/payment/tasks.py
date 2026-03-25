@@ -88,19 +88,17 @@ def verify_transfer_and_finalize_task(
         service = FlutterwaveService()
         verification_response = service.verify_transfer(tx_id)
         if verification_response.lower() not in ["success", "successful"]:
-            PaymentHandlers._finalise_failed_transfer(tx, webhook_payload, verification_response)
+            error_data = {"webhook": webhook_payload, "verif_status": verification_response}
+            PaymentHandlers._finalise_failed_transfer(tx, error_data, verification_response)
             logger.error(f"Verification failed for tx {tx.reference}")
-            tx.metadata["flw_transfer_verification"] = {"status": verification_response}
-            tx.save(update_fields=["metadata"])
             return {
                 "verification": verification_response,
             }
 
+        success_data = {"webhook": webhook_payload, "verif_status": verification_response}
         PaymentHandlers._finalise_successful_transfer(
-            tx, webhook_payload, Decimal(amount)
+            tx, success_data, Decimal(amount)
         )
-        tx.metadata["flw_transfer_verification"] = {"status": verification_response}
-        tx.save(update_fields=["metadata"])
         logger.info(
             f"Transfer verification and finalisation completed for tx={tx.reference}"
         )

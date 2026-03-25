@@ -344,8 +344,7 @@ class PurchaseFilm(views.APIView):
                 context={
                     "request": request, 
                     "film": film,
-                    "transaction": transaction,
-                    "method": method
+                    "transaction": transaction
                 },
             )
             serializer.is_valid(raise_exception=True)
@@ -364,7 +363,7 @@ class PurchaseFilm(views.APIView):
         payment_response = payment_helper.transfer(
             beneficiary=beneficiary,
             description="Film purchase via transfer",
-            debit_subaccount=film.owner.wallet.account_reference,
+            debit_subaccount=request.user.wallet.account_reference,
         )
         return payment_response
     
@@ -376,21 +375,28 @@ class PurchaseFilm(views.APIView):
     )
     @IdempotencyDecorator.make_endpoint_idempotent(ttl=300)
     def post(self, request, pk=None):
-        try:
-            film = Feed.objects.get(id=pk)
-        except Feed.DoesNotExist:
-            raise exceptions.CustomException(
-                "Film not found", status_code=status.HTTP_404_NOT_FOUND
-            )
         user = request.user
         method = request.data.get("method", None)
         if not method:
             raise exceptions.CustomException(
                 "missing field. a payment method must be added", status_code=status.HTTP_404_NOT_FOUND
             )
+        
+        if not request.user.is_creator and method == enums.PaymentType.TRANSFER.value:
+            raise exceptions.CustomException(
+                message="Permission Denied. Method not allowed for user type",
+                status_code=status.HTTP_403_FORBIDDEN
+            )
 
         if method == enums.PaymentType.TRANSFER.value:
             user.wallet.verify_pin(request.data.get("wallet_pin"))
+
+        try:
+            film = Feed.objects.get(id=pk)
+        except Feed.DoesNotExist:
+            raise exceptions.CustomException(
+                "Film not found", status_code=status.HTTP_404_NOT_FOUND
+            )
         
         entry_lines = [
             {

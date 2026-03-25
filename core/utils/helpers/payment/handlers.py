@@ -1,12 +1,15 @@
 from loguru import logger
 from decimal import Decimal
+from datetime import timedelta
 
 from django.db import transaction as db_transaction
+from django.utils import timezone
 
 from core.payment.models import Transaction, JournalEntry
 from core.utils import enums
 from core.utils.helpers.payment import PostLedgerData
 from .base import PaymentHelper
+from core.feed.models import Purchase
 
 
 class PaymentHandlers:
@@ -16,11 +19,7 @@ class PaymentHandlers:
         Marks a Purchase linked to this Transaction as completed/active.
         Also sets rental expiry_time when applicable.
         """
-        from django.utils import timezone
-        from datetime import timedelta
-
-        from core.feed.models import Purchase
-
+        
         purchase = (
             Purchase.objects
             .select_related("film")
@@ -184,6 +183,7 @@ class PaymentHandlers:
         with db_transaction.atomic():
             transaction = PostLedgerData.as_pending(
                 ledger_data=entry_lines,
+                tx_purpose=charge_tx.purpose,
                 description="bank charge completion via subaccount transfer"
             )
 
@@ -260,11 +260,11 @@ class PaymentHandlers:
             )
             return {"status": "error", "detail": "missing debit entry"}
         
-        wallet = debit_entry.account.owner.wallet
-        if tx.purpose == enums.TransactionPurpose.PURCHASE.value:   
-            wallet.pay_to_wallet(debit_entry.amount, is_funding=True)
-        elif tx.purpose == enums.TransactionPurpose.PAYOUT.value:
+        wallet = debit_entry.account.owner.wallet           
+        if tx.purpose == enums.TransactionPurpose.PAYOUT.value:
             wallet.pay_to_wallet(debit_entry.amount)
+        else:
+            wallet.pay_to_wallet(debit_entry.amount, is_funding=True)
 
         logger.warning(f"transfer.completed: tx {tx.reference} failed ({flw_status})")
         return {"status": "failed"}
