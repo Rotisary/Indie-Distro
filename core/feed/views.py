@@ -1,6 +1,5 @@
 from rest_framework import status, response, views, filters, generics
 from rest_framework.parsers import JSONParser
-from rest_framework.renderers import JSONRenderer
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.db import transaction as db_transaction
 from django.apps import apps
@@ -34,7 +33,7 @@ from core.utils import enums
 class ListCreateFeed(views.APIView):
     http_method_names = ["post", "get"]
     parser_classes = [JSONParser, ]
-    permission_classes = [IsAuthenticated, IsAccountType.IsCreatorAccount ]
+    permission_classes = [IsAuthenticated, IsAccountType.IsCreatorAccount]
 
 
     @extend_schema(
@@ -162,6 +161,20 @@ class PublicFeedList(generics.ListAPIView):
     ordering = ["-release_date"]
 
 
+@extend_schema(tags=["feed"])
+class UserFeedsList(generics.ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = FeedSerializer.FeedRetrieve
+    filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
+    filterset_class = FilmFilter
+    ordering_fields = ["release_date", "price"]
+    ordering = ["-release_date"]
+
+    def get_queryset(self):
+        owner_id = self.kwargs.get("pk")
+        return Feed.objects.filter(is_released=True, owner_id=owner_id)
+
+
 @extend_schema(tags=["shorts"])
 class ListCreateShort(views.APIView):
     http_method_names = ["post", "get"]
@@ -286,6 +299,25 @@ class PublicShortsList(generics.ListAPIView):
         "comments_count"
     ]
     ordering = ["-release_date"]
+
+
+@extend_schema(tags=["shorts"])
+class UserShortsList(generics.ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = ShortSerializer.ShortRetrieve
+    filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
+    filterset_class = ShortFilter
+    ordering_fields = [
+        "release_date", 
+        "views_count",
+        "likes_count",
+        "comments_count"
+    ]
+    ordering = ["-release_date"]
+
+    def get_queryset(self):
+        owner_id = self.kwargs.get("pk")
+        return Short.objects.filter(is_released=True, owner_id=owner_id)
 
 
 @extend_schema(tags=["purchases"])
