@@ -17,13 +17,13 @@ from core.users.serializers import (
     AuthSerializer
 )
 from core.utils import exceptions
-from utils.permissions import IsGuestUser
+from core.utils.helpers.authenticators import ServerAuthentication
 
 
 class CreateUser(views.APIView):
     http_method_names = ['post']
-    permission_classes = [IsGuestUser, ]
-    parser_classes = [JSONParser, ]
+    authentication_classes = [ServerAuthentication]
+    parser_classes = [JSONParser]
 
 
     @extend_schema(
@@ -57,8 +57,8 @@ class CreateUser(views.APIView):
 
 class RetrieveUpdateUser(views.APIView):
     http_method_names = ["get", "patch"]
-    permission_classes = [IsAuthenticated, ]
-    renderer_classes = [JSONRenderer, ]
+    permission_classes = [IsAuthenticated]
+    renderer_classes = [JSONRenderer]
 
 
     @extend_schema(
@@ -88,8 +88,8 @@ class RetrieveUpdateUser(views.APIView):
 
 class Login(views.APIView):
     http_method_names = ['post']
-    permission_classes = [IsGuestUser, ]
-    parser_classes = [JSONParser, ]
+    authentication_classes = [ServerAuthentication]
+    parser_classes = [JSONParser]
 
 
     @extend_schema(
@@ -160,8 +160,8 @@ class Logout(views.APIView):
 
 class TokenRefresh(views.APIView):
     http_method_names = ['post']
-    permission_classes = []
-    parser_classes = [JSONParser, ]
+    authentication_classes = [ServerAuthentication]
+    parser_classes = [JSONParser]
 
 
     @extend_schema(
