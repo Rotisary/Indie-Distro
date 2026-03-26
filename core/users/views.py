@@ -84,6 +84,37 @@ class RetrieveUpdateUser(views.APIView):
         serializer = UserSerializer.Retrieve(instance=user)
         response_data = {"message": "details successfully updated", "data": serializer.data}
         return response.Response(data=response_data, status=status.HTTP_200_OK)
+
+
+class BecomeCreator(views.APIView):
+    http_method_names = ["post"]
+    permission_classes = [IsAuthenticated]
+    renderer_classes = [JSONRenderer]
+
+
+    @extend_schema(
+        description="endpoint for authenticated user to opt in as a creator",
+        request=None,
+        responses={200: UserSerializer.Retrieve},
+    )
+    def post(self, request):
+        user = request.user
+
+        if user.is_creator:
+            raise exceptions.CustomException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                message="user is already a creator",
+            )
+
+        user.is_creator = True
+        user.save(update_fields=["is_creator"])
+
+        serializer = UserSerializer.Retrieve(instance=user)
+        response_data = {
+            "message": "creator status updated",
+            "data": serializer.data,
+        }
+        return response.Response(data=response_data, status=status.HTTP_200_OK)
     
 
 class Login(views.APIView):
