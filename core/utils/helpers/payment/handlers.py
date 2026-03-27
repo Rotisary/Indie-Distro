@@ -98,8 +98,16 @@ class PaymentHandlers:
             )
             return {"status": "error", "detail": "missing debit entry"}
 
-        user = debit_entry.account.owner
+        purchase = (
+            Purchase.objects
+            .select_related("film")
+            .filter(transaction=charge_tx)
+            .first()
+        )
+        if not purchase:
+            return
         
+        user = purchase.film.owner 
         entry_lines = [
             {
                 "user": None,
@@ -181,6 +189,11 @@ class PaymentHandlers:
     def _finalise_failed_transfer(tx: Transaction, data: dict, flw_status: str) -> dict:
 
         PostLedgerData.as_failed(tx, data, "transfer")
+
+        if not tx.parent_transaction:
+            logger.warning(f"transfer.completed: tx {tx.reference} failed ({flw_status})")
+            return {"status": "failed"}
+
         debit_entry = (
             JournalEntry.objects
             .filter(
