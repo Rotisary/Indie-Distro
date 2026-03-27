@@ -50,6 +50,35 @@ class PaymentHelper:
         message: str = None
 
 
+    def _build_failure_payload(self, exc: Exception = None) -> tuple[dict, list | None, str | None]:
+        error_list = getattr(exc, "errors", None) if exc else None
+        message = getattr(exc, "message", None) if exc else None
+        if not message and exc:
+            message = str(exc)
+
+        data = {
+            "initiation_error": error_list or message,
+            "message": message,
+        }
+        return data, error_list, message
+
+
+    def _handle_initiation_failure(self, kind: str, exc = None) -> "PaymentResponse":
+        from core.utils.helpers.payment import PostLedgerData
+        from core.utils.helpers.payment.handlers import PaymentHandlers
+
+        data, error_list, message = self._build_failure_payload(exc)
+        PostLedgerData.as_failed(self.transaction, data, kind)
+
+        if kind == "transfer":
+            self.user.wallet.pay_to_wallet(self.amount, is_funding=True)
+
+        if self.transaction.purpose == enums.TransactionPurpose.PURCHASE.value:
+            PaymentHandlers._mark_purchase_failed(self.transaction)
+
+        return self.PaymentResponse(status="failed", error=error_list, message=message)
+
+
     def charge_bank(self) -> PaymentResponse:
         return getattr(self, f"charge_{self.charge_type.lower()}_account")()
 
@@ -76,10 +105,7 @@ class PaymentHelper:
             exceptions.ClientPaymentException
         ) as exc:
             logger.error(f"nigerian account charge failed ({self.transaction.reference}): {str(exc)}")
-            self.transaction.status = enums.TransactionStatus.FAILED.value
-            return self.PaymentResponse(
-                status="failed", error=exc.errors, message=exc.message
-            )
+            return self._handle_initiation_failure("charge", exc)
                
     def transfer(
             self, beneficiary: dict, description: str, debit_subaccount: str=None, 
@@ -106,10 +132,7 @@ class PaymentHelper:
             exceptions.CustomException
         ) as exc:
             logger.error(f"transfer initiation failed ({self.transaction.reference}): {str(exc)}")
-            self.transaction.status = enums.TransactionStatus.FAILED.value
-            return self.PaymentResponse(
-                status="failed", error=exc.errors, message=exc.message
-            )
+            return self._handle_initiation_failure("transfer", exc)
 
 
 class PaymentLedgerCreatorHelpers:

@@ -203,6 +203,30 @@ class Wallet(mixins.BaseModelMixin):
         raise exceptions.WalletException([
             "Invalid PIN"
         ], "The PIN you provided is incorrect")
+
+    def check_balance(self, amount):
+        if not isinstance(amount, Decimal):
+            amount = Decimal(str(amount))
+
+        if amount <= 0:
+            raise exceptions.WalletException(
+                ["Invalid Number"], "Must be greater than zero"
+            )
+
+        with transaction.atomic():
+            locked_wallet = (
+                Wallet.objects
+                .select_for_update()
+                .get(pk=self.pk)
+            )
+
+            if locked_wallet.funding_balance < amount:
+                raise exceptions.WalletException(
+                    ["Insufficient funds"],
+                    "Insufficient funds in wallet, fund your wallet to continue",
+                )
+
+        return True
     
     def withdraw_funds(self, amount, is_earnings=False):
         if is_earnings:

@@ -324,7 +324,7 @@ class UserShortsList(generics.ListAPIView):
 class PurchaseFilm(views.APIView):
     http_method_names = ["post"]
     parser_classes = [JSONParser]
-    permission_classes = [IsAuthenticated, ]   
+    permission_classes = [IsAuthenticated, FilmNotReleased]   
 
 
     @staticmethod
@@ -365,6 +365,7 @@ class PurchaseFilm(views.APIView):
             request, entry_lines: list, film, method: str
         ):
         with db_transaction.atomic():
+            request.user.wallet.withdraw_funds(film.price)
             transaction = payment.PostLedgerData.as_pending(
                 ledger_data=entry_lines,
                 tx_purpose=enums.TransactionPurpose.PURCHASE.value,
@@ -420,15 +421,23 @@ class PurchaseFilm(views.APIView):
                 status_code=status.HTTP_403_FORBIDDEN
             )
 
-        if method == enums.PaymentType.TRANSFER.value:
-            user.wallet.verify_pin(request.data.get("wallet_pin"))
-
         try:
             film = Feed.objects.get(id=pk)
         except Feed.DoesNotExist:
             raise exceptions.CustomException(
                 "Film not found", status_code=status.HTTP_404_NOT_FOUND
             )
+
+        self.check_object_permissions(request, film)
+
+        if IsFilmOwner().has_object_permission(request, self, film):
+            raise exceptions.CustomException(
+                message="You cannot purchase your own film",
+                status_code=status.HTTP_403_FORBIDDEN,
+            )
+
+        if method == enums.PaymentType.TRANSFER.value:
+            user.wallet.verify_pin(request.data.get("wallet_pin"))
         
         entry_lines = [
             {
@@ -460,9 +469,6 @@ class PurchaseFilm(views.APIView):
                 f"invalid method type. {method} not part of allowed choices", 
                 status_code=status.HTTP_404_NOT_FOUND
             )
-
-        if method == enums.PaymentType.TRANSFER.value and payment_response.status == "initiated":
-            user.wallet.withdraw_funds(film.price)
 
         status_code = (
             status.HTTP_202_ACCEPTED
