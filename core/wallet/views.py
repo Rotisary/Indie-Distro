@@ -165,10 +165,12 @@ class InitiatePayout(views.APIView):
             description="Earnings payout",
             debit_subaccount=request.user.wallet.account_reference,
         )
-
+        if payment_response.status == "initiated":
+            request.user.wallet.withdraw_funds(amount, is_earnings=True)
+    
         status_code = (
             status.HTTP_202_ACCEPTED
-            if getattr(payment_response, "status", None) == "initiated"
+            if payment_response.status == "initiated"
             else status.HTTP_502_BAD_GATEWAY
         )
         return response.Response(data=payment_response, status=status_code)

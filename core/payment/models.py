@@ -80,6 +80,14 @@ class Transaction(BaseModelMixin):
         null=True,
         help_text=_("The purpose of the transaction(funding, purchase, payout)")
     )
+    parent_transaction = models.ForeignKey(
+        "self",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="child_transactions",
+        help_text=_("Parent transaction used to link related payment steps"),
+    )
     metadata = JSONField(
         _("Metadata"), 
         null=True, 

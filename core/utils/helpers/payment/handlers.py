@@ -46,6 +46,169 @@ class PaymentHandlers:
             setattr(purchase, k, v)
         purchase.save(update_fields=[*updates.keys(), "date_last_modified"])
 
+
+    def _mark_purchase_failed(tx: Transaction):
+        """
+        Marks a Purchase linked to this Transaction as failed.
+        """
+        
+        purchase = (
+            Purchase.objects
+            .select_related("film")
+            .filter(transaction=tx)
+            .first()
+        )
+        if not purchase:
+            return
+        
+        purchase.payment_status = enums.PurchasePaymentStatus.FAILED.value
+        purchase.save(update_fields=["payment_status", "date_last_modified"])
+
+
+    @staticmethod
+    def _finalise_failed_charge(tx: Transaction, data: dict, flw_status: str) -> dict:
+        PostLedgerData.as_failed(tx, data, "charge")
+        PaymentHandlers._mark_purchase_failed(tx)
+        logger.warning(f"charge.completed: tx {tx.reference} failed ({flw_status})")
+
+        return {"status": "failed"}
+
+
+    @staticmethod
+    def _initiate_subaccount_transfer(charge_tx: Transaction, amount) -> None:
+        """
+        After a successful bank charge, transfer funds from the main
+        Flutterwave account into the user's payout subaccount.
+        """
+    
+        debit_entry = (
+            JournalEntry.objects
+            .filter(
+                journal__transaction=charge_tx,
+                type=enums.EntryType.DEBIT.value,
+                account__type=enums.LedgerAccountType.FUNDING.value,
+            )
+            .select_related("account__owner")
+            .first()
+        )
+
+        if not debit_entry:
+            logger.error(
+                f"No debit entry for charge tx {charge_tx.reference}"
+            )
+            return {"status": "error", "detail": "missing debit entry"}
+
+        user = debit_entry.account.owner
+        
+        entry_lines = [
+            {
+                "user": None,
+                "account_type": enums.LedgerAccountType.PROVIDER_WALLET.value,
+                "entry_type": enums.EntryType.DEBIT.value,
+                "amount": amount
+            },
+            {
+                "user": user,
+                "account_type": enums.LedgerAccountType.USER_WALLET.value,
+                "entry_type": enums.EntryType.CREDIT.value,
+                "amount": amount
+            }
+        ]
+
+        with db_transaction.atomic():
+            transaction = PostLedgerData.as_pending(
+                ledger_data=entry_lines,
+                tx_purpose=charge_tx.purpose,
+                description="bank charge completion via subaccount transfer",
+                parent_transaction=charge_tx,
+            )
+
+            payment_helper = PaymentHelper(
+                user=user, 
+                transaction=transaction,
+                amount=amount,
+                payment_type=enums.PaymentType.TRANSFER.value, 
+            )
+            beneficiary = {
+                "account_number": user.wallet.barter_id,
+                "name": f"{user.first_name} {user.last_name}",
+            }
+            payment_helper.transfer(
+                beneficiary=beneficiary,
+                description="bank charge completion via subaccount transfer",
+            )
+
+
+    @staticmethod
+    def _finalise_successful_transfer(tx: Transaction, data: dict, amount) -> dict:
+        """
+        Finalises successful transfers and move money from and to  the right balances
+        """
+
+        PostLedgerData.as_successful(tx, data, "transfer")
+
+        credit_entry = (
+            JournalEntry.objects
+            .filter(
+                journal__transaction=tx,
+                type=enums.EntryType.CREDIT.value,
+                account__type=enums.LedgerAccountType.USER_WALLET.value,
+            )
+            .select_related("account__owner")
+            .first()
+        )
+        if not credit_entry:
+            logger.error(
+                f"No USER_WALLET credit entry for transfer tx {tx.reference} found"
+            )
+            return {"status": "error", "detail": "missing credit entry"}
+
+        wallet = credit_entry.account.owner.wallet
+        tx_purpose = tx.purpose
+
+        if tx_purpose == enums.TransactionPurpose.FUNDING.value:
+            wallet.pay_to_wallet(amount, is_funding=True)
+        elif tx.purpose == enums.TransactionPurpose.PURCHASE.value:
+            wallet.pay_to_wallet(amount)
+            PaymentHandlers._mark_purchase_completed(tx)
+        elif tx.purpose == enums.TransactionPurpose.PAYOUT.value:
+            wallet.withdraw_funds(amount, is_earnings=True)
+
+        logger.success(f"transfer.completed: tx {tx.reference} finalised ({tx_purpose})")
+        return {"status": "success"}
+
+    @staticmethod
+    def _finalise_failed_transfer(tx: Transaction, data: dict, flw_status: str) -> dict:
+
+        PostLedgerData.as_failed(tx, data, "transfer")
+        debit_entry = (
+            JournalEntry.objects
+            .filter(
+                journal__transaction=tx,
+                type=enums.EntryType.DEBIT.value
+            )
+            .select_related("account__owner")
+            .first()
+        )
+        if not debit_entry:
+            logger.error(
+                f"No debit entry for transfer tx {tx.reference} found"
+            )
+            return {"status": "error", "detail": "missing debit entry"}
+        
+        wallet = debit_entry.account.owner.wallet           
+        if tx.purpose == enums.TransactionPurpose.PAYOUT.value:
+            wallet.pay_to_wallet(debit_entry.amount)
+        elif tx.purpose == enums.TransactionPurpose.PURCHASE.value:
+            wallet.pay_to_wallet(debit_entry.amount, is_funding=True)
+            PaymentHandlers._mark_purchase_failed(tx)
+        elif tx.purpose == enums.TransactionPurpose.FUNDING.value:
+            wallet.pay_to_wallet(debit_entry.amount, is_funding=True)
+
+        logger.warning(f"transfer.completed: tx {tx.reference} failed ({flw_status})")
+        return {"status": "failed"}
+
+
     @staticmethod
     def handle_bank_charge(data: dict) -> dict:
         """
@@ -129,142 +292,3 @@ class PaymentHandlers:
             else:
                 return PaymentHandlers._finalise_failed_transfer(tx, data, flw_status)
     
-
-    @staticmethod
-    def _finalise_failed_charge(tx: Transaction, data: dict, flw_status: str) -> dict:
-        PostLedgerData.as_failed(tx, data, "charge")
-        logger.warning(f"charge.completed: tx {tx.reference} failed ({flw_status})")
-
-        return {"status": "failed"}
-
-
-    @staticmethod
-    def _initiate_subaccount_transfer(charge_tx: Transaction, amount) -> None:
-        """
-        After a successful bank charge, transfer funds from the main
-        Flutterwave account into the user's payout subaccount.
-        """
-    
-        debit_entry = (
-            JournalEntry.objects
-            .filter(
-                journal__transaction=charge_tx,
-                type=enums.EntryType.DEBIT.value,
-                account__type=enums.LedgerAccountType.FUNDING.value,
-            )
-            .select_related("account__owner")
-            .first()
-        )
-
-        if not debit_entry:
-            logger.error(
-                f"No debit entry for charge tx {charge_tx.reference}; "
-                "cannot determine user for subaccount transfer"
-            )
-            return {"status": "error", "detail": "missing debit entry"}
-
-        user = debit_entry.account.owner
-        
-        entry_lines = [
-            {
-                "user": None,
-                "account_type": enums.LedgerAccountType.PROVIDER_WALLET.value,
-                "entry_type": enums.EntryType.DEBIT.value,
-                "amount": amount
-            },
-            {
-                "user": user,
-                "account_type": enums.LedgerAccountType.USER_WALLET.value,
-                "entry_type": enums.EntryType.CREDIT.value,
-                "amount": amount
-            }
-        ]
-
-        with db_transaction.atomic():
-            transaction = PostLedgerData.as_pending(
-                ledger_data=entry_lines,
-                tx_purpose=charge_tx.purpose,
-                description="bank charge completion via subaccount transfer"
-            )
-
-            payment_helper = PaymentHelper(
-                user=user, 
-                transaction=transaction,
-                amount=amount,
-                payment_type=enums.PaymentType.TRANSFER.value, 
-            )
-            beneficiary = {
-                "account_number": user.wallet.barter_id,
-                "name": f"{user.first_name} {user.last_name}",
-            }
-            payment_helper.transfer(
-                beneficiary=beneficiary,
-                description="bank charge completion via subaccount transfer",
-            )
-
-
-    @staticmethod
-    def _finalise_successful_transfer(tx: Transaction, data: dict, amount) -> dict:
-        """
-        Finalises successful transfers and move money from and to  the right balances
-        """
-
-        PostLedgerData.as_successful(tx, data, "transfer")
-
-        credit_entry = (
-            JournalEntry.objects
-            .filter(
-                journal__transaction=tx,
-                type=enums.EntryType.CREDIT.value,
-                account__type=enums.LedgerAccountType.USER_WALLET.value,
-            )
-            .select_related("account__owner")
-            .first()
-        )
-        if not credit_entry:
-            logger.error(
-                f"No USER_WALLET credit entry for transfer tx {tx.reference} found"
-            )
-            return {"status": "error", "detail": "missing credit entry"}
-
-        wallet = credit_entry.account.owner.wallet
-        tx_purpose = tx.purpose
-
-        if tx_purpose == enums.TransactionPurpose.FUNDING.value:
-            wallet.pay_to_wallet(amount, is_funding=True)
-        elif tx.purpose == enums.TransactionPurpose.PURCHASE.value:
-            wallet.pay_to_wallet(amount)
-            PaymentHandlers._mark_purchase_completed(tx)
-        elif tx.purpose == enums.TransactionPurpose.PAYOUT.value:
-            wallet.withdraw_funds(amount, is_earnings=True)
-
-        logger.success(f"transfer.completed: tx {tx.reference} finalised ({tx_purpose})")
-        return {"status": "success"}
-
-    @staticmethod
-    def _finalise_failed_transfer(tx: Transaction, data: dict, flw_status: str) -> dict:
-
-        PostLedgerData.as_failed(tx, data, "transfer")
-        debit_entry = (
-            JournalEntry.objects
-            .filter(
-                journal__transaction=tx,
-                type=enums.EntryType.DEBIT.value
-            )
-            .select_related("account__owner")
-            .first()
-        )
-        if not debit_entry:
-            logger.error(
-                f"No debit entry for transfer tx {tx.reference} found"
-            )
-            return {"status": "error", "detail": "missing debit entry"}
-        
-        wallet = debit_entry.account.owner.wallet           
-        if tx.purpose == enums.TransactionPurpose.PAYOUT.value:
-            wallet.pay_to_wallet(debit_entry.amount)
-        else:
-            wallet.pay_to_wallet(debit_entry.amount, is_funding=True)
-
-        logger.warning(f"transfer.completed: tx {tx.reference} failed ({flw_status})")
-        return {"status": "failed"}

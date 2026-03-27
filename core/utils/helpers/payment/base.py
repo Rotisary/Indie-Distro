@@ -128,7 +128,10 @@ class PaymentLedgerCreatorHelpers:
 
     @staticmethod
     def create_ledger_transaction( 
-            tx_purpose: str, description: str = None, currency: str="NGN"
+            tx_purpose: str,
+            description: str = None,
+            currency: str = "NGN",
+            parent_transaction: Transaction = None,
         ) -> Transaction:
         hex_id = ObjectIdentifiers.unique_hex_id()
         tx_reference = f"tx_{hex_id[:13]}"
@@ -137,7 +140,8 @@ class PaymentLedgerCreatorHelpers:
             status=enums.TransactionStatus.PENDING.value,
             description=description,
             currency=currency,
-            purpose=tx_purpose
+            purpose=tx_purpose,
+            parent_transaction=parent_transaction,
         )
         return transaction
     

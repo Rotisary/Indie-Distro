@@ -437,7 +437,7 @@ class PurchaseFilm(views.APIView):
                 "amount": film.price
             },
             {
-                "user": film.owner,
+                "user": None,
                 "entry_type": enums.EntryType.CREDIT.value,
                 "amount": film.price
             }
@@ -451,6 +451,7 @@ class PurchaseFilm(views.APIView):
         elif method == enums.PaymentType.TRANSFER.value:
             entry_lines[0]["account_type"] = enums.LedgerAccountType.USER_WALLET.value
             entry_lines[1]["account_type"] = enums.LedgerAccountType.USER_WALLET.value
+            entry_lines[1]["user"] = film.owner
             payment_response = self._purchase_film_with_transfer(
                 request, entry_lines, film, method
             )
@@ -463,11 +464,11 @@ class PurchaseFilm(views.APIView):
         if method == enums.PaymentType.TRANSFER.value and payment_response.status == "initiated":
             user.wallet.withdraw_funds(film.price)
 
-        status_code = None
-        if payment_response.status == "initiated":
-            status_code = status.HTTP_202_ACCEPTED
-        else:
-            status_code = status.HTTP_502_BAD_GATEWAY
+        status_code = (
+            status.HTTP_202_ACCEPTED
+            if payment_response.status == "initiated"
+            else status.HTTP_502_BAD_GATEWAY
+        )
 
         return response.Response(data=payment_response, status=status_code)
         

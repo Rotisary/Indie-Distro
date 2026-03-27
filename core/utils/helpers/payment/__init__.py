@@ -15,10 +15,13 @@ class PostLedgerData:
         tx_purpose: str,
         currency: str=None,
         description: str=None,
+        parent_transaction: Transaction = None,
     ):
         with db_transaction.atomic():
             transaction = PaymentLedgerCreatorHelpers.create_ledger_transaction(
-                tx_purpose=tx_purpose, description=description
+                tx_purpose=tx_purpose,
+                description=description,
+                parent_transaction=parent_transaction,
             )
             journal = PaymentLedgerCreatorHelpers.add_transaction_to_journal(transaction)
             for data in ledger_data: 
