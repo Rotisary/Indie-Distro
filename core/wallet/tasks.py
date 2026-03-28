@@ -1,6 +1,6 @@
 from celery import shared_task
 from loguru import logger
-from requests import RequestException
+from requests import RequestException, Timeout, ConnectionError
 
 from django.db import transaction
 from django.utils import timezone
@@ -36,9 +36,7 @@ def create_wallet_for_user(self, user_id: int) -> None:
             wallet.save(update_fields=["creation_status", "date_last_modified"])
         logger.info(f"Wallet created successfully for user {user.id}")
         wallet.emit_event(enums.WalletEventType.WALLET_CREATED)
-    except (
-        RequestException, exceptions.ServiceRequestException
-    ) as exc:
+    except (Timeout, ConnectionError) as exc:
         if self.request.retries >= self.max_retries:
             logger.error(
                 f"Wallet creation failed for user {user.id}: {str(exc)}. Max retries exceeded"
@@ -68,15 +66,25 @@ def create_wallet_for_user(self, user_id: int) -> None:
             },
         )
         delay = 5 * (self.request.retries + 1)
-        raise self.retry(exc=exc, countdown=delay)     
+        raise self.retry(exc=exc, countdown=delay)
+    except (exceptions.ServiceRequestException, RequestException) as exc:
+        emit_user_event(
+            user,
+            enums.WalletEventType.WALLET_FAILED.value,
+            {
+                "status": enums.WalletCreationStatus.FAILED.value,
+                "user_id": user.id,
+                "timestamp": timezone.now().isoformat(),
+            },
+        )
+        logger.error(f"Wallet creation failed for user {user.id}: {str(exc)}")
+        raise
     except Exception as general_exc:
         # Rollback subaccount creation on Flutterwave if wallet creation fails
         if data and data.get("account_reference"):
             try:
                 service.delete_subaccount(account_reference=data['account_reference'])
-            except (
-                RequestException, exceptions.ServiceRequestException
-            ) as exc:
+            except (Timeout, ConnectionError) as exc:
                 if self.request.retries >= self.max_retries:
                     logger.error(
                         f"Wallet deletion failed for user {user.id}: {str(exc)}. Max retries exceeded"
@@ -86,7 +94,12 @@ def create_wallet_for_user(self, user_id: int) -> None:
                     f"Wallet deletion failed for user {user.id}: {str(exc)}. Retrying"
                 )
                 delay = 5 * (self.request.retries + 1)
-                raise self.retry(exc=exc, countdown=delay) 
+                raise self.retry(exc=exc, countdown=delay)
+            except (exceptions.ServiceRequestException, RequestException) as exc:
+                logger.error(
+                    f"Wallet deletion failed for user {user.id}: {str(exc)}"
+                )
+                raise exc
         
         emit_user_event(
             user,
@@ -115,10 +128,7 @@ def fetch_virtual_account_for_wallet(
         )
         logger.info(f"Virtual account fetched successfully for wallet {wallet.id}")
         wallet.emit_event(enums.WalletEventType.VIRTUAL_ACCOUNT_FETCHED.value)
-    except (
-        RequestException,  
-        exceptions.ServiceRequestException
-    ) as exc:
+    except (Timeout, ConnectionError) as exc:
         if self.request.retries >= self.max_retries:
             logger.error(
                 f"Virtual account fetch failed for wallet {wallet.id}: {str(exc)}. Max retries exceeded"
@@ -129,6 +139,10 @@ def fetch_virtual_account_for_wallet(
         wallet.emit_event(enums.WalletEventType.VIRTUAL_ACCOUNT_RETRYING.value)
         delay = 5 * (self.request.retries + 1)
         raise self.retry(exc=exc, countdown=delay)
+    except (exceptions.ServiceRequestException, RequestException) as exc:
+        logger.error(f"Virtual account fetch failed for wallet {wallet.id}: {str(exc)}")
+        wallet.emit_event(enums.WalletEventType.VIRTUAL_ACCOUNT_FAILED.value)
+        raise
     except (Exception, exceptions.CustomException) as exc:
         logger.error(f"Virtual account fetch failed for wallet {wallet.id}: {str(exc)}")
         wallet.emit_event(enums.WalletEventType.VIRTUAL_ACCOUNT_FAILED.value)
