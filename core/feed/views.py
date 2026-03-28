@@ -410,10 +410,19 @@ class PurchaseFilm(views.APIView):
     def post(self, request, pk=None):
         user = request.user
         method = request.data.get("method", None)
+        wallet_pin = request.data.get("wallet_pin", None)
         if not method:
             raise exceptions.CustomException(
                 "missing field. a payment method must be added", status_code=status.HTTP_404_NOT_FOUND
             )
+        if not wallet_pin:
+            raise exceptions.CustomException(
+                "missing field. wallet pin is required", status_code=status.HTTP_404_NOT_FOUND
+            )
+        if len(wallet_pin) < 4:
+            raise exceptions.CustomException(
+                "only 4 digit pin is required", status_code=status.HTTP_404_NOT_FOUND
+            )       
         
         if not request.user.is_creator and method == enums.PaymentType.TRANSFER.value:
             raise exceptions.CustomException(
@@ -436,8 +445,7 @@ class PurchaseFilm(views.APIView):
                 status_code=status.HTTP_403_FORBIDDEN,
             )
 
-        if method == enums.PaymentType.TRANSFER.value:
-            user.wallet.verify_pin(request.data.get("wallet_pin"))
+        user.wallet.verify_pin(wallet_pin)
         
         entry_lines = [
             {

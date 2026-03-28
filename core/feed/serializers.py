@@ -128,7 +128,7 @@ class FilmPurchaseSerializer:
     class CreatePurchase(serializers.ModelSerializer):
         method = serializers.ChoiceField(choices=enums.PaymentType.choices(), required=True)
         wallet_pin = serializers.CharField(
-            required=False,
+            required=True,
             write_only=True,
             validators=[RegexValidator(r"^\d{4}$", "PIN must be exactly 4 digits")],
             help_text=_("4-digit wallet PIN required for wallet transfers"),
@@ -142,7 +142,6 @@ class FilmPurchaseSerializer:
         def validate(self, attrs):
             user = self.context["request"].user
             film = self.context.get("film")
-            method = attrs.get("method")
 
             if Purchase.objects.filter(
                 owner=user,
@@ -153,11 +152,6 @@ class FilmPurchaseSerializer:
                 raise exceptions.CustomException(
                     message="User has already purchased this film."
                 )
-
-            if method == enums.PaymentType.TRANSFER.value and not attrs.get("wallet_pin"):
-                raise serializers.ValidationError({
-                    "wallet_pin": "Wallet PIN is required for wallet transfers"
-                })
 
             return attrs
 

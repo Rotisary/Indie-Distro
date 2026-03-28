@@ -22,6 +22,12 @@ class FundWalletSerializer:
             decimal_places=2,
             help_text=_("The amount to fund the wallet with.")
         )
+        wallet_pin = serializers.CharField(
+            required=True,
+            write_only=True,
+            validators=[RegexValidator(r"^\d{4}$", "PIN must be exactly 4 digits")],
+            help_text=_("4-digit wallet PIN for payout authorization"),
+        )
     
     class InitiateBankChargeFundingResponseSerializer(serializers.Serializer):
         status = serializers.CharField(

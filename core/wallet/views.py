@@ -1,5 +1,6 @@
 from rest_framework import views, status, response
 from rest_framework.permissions import IsAuthenticated
+from django.db import transaction
 
 from loguru import logger
 from drf_spectacular.utils import extend_schema
@@ -7,7 +8,7 @@ from drf_spectacular.utils import extend_schema
 from .models import Wallet
 from .tasks import fetch_virtual_account_for_wallet
 from core.utils import exceptions
-from core.utils.permissions import IsObjOwner
+from core.utils.permissions import IsObjOwner, IsAccountType
 from .serializers import (
     FundWalletSerializer, 
     PayoutSerializer, 
@@ -53,7 +54,7 @@ class FetchVirtualAccount(views.APIView):
 @extend_schema(tags=["wallets"])
 class InitiateFundingWithBankCharge(views.APIView):
     http_method_names = ["post"]
-    permission_classes = [IsAuthenticated, ]
+    permission_classes = [IsAuthenticated, IsAccountType.IsCreatorAccount, IsObjOwner]
 
     @extend_schema(
         description="endpoint to initiate wallet funding",
@@ -67,6 +68,9 @@ class InitiateFundingWithBankCharge(views.APIView):
         serializer.is_valid(raise_exception=True)
         owner = serializer.validated_data["owner"]
         amount = serializer.validated_data["amount"]
+        wallet_pin = serializer.validated_data["wallet_pin"]
+
+        request.user.wallet.verify_pin(wallet_pin)
         entry_lines = [
             {
                 "user": owner,
@@ -94,11 +98,11 @@ class InitiateFundingWithBankCharge(views.APIView):
             charge_type="nigerian"
         )
         payment_response = payment_helper.charge_bank()
-        status_code = None
-        if payment_response.status == "initiated":
-            status_code = status.HTTP_202_ACCEPTED
-        else:
-            status_code = status.HTTP_502_BAD_GATEWAY
+        status_code = (
+            status.HTTP_202_ACCEPTED
+            if payment_response.status == "initiated"
+            else status.HTTP_502_BAD_GATEWAY
+        )
         
         return response.Response(
             data=payment_response, status=status_code
@@ -112,7 +116,7 @@ class InitiatePayout(views.APIView):
     Completion/failure is handled asynchronously via Flutterwave transfer webhook.
     """
     http_method_names = ["post"]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsAccountType.IsCreatorAccount, IsObjOwner]
 
     @extend_schema(
         description="Initiate payout (withdraw from earnings) via transfer",
@@ -123,35 +127,38 @@ class InitiatePayout(views.APIView):
     def post(self, request):
         serializer = PayoutSerializer.InitiatePayoutSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-
         amount = serializer.validated_data["amount"]
-        request.user.wallet.verify_pin(serializer.validated_data.get("wallet_pin"))
-        beneficiary = {
-            "bank": serializer.validated_data["bank"],
-            "account_number": serializer.validated_data["account_number"],
-            "name": serializer.validated_data.get("name") or f"{request.user.first_name} {request.user.last_name}",
-        }
+        wallet_pin = serializer.validated_data["wallet_pin"]
 
-        entry_lines = [
-            {
-                "user": request.user,
-                "account_type": enums.LedgerAccountType.USER_WALLET.value,
-                "entry_type": enums.EntryType.DEBIT.value,
-                "amount": amount,
-            },
-            {
-                "user": request.user,
-                "account_type": enums.LedgerAccountType.WITHDRAWAL.value,
-                "entry_type": enums.EntryType.CREDIT.value,
-                "amount": amount,
-            },
-        ]
+        request.user.wallet.verify_pin(wallet_pin)
+        with transaction.atomic():
+            request.user.wallet.withdraw_funds(amount, is_earnings=True)
+            beneficiary = {
+                "bank": serializer.validated_data["bank"],
+                "account_number": serializer.validated_data["account_number"],
+                "name": serializer.validated_data.get("name") or f"{request.user.first_name} {request.user.last_name}",
+            }
 
-        tx = payment.PostLedgerData.as_pending(
-            ledger_data=entry_lines,
-            tx_purpose=enums.TransactionPurpose.PAYOUT.value,
-            description="earnings payout",
-        )
+            entry_lines = [
+                {
+                    "user": request.user,
+                    "account_type": enums.LedgerAccountType.USER_WALLET.value,
+                    "entry_type": enums.EntryType.DEBIT.value,
+                    "amount": amount,
+                },
+                {
+                    "user": request.user,
+                    "account_type": enums.LedgerAccountType.WITHDRAWAL.value,
+                    "entry_type": enums.EntryType.CREDIT.value,
+                    "amount": amount,
+                },
+            ]
+
+            tx = payment.PostLedgerData.as_pending(
+                ledger_data=entry_lines,
+                tx_purpose=enums.TransactionPurpose.PAYOUT.value,
+                description="earnings payout",
+            )
 
         payment_helper = payment.PaymentHelper(
             user=request.user,
@@ -165,8 +172,6 @@ class InitiatePayout(views.APIView):
             description="Earnings payout",
             debit_subaccount=request.user.wallet.account_reference,
         )
-        if payment_response.status == "initiated":
-            request.user.wallet.withdraw_funds(amount, is_earnings=True)
     
         status_code = (
             status.HTTP_202_ACCEPTED
