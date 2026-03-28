@@ -56,6 +56,19 @@ class Feed(BaseModelMixin):
         blank=True,
         help_text=_("The date the film was/is to be released")
     )
+    release_task_id = models.CharField(
+        _("Release Task Id"),
+        max_length=255,
+        null=True,
+        blank=True,
+        help_text=_("Celery task id scheduled to release this film")
+    )
+    scheduled_release_at = models.DateTimeField(
+        _("Scheduled Release At"),
+        null=True,
+        blank=True,
+        help_text=_("Datetime this film is scheduled to be released")
+    )
     is_released = models.BooleanField(
         _("Has the movie been released?"),
         blank=True,
@@ -260,6 +273,19 @@ class Short(BaseModelMixin):
         null=True,
         blank=True,
         help_text=_("The date this short was/will be released"),
+    )
+    release_task_id = models.CharField(
+        _("Release Task Id"),
+        max_length=255,
+        null=True,
+        blank=True,
+        help_text=_("Celery task id scheduled to release this short")
+    )
+    scheduled_release_at = models.DateTimeField(
+        _("Scheduled Release At"),
+        null=True,
+        blank=True,
+        help_text=_("Datetime this short is scheduled to be released")
     )
     is_released = models.BooleanField(
         _("Has the short been released?"),

@@ -21,7 +21,14 @@ def release_object(self, object_id: int, object_model_name: str = None):
         if hasattr(obj, "is_released"):
             if not obj.is_released:
                 obj.is_released = True
-                obj.save(update_fields=["is_released", "date_last_modified"])
+                update_fields = ["is_released", "date_last_modified"]
+                if hasattr(obj, "release_task_id"):
+                    obj.release_task_id = None
+                    update_fields.append("release_task_id")
+                if hasattr(obj, "scheduled_release_at"):
+                    obj.scheduled_release_at = None
+                    update_fields.append("scheduled_release_at")
+                obj.save(update_fields=update_fields)
                 logger.success(f"Released {object_model_name}({obj.pk})")
             else:
                 logger.info(f"{object_model_name}({obj.pk}) already released")
