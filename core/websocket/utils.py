@@ -22,9 +22,21 @@ def emit_websocket_event(instance, event_type: str, save: bool = True) -> None:
         raise ValueError("Event instance does not have an owner")
 
     data = event.get("data") or {}
-    entity = instance.__class__.__name__.lower()
+    entity_map = {
+        "wallet": "wallet",
+        "fileprocessingjob": "file_processing",
+    }
+    entity = entity_map.get(instance.__class__.__name__.lower())
+    if not entity:
+        raise ValueError(
+            f"No websocket entity mapping for {instance.__class__.__name__}"
+        )
     status = data.get("status") or ""
     resource_id = data.get("id") or getattr(instance, "pk", "")
+    event_payload = {
+        "event": event.get("type", ""),
+        **data,
+    }
 
     if save:
         EventLog.objects.create(
@@ -33,17 +45,21 @@ def emit_websocket_event(instance, event_type: str, save: bool = True) -> None:
             entity=entity,
             status=status,
             resource_id=str(resource_id),
-            payload=data,
+            payload=event_payload,
         )
     try:
+        envelope = {
+            "type": f"{entity}_event",
+            "data": event_payload,
+        }
         channel_layer = get_channel_layer()
         async_to_sync(channel_layer.group_send)(
             user.push_notification_channel_id,
-            event
+            envelope
         )
         logger.info(
             f"event emitted: type={event_type}, "
-            f"user={instance.owner.id}"
+            f"entity={entity}, user={instance.owner.id}"
         )
     except Exception as e:
         logger.error(f"Failed to emit event: {e}")
@@ -52,7 +68,14 @@ def emit_websocket_event(instance, event_type: str, save: bool = True) -> None:
         )
 
 
-def emit_user_event(user, event_type: str, data: dict, save: bool = True) -> None:
+def emit_user_event(
+    user,
+    event_type: str,
+    data: dict,
+    *,
+    entity: str,
+    save: bool = True,
+) -> None:
     """
     Emit a websocket event for a user when a resource instance does not exist.
     Event schema: {type, data}
@@ -60,9 +83,16 @@ def emit_user_event(user, event_type: str, data: dict, save: bool = True) -> Non
     if not user:
         raise ValueError("User is required for user-scoped events")
 
+    if not entity:
+        raise ValueError("Entity is required for user-scoped events")
+
+    event_payload = {
+        "event": event_type,
+        **(data or {}),
+    }
     event = {
-        "type": event_type,
-        "data": data or {},
+        "type": f"{entity}_event",
+        "data": event_payload,
     }
     status = (data or {}).get("status") or ""
 
@@ -70,10 +100,10 @@ def emit_user_event(user, event_type: str, data: dict, save: bool = True) -> Non
         EventLog.objects.create(
             user=user,
             type=event_type,
-            entity="user",
+            entity=entity,
             status=status,
             resource_id="",
-            payload=event.get("data") or {},
+            payload=event_payload,
         )
 
     try:
@@ -84,7 +114,7 @@ def emit_user_event(user, event_type: str, data: dict, save: bool = True) -> Non
         )
         logger.info(
             f"event emitted: type={event_type}, "
-            f"user={user.id}"
+            f"entity={entity}, user={user.id}"
         )
     except Exception as e:
         logger.error(f"Failed to emit event: {e}")

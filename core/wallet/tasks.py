@@ -49,6 +49,7 @@ def create_wallet_for_user(self, user_id: int) -> None:
                     "user_id": user.id,
                     "timestamp": timezone.now().isoformat(),
                 },
+                entity="wallet",
             )
             raise exc
 
@@ -64,6 +65,7 @@ def create_wallet_for_user(self, user_id: int) -> None:
                 "attempt": self.request.retries + 1,
                 "timestamp": timezone.now().isoformat(),
             },
+            entity="wallet",
         )
         delay = 5 * (self.request.retries + 1)
         raise self.retry(exc=exc, countdown=delay)
@@ -74,8 +76,9 @@ def create_wallet_for_user(self, user_id: int) -> None:
             {
                 "status": enums.WalletCreationStatus.FAILED.value,
                 "user_id": user.id,
-     "timestamp": timezone.now().isoformat(),
+                "timestamp": timezone.now().isoformat(),
             },
+            entity="wallet",
         )
         logger.error(f"Wallet creation failed for user {user.id}: {str(exc)}")
         raise
@@ -109,6 +112,7 @@ def create_wallet_for_user(self, user_id: int) -> None:
                 "user_id": user.id,
                 "timestamp": timezone.now().isoformat(),
             },
+            entity="wallet",
         )
         logger.error(f"Wallet creation failed for user {user.id}: {str(general_exc)}")
         raise general_exc

@@ -100,7 +100,7 @@ class PaymentHandlers:
             payload["purchase_id"] = purchase_id
 
         event_type = mapped[0] if success else mapped[1]
-        emit_user_event(user, event_type, payload)
+        emit_user_event(user, event_type, payload, entity="payment")
         
 
     @staticmethod
