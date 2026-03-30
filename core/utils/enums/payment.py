@@ -44,3 +44,12 @@ class TransactionPurpose(BaseEnum):
     PAYOUT = "payment"
     PURCHASE = "purchase"
     FUNDING = "funding"
+
+
+class PaymentEventType(BaseEnum):
+    PURCHASE_SUCCEEDED = "purchase_succeeded"
+    PURCHASE_FAILED = "purchase_failed"
+    FUNDING_SUCCEEDED = "funding_succeeded"
+    FUNDING_FAILED = "funding_failed"
+    PAYOUT_SUCCEEDED = "payout_succeeded"
+    PAYOUT_FAILED = "payout_failed"

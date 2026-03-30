@@ -74,7 +74,7 @@ def create_wallet_for_user(self, user_id: int) -> None:
             {
                 "status": enums.WalletCreationStatus.FAILED.value,
                 "user_id": user.id,
-                "timestamp": timezone.now().isoformat(),
+     "timestamp": timezone.now().isoformat(),
             },
         )
         logger.error(f"Wallet creation failed for user {user.id}: {str(exc)}")
