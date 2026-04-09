@@ -11,20 +11,15 @@ from rest_framework.renderers import JSONRenderer
 from rest_framework.permissions import IsAuthenticated
 
 from core.users.models import User, UserSession
-from core.users.serializers import (
-    UserSerializer, 
-    TokenSerializer,
-    AuthSerializer
-)
+from core.users.serializers import UserSerializer, TokenSerializer, AuthSerializer
 from core.utils import exceptions
 from core.utils.helpers.authenticators import ServerAuthentication
 
 
 class CreateUser(views.APIView):
-    http_method_names = ['post']
+    http_method_names = ["post"]
     authentication_classes = [ServerAuthentication]
     parser_classes = [JSONParser]
-
 
     @extend_schema(
         auth=[],
@@ -53,13 +48,12 @@ class CreateUser(views.APIView):
         serializer = UserSerializer.Retrieve(instance=account)
         response_data = {"user": serializer.data, "token": auth_token}
         return response.Response(response_data, status=status.HTTP_201_CREATED)
-    
+
 
 class RetrieveUpdateUser(views.APIView):
     http_method_names = ["get", "patch"]
     permission_classes = [IsAuthenticated]
     renderer_classes = [JSONRenderer]
-
 
     @extend_schema(
         description="endpoint for retrieving details of the authenticated user",
@@ -69,10 +63,10 @@ class RetrieveUpdateUser(views.APIView):
     def get(self, request):
         serializer = UserSerializer.Retrieve(request.user)
         return response.Response(serializer.data, status=status.HTTP_200_OK)
-    
+
     @extend_schema(
         description="endpoint for updating details of the authenticated user",
-        request=UserSerializer.Update, 
+        request=UserSerializer.Update,
         responses={200: UserSerializer.Retrieve},
     )
     def patch(self, request):
@@ -82,7 +76,10 @@ class RetrieveUpdateUser(views.APIView):
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
         serializer = UserSerializer.Retrieve(instance=user)
-        response_data = {"message": "details successfully updated", "data": serializer.data}
+        response_data = {
+            "message": "details successfully updated",
+            "data": serializer.data,
+        }
         return response.Response(data=response_data, status=status.HTTP_200_OK)
 
 
@@ -90,7 +87,6 @@ class BecomeCreator(views.APIView):
     http_method_names = ["post"]
     permission_classes = [IsAuthenticated]
     renderer_classes = [JSONRenderer]
-
 
     @extend_schema(
         description="endpoint for authenticated user to opt in as a creator",
@@ -115,13 +111,12 @@ class BecomeCreator(views.APIView):
             "data": serializer.data,
         }
         return response.Response(data=response_data, status=status.HTTP_200_OK)
-    
+
 
 class Login(views.APIView):
-    http_method_names = ['post']
+    http_method_names = ["post"]
     authentication_classes = [ServerAuthentication]
     parser_classes = [JSONParser]
-
 
     @extend_schema(
         auth=[],
@@ -132,15 +127,14 @@ class Login(views.APIView):
     def post(self, request):
         serializer = AuthSerializer.Login(data=request.data)
         serializer.is_valid(raise_exception=True)
-        email=serializer.validated_data["email"]
-        password=serializer.validated_data["password"]
+        email = serializer.validated_data["email"]
+        password = serializer.validated_data["password"]
         account = authenticate(request, email=email, password=password)
 
         if not account:
             logger.error("Authentication failed")
             raise exceptions.CustomException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                message="Invalid credentials"
+                status_code=status.HTTP_401_UNAUTHORIZED, message="Invalid credentials"
             )
 
         auth_token = account.retrieve_auth_token()
@@ -157,14 +151,15 @@ class Login(views.APIView):
         logger.info(f"User {account.email} logged in successfully")
 
         serializer = UserSerializer.Retrieve(instance=account)
-        response_data = {"user": serializer.data,  "token": auth_token}
+        response_data = {"user": serializer.data, "token": auth_token}
         return response.Response(response_data, status=status.HTTP_200_OK)
-    
+
 
 class Logout(views.APIView):
-    http_method_names = ['post']
-    permission_classes = [IsAuthenticated, ]
-
+    http_method_names = ["post"]
+    permission_classes = [
+        IsAuthenticated,
+    ]
 
     @extend_schema(
         description="endpoint for user logout",
@@ -182,23 +177,22 @@ class Logout(views.APIView):
         except UserSession.DoesNotExist:
             raise exceptions.CustomException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                message="user does not have an active session"
+                message="user does not have an active session",
             )
         else:
             logger.info(f"User {request.user.email} logged out successfully")
             return response.Response(status=status.HTTP_205_RESET_CONTENT)
-        
+
 
 class TokenRefresh(views.APIView):
-    http_method_names = ['post']
+    http_method_names = ["post"]
     authentication_classes = [ServerAuthentication]
     parser_classes = [JSONParser]
-
 
     @extend_schema(
         description="endpoint for refreshing user access token after it expires",
         request=AuthSerializer.TokenRefresh,
-        responses={200: TokenSerializer}
+        responses={200: TokenSerializer},
     )
     def post(self, request):
         serializer = AuthSerializer.TokenRefresh(data=request.data)

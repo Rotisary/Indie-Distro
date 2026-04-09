@@ -26,7 +26,6 @@ class AccessUtils:
     def _b64url_encode(data: bytes) -> str:
         return base64.urlsafe_b64encode(data).rstrip(b"=").decode("ascii")
 
-
     @staticmethod
     def _build_stream_cookie_path(master_key: str) -> str:
         if master_key.startswith("http://") or master_key.startswith("https://"):
@@ -38,7 +37,6 @@ class AccessUtils:
             return "/"
 
         return path.rsplit("/", 1)[0] + "/"
-
 
     @staticmethod
     def generate_stream_cookie(purchase: Purchase, session: UserSession | None):
@@ -79,7 +77,6 @@ class AccessUtils:
         cookie_value = f"{payload_b64}.{signature_b64}"
         return cookie_value, expires_at, cookie_path
 
-
     @staticmethod
     def generate_short_stream_cookie(short: Short, session: UserSession | None):
         ttl_seconds = int(getattr(settings, "STREAM_COOKIE_TTL_SECONDS", 900))
@@ -119,12 +116,10 @@ class AccessUtils:
         cookie_value = f"{payload_b64}.{signature_b64}"
         return cookie_value, expires_at, cookie_path
 
-
     @staticmethod
     def get_valid_purchase_for_film(film_id: int, user) -> Purchase:
         purchase = (
-            Purchase.objects
-            .select_related("film", "film__file")
+            Purchase.objects.select_related("film", "film__file")
             .filter(
                 film_id=film_id,
                 owner=user,
@@ -145,13 +140,11 @@ class AccessUtils:
             )
         return purchase
 
-
     @staticmethod
     def return_stream_cookie(film_id: int, user):
         purchase = AccessUtils.get_valid_purchase_for_film(film_id, user)
         session = (
-            UserSession.objects
-            .filter(user=user, is_active=True)
+            UserSession.objects.filter(user=user, is_active=True)
             .order_by("-last_activity")
             .first()
         )
@@ -159,14 +152,12 @@ class AccessUtils:
             purchase, session
         )
         return purchase, cookie_value, expires_at, cookie_path
-
 
     @staticmethod
     def return_stream_cookie_for_film(film_id: int, user):
         purchase = AccessUtils.get_valid_purchase_for_film(film_id, user)
         session = (
-            UserSession.objects
-            .filter(user=user, is_active=True)
+            UserSession.objects.filter(user=user, is_active=True)
             .order_by("-last_activity")
             .first()
         )
@@ -175,12 +166,10 @@ class AccessUtils:
         )
         return purchase, cookie_value, expires_at, cookie_path
 
-
     @staticmethod
     def return_stream_cookie_for_short(short_id: int, user):
         short = (
-            Short.objects
-            .select_related("file")
+            Short.objects.select_related("file")
             .filter(id=short_id, is_released=True)
             .first()
         )
@@ -193,13 +182,12 @@ class AccessUtils:
         session = None
         if user:
             session = (
-                UserSession.objects
-                .filter(user=user, is_active=True)
+                UserSession.objects.filter(user=user, is_active=True)
                 .order_by("-last_activity")
                 .first()
             )
-        cookie_value, expires_at, cookie_path = AccessUtils.generate_short_stream_cookie(
-            short, session
+        cookie_value, expires_at, cookie_path = (
+            AccessUtils.generate_short_stream_cookie(short, session)
         )
         return short, cookie_value, expires_at, cookie_path
 
@@ -231,7 +219,6 @@ class AccessUtils:
             )
 
         return f"{base_url}/{master_key}"
-
 
     @staticmethod
     def build_short_playback_url(short: Short) -> str:

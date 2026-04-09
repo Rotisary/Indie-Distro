@@ -22,7 +22,8 @@ USING_MANAGED_STORAGE = env.bool("USING_MANAGED_STORAGE", False)
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = env.str(
-    'DJANGO_SECRET_KEY', 'django-insecure-hkp)*xa9#c%txjag9ku7#rgm2^61n+0sy@c!*mzg61q_vb7obw'
+    "DJANGO_SECRET_KEY",
+    "django-insecure-hkp)*xa9#c%txjag9ku7#rgm2^61n+0sy@c!*mzg61q_vb7obw",
 )
 
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -51,7 +52,6 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-
     # third party apps
     "drf_spectacular",
     "rest_framework",
@@ -64,15 +64,15 @@ INSTALLED_APPS = [
 ]
 
 CORE_APPS = [
-    'core.users.apps.UsersConfig',
-    'core.payment.apps.PaymentConfig',
-    'core.feed.apps.FeedConfig',
-    'core.utils.apps.UtilsConfig',
-    'core.playback.apps.PlaybackConfig',
-    'core.file_storage.apps.FileStorageConfig',
-    'core.wallet.apps.WalletConfig',
-    'core.webhook.apps.WebhookConfig',
-    'core.websocket.apps.WebsocketConfig'
+    "core.users.apps.UsersConfig",
+    "core.payment.apps.PaymentConfig",
+    "core.feed.apps.FeedConfig",
+    "core.utils.apps.UtilsConfig",
+    "core.playback.apps.PlaybackConfig",
+    "core.file_storage.apps.FileStorageConfig",
+    "core.wallet.apps.WalletConfig",
+    "core.webhook.apps.WebhookConfig",
+    "core.websocket.apps.WebsocketConfig",
 ]
 
 INSTALLED_APPS += CORE_APPS
@@ -89,25 +89,25 @@ MIDDLEWARE = [
     "debug_toolbar.middleware.DebugToolbarMiddleware",
 ]
 
-ROOT_URLCONF = 'config.urls'
+ROOT_URLCONF = "config.urls"
 
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
             ],
         },
     },
 ]
 
-WSGI_APPLICATION = 'config.wsgi.application'
+WSGI_APPLICATION = "config.wsgi.application"
 ASGI_APPLICATION = "config.asgi.application"
 AUTH_USER_MODEL = "users.User"
 
@@ -116,16 +116,16 @@ AUTH_USER_MODEL = "users.User"
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
 
@@ -133,9 +133,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = "UTC"
 
 USE_I18N = True
 
@@ -144,17 +144,15 @@ USE_TZ = True
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 API_VERSION = env.int("API_VERSION", default=1)
 
 # CORS
-CORS_ALLOW_ALL_ORIGINS = env.bool(
-    "CORS_ALLOW_ALL_ORIGINS", False
-)
+CORS_ALLOW_ALL_ORIGINS = env.bool("CORS_ALLOW_ALL_ORIGINS", False)
 CORS_ALLOWED_ORIGINS = env.list(
-        "DJANGO_CORS_ALLOWED_ORIGINS",
-        default=[],
-    )
+    "DJANGO_CORS_ALLOWED_ORIGINS",
+    default=[],
+)
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
@@ -253,7 +251,7 @@ UNFOLD = {
                         "icon": "movie",
                         "link": reverse_lazy("admin:feed_short_changelist"),
                     },
-                ]
+                ],
             },
             {
                 "title": _("File Storage"),
@@ -267,9 +265,11 @@ UNFOLD = {
                     {
                         "title": _("File Processing Jobs"),
                         "icon": "build",
-                        "link": reverse_lazy("admin:file_storage_fileprocessingjob_changelist"),
+                        "link": reverse_lazy(
+                            "admin:file_storage_fileprocessingjob_changelist"
+                        ),
                     },
-                ]
+                ],
             },
             {
                 "title": _("Wallets"),
@@ -280,7 +280,7 @@ UNFOLD = {
                         "icon": "account_balance_wallet",
                         "link": reverse_lazy("admin:wallet_wallet_changelist"),
                     },
-                ]
+                ],
             },
             {
                 "title": _("Payment"),
@@ -306,7 +306,7 @@ UNFOLD = {
                         "icon": "list",
                         "link": reverse_lazy("admin:payment_journalentry_changelist"),
                     },
-                ]
+                ],
             },
             {
                 "title": _("Webhooks"),
@@ -315,12 +315,14 @@ UNFOLD = {
                     {
                         "title": _("Webhook Endpoints"),
                         "icon": "link",
-                        "link": reverse_lazy("admin:webhook_webhookendpoint_changelist"),
+                        "link": reverse_lazy(
+                            "admin:webhook_webhookendpoint_changelist"
+                        ),
                     },
-                ]
-            }
-        ]
-    }
+                ],
+            },
+        ],
+    },
 }
 
 SIMPLE_JWT = {
@@ -384,7 +386,7 @@ CACHES = {
     }
 }
 
-PRESIGNED_UPLOAD_TTL = 60*60
+PRESIGNED_UPLOAD_TTL = 60 * 60
 
 CELERY_BROKER = env.str("CELERY_BROKER")
 CELERY_BROKER_URL = CELERY_BROKER
@@ -429,20 +431,20 @@ CELERY_BEAT_SCHEDULE = {
 
 
 LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'file': {
-            'level': 'INFO',
-            'class': 'logging.FileHandler',
-            'filename': 'webhook.log',
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "file": {
+            "level": "INFO",
+            "class": "logging.FileHandler",
+            "filename": "webhook.log",
         },
     },
-    'loggers': {
-        '': {
-            'handlers': ['file'],
-            'level': 'INFO',
-            'propagate': True,
+    "loggers": {
+        "": {
+            "handlers": ["file"],
+            "level": "INFO",
+            "propagate": True,
         },
     },
 }
@@ -485,8 +487,6 @@ SERVER_SECRET_KEY_FIELD_NAME = env.str(
 
 SERVER_SECRET_KEY = env.str("DJANGO_SERVER_SECRET_KEY", "**************")
 
-IDEMPOTENCY_KEY_HEADER_NAME = env.str(
-    "IDEMPOTENCY_KEY_HEADER_NAME", "IDEMPOTENCY_KEY"
-)
-CACHE_TTL = env.int("CACHE_TTL", 60*60)
-POLL_CACHE_TTL = env.int("POLL_CACHE_TTL", 60*5)
+IDEMPOTENCY_KEY_HEADER_NAME = env.str("IDEMPOTENCY_KEY_HEADER_NAME", "IDEMPOTENCY_KEY")
+CACHE_TTL = env.int("CACHE_TTL", 60 * 60)
+POLL_CACHE_TTL = env.int("POLL_CACHE_TTL", 60 * 5)

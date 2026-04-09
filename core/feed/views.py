@@ -14,17 +14,17 @@ from .filters import FilmFilter, ShortFilter
 from .serializers import FeedSerializer, ShortSerializer, FilmPurchaseSerializer
 from core.utils import mixins as global_mixins, exceptions
 from core.utils.helpers.decorators import (
-    RequestDataManipulationsDecorators, 
-    IdempotencyDecorator
+    RequestDataManipulationsDecorators,
+    IdempotencyDecorator,
 )
 from core.utils.helpers import payment
 from core.utils.commons.utils import serializers
 from core.utils.permissions import (
-    IsAccountType, 
-    IsFilmOwner, 
+    IsAccountType,
+    IsFilmOwner,
     IsShortOwner,
     FilmNotReleased,
-    ShortNotReleased
+    ShortNotReleased,
 )
 from core.utils import enums
 
@@ -32,14 +32,15 @@ from core.utils import enums
 @extend_schema(tags=["feed"])
 class ListCreateFeed(views.APIView):
     http_method_names = ["post", "get"]
-    parser_classes = [JSONParser, ]
+    parser_classes = [
+        JSONParser,
+    ]
     permission_classes = [IsAuthenticated, IsAccountType.IsCreatorAccount]
-
 
     @extend_schema(
         description="endpoint for adding a new film",
         request=FeedSerializer.FeedCreate,
-        responses={201: FeedSerializer.FeedRetrieve}, 
+        responses={201: FeedSerializer.FeedRetrieve},
     )
     @RequestDataManipulationsDecorators.update_request_data_with_owner_data("owner")
     def post(self, request):
@@ -50,42 +51,44 @@ class ListCreateFeed(views.APIView):
         serializer = FeedSerializer.FeedRetrieve(instance=instance)
         return response.Response(data=serializer.data, status=status.HTTP_201_CREATED)
 
-    
     @extend_schema(
         description="endpoint for retrieving list of films owned by the authenticated user",
         request=None,
-        responses={200: FeedSerializer.FeedRetrieve(many=True)}, 
+        responses={200: FeedSerializer.FeedRetrieve(many=True)},
     )
     def get(self, request):
         queryset = Feed.objects.filter(owner=request.user)
         serializer = FeedSerializer.FeedRetrieve(queryset, many=True)
         # logger.info(f"Retrieved {len(serializer.data['results'])} films for the user.")
         return response.Response(data=serializer.data, status=status.HTTP_200_OK)
-    
+
+
 @extend_schema(tags=["feed"])
 class RetrieveUpdateDeleteFeed(views.APIView):
     http_method_names = ["get", "patch", "delete"]
     permission_classes = [
-        IsAuthenticated, 
-        IsAccountType.IsCreatorAccount, 
-        IsFilmOwner, 
-        FilmNotReleased
+        IsAuthenticated,
+        IsAccountType.IsCreatorAccount,
+        IsFilmOwner,
+        FilmNotReleased,
     ]
-    parser_classes = [JSONParser, ]
-
+    parser_classes = [
+        JSONParser,
+    ]
 
     def get_permissions(self):
         if self.request.method == "GET":
-            return [IsAuthenticated(), ]
+            return [
+                IsAuthenticated(),
+            ]
         if self.request.method == "DELETE":
             return [
-                IsAuthenticated(), 
-                IsAccountType.IsCreatorAccount(), 
-                IsFilmOwner(), 
+                IsAuthenticated(),
+                IsAccountType.IsCreatorAccount(),
+                IsFilmOwner(),
             ]
-        
-        return super().get_permissions()
 
+        return super().get_permissions()
 
     @extend_schema(
         description="endpoint for retrieving details of a specific film",
@@ -93,9 +96,9 @@ class RetrieveUpdateDeleteFeed(views.APIView):
         responses={200: FeedSerializer.FeedRetrieve},
     )
     def get(self, request, pk):
-        try: 
-            feed = Feed.objects.get(id=pk) 
-            if request.user == feed.owner:         
+        try:
+            feed = Feed.objects.get(id=pk)
+            if request.user == feed.owner:
                 serializer = FeedSerializer.FeedOwnerRetrieve(instance=feed)
             else:
                 serializer = FeedSerializer.FeedRetrieve(instance=feed)
@@ -104,10 +107,9 @@ class RetrieveUpdateDeleteFeed(views.APIView):
         except Feed.DoesNotExist:
             logger.error(f"Failed to retrive film with ID: {pk}. Not Found")
             raise exceptions.CustomException(
-                "Film not found", 
-                status_code=status.HTTP_404_NOT_FOUND
+                "Film not found", status_code=status.HTTP_404_NOT_FOUND
             )
-    
+
     @extend_schema(
         description="endpoint for updating details of a specific film",
         request=FeedSerializer.FeedCreate,
@@ -118,7 +120,9 @@ class RetrieveUpdateDeleteFeed(views.APIView):
         try:
             feed = Feed.objects.get(id=pk, owner=request.user)
             self.check_object_permissions(request, feed)
-            serializer = FeedSerializer.FeedCreate(instance=feed, data=request.data, partial=True)
+            serializer = FeedSerializer.FeedCreate(
+                instance=feed, data=request.data, partial=True
+            )
             serializer.is_valid(raise_exception=True)
             instance = serializer.save()
             logger.success(f"Film with ID: {pk} successfully updated.")
@@ -127,10 +131,9 @@ class RetrieveUpdateDeleteFeed(views.APIView):
         except Feed.DoesNotExist:
             logger.error(f"Failed to update film with ID: {pk}. Not Found")
             raise exceptions.CustomException(
-                "Film not found", 
-                status_code=status.HTTP_404_NOT_FOUND
+                "Film not found", status_code=status.HTTP_404_NOT_FOUND
             )
-    
+
     @extend_schema(
         description="Delete a specific film",
         request=None,
@@ -188,7 +191,9 @@ class ListCreateShort(views.APIView):
     )
     @RequestDataManipulationsDecorators.update_request_data_with_owner_data("owner")
     def post(self, request):
-        serializer = ShortSerializer.ShortCreate(data=request.data, context={"request": request})
+        serializer = ShortSerializer.ShortCreate(
+            data=request.data, context={"request": request}
+        )
         serializer.is_valid(raise_exception=True)
         instance = serializer.save()
         logger.success(f"Short created with title: {instance.title}")
@@ -211,10 +216,10 @@ class RetrieveUpdateDeleteShort(views.APIView):
     http_method_names = ["get", "patch", "delete"]
     parser_classes = [JSONParser]
     permission_classes = [
-        IsAuthenticated, 
-        IsAccountType.IsCreatorAccount, 
+        IsAuthenticated,
+        IsAccountType.IsCreatorAccount,
         IsShortOwner,
-        ShortNotReleased
+        ShortNotReleased,
     ]
 
     def get_permissions(self):
@@ -222,9 +227,9 @@ class RetrieveUpdateDeleteShort(views.APIView):
             return [IsAuthenticated()]
         if self.request.method == "DELETE":
             return [
-                IsAuthenticated(), 
-                IsAccountType.IsCreatorAccount(), 
-                IsShortOwner(), 
+                IsAuthenticated(),
+                IsAccountType.IsCreatorAccount(),
+                IsShortOwner(),
             ]
         return super().get_permissions()
 
@@ -255,7 +260,10 @@ class RetrieveUpdateDeleteShort(views.APIView):
             short = Short.objects.get(id=pk, owner=request.user)
             self.check_object_permissions(request, short)
             serializer = ShortSerializer.ShortCreate(
-                instance=short, data=request.data, partial=True, context={"request": request}
+                instance=short,
+                data=request.data,
+                partial=True,
+                context={"request": request},
             )
             serializer.is_valid(raise_exception=True)
             instance = serializer.save()
@@ -292,12 +300,7 @@ class PublicShortsList(generics.ListAPIView):
     queryset = Short.objects.filter(is_released=True)
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     filterset_class = ShortFilter
-    ordering_fields = [
-        "release_date", 
-        "views_count",
-        "likes_count",
-        "comments_count"
-    ]
+    ordering_fields = ["release_date", "views_count", "likes_count", "comments_count"]
     ordering = ["-release_date"]
 
 
@@ -307,12 +310,7 @@ class UserShortsList(generics.ListAPIView):
     serializer_class = ShortSerializer.ShortRetrieve
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     filterset_class = ShortFilter
-    ordering_fields = [
-        "release_date", 
-        "views_count",
-        "likes_count",
-        "comments_count"
-    ]
+    ordering_fields = ["release_date", "views_count", "likes_count", "comments_count"]
     ordering = ["-release_date"]
 
     def get_queryset(self):
@@ -324,70 +322,60 @@ class UserShortsList(generics.ListAPIView):
 class PurchaseFilm(views.APIView):
     http_method_names = ["post"]
     parser_classes = [JSONParser]
-    permission_classes = [IsAuthenticated, FilmNotReleased]   
-
+    permission_classes = [IsAuthenticated, FilmNotReleased]
 
     @staticmethod
-    def _purchase_film_with_bank_charge(
-            request, entry_lines: list, film, user
-        ):
+    def _purchase_film_with_bank_charge(request, entry_lines: list, film, user):
         with db_transaction.atomic():
             transaction = payment.PostLedgerData.as_pending(
                 ledger_data=entry_lines,
                 tx_purpose=enums.TransactionPurpose.PURCHASE.value,
-                description="film purchase via bank charge"
+                description="film purchase via bank charge",
             )
 
             serializer = FilmPurchaseSerializer.CreatePurchase(
                 data=request.data,
                 context={
-                    "request": request, 
+                    "request": request,
                     "film": film,
                     "transaction": transaction,
                 },
             )
             serializer.is_valid(raise_exception=True)
             purchase = serializer.save()
-    
+
         payment_helper = payment.PaymentHelper(
-            user=user, 
+            user=user,
             transaction=transaction,
             amount=film.price,
-            payment_type=enums.PaymentType.BANK_CHARGE.value, 
-            charge_type="nigerian"
+            payment_type=enums.PaymentType.BANK_CHARGE.value,
+            charge_type="nigerian",
         )
         payment_response = payment_helper.charge_bank()
         return payment_response
 
-
     @staticmethod
-    def _purchase_film_with_transfer(
-            request, entry_lines: list, film, method: str
-        ):
+    def _purchase_film_with_transfer(request, entry_lines: list, film, method: str):
         with db_transaction.atomic():
             request.user.wallet.withdraw_funds(film.price)
             transaction = payment.PostLedgerData.as_pending(
                 ledger_data=entry_lines,
                 tx_purpose=enums.TransactionPurpose.PURCHASE.value,
-                description="film purchase via transfer"
+                description="film purchase via transfer",
             )
 
             serializer = FilmPurchaseSerializer.CreatePurchase(
                 data=request.data,
-                context={
-                    "request": request, 
-                    "film": film,
-                    "transaction": transaction
-                },
+                context={"request": request, "film": film, "transaction": transaction},
             )
             serializer.is_valid(raise_exception=True)
             purchase = serializer.save()
-    
+
         payment_helper = payment.PaymentHelper(
-            user=film.owner, 
+            user=film.owner,
             transaction=transaction,
             amount=film.price,
-            payment_type=enums.PaymentType.TRANSFER.value, 
+            payment_type=enums.PaymentType.TRANSFER.value,
         )
         beneficiary = {
             "account_number": film.owner.wallet.barter_id,
@@ -399,7 +387,6 @@ class PurchaseFilm(views.APIView):
             debit_subaccount=request.user.wallet.account_reference,
         )
         return payment_response
-    
 
     @extend_schema(
         description="Endpoint for users to purchase a film",
@@ -413,21 +400,23 @@ class PurchaseFilm(views.APIView):
         wallet_pin = request.data.get("wallet_pin", None)
         if not method:
             raise exceptions.CustomException(
-                "missing field. a payment method must be added", status_code=status.HTTP_404_NOT_FOUND
+                "missing field. a payment method must be added",
+                status_code=status.HTTP_404_NOT_FOUND,
             )
         if not wallet_pin:
             raise exceptions.CustomException(
-                "missing field. wallet pin is required", status_code=status.HTTP_404_NOT_FOUND
+                "missing field. wallet pin is required",
+                status_code=status.HTTP_404_NOT_FOUND,
             )
         if len(wallet_pin) < 4:
             raise exceptions.CustomException(
                 "only 4 digit pin is required", status_code=status.HTTP_404_NOT_FOUND
-            )       
-        
+            )
+
         if not request.user.is_creator and method == enums.PaymentType.TRANSFER.value:
             raise exceptions.CustomException(
                 message="Permission Denied. Method not allowed for user type",
-                status_code=status.HTTP_403_FORBIDDEN
+                status_code=status.HTTP_403_FORBIDDEN,
             )
 
         try:
@@ -446,22 +435,26 @@ class PurchaseFilm(views.APIView):
             )
 
         user.wallet.verify_pin(wallet_pin)
-        
+
         entry_lines = [
             {
                 "user": user,
                 "entry_type": enums.EntryType.DEBIT.value,
-                "amount": film.price
+                "amount": film.price,
             },
             {
                 "user": None,
                 "entry_type": enums.EntryType.CREDIT.value,
-                "amount": film.price
-            }
-        ]   
+                "amount": film.price,
+            },
+        ]
         if method == enums.PaymentType.BANK_CHARGE.value:
-            entry_lines[0]["account_type"] = enums.LedgerAccountType.EXTERNAL_PAYMENT.value
-            entry_lines[1]["account_type"] = enums.LedgerAccountType.PROVIDER_WALLET.value
+            entry_lines[0][
+                "account_type"
+            ] = enums.LedgerAccountType.EXTERNAL_PAYMENT.value
+            entry_lines[1][
+                "account_type"
+            ] = enums.LedgerAccountType.PROVIDER_WALLET.value
             payment_response = self._purchase_film_with_bank_charge(
                 request, entry_lines, film, user, method
             )
@@ -474,8 +467,8 @@ class PurchaseFilm(views.APIView):
             )
         else:
             raise exceptions.CustomException(
-                f"invalid method type. {method} not part of allowed choices", 
-                status_code=status.HTTP_404_NOT_FOUND
+                f"invalid method type. {method} not part of allowed choices",
+                status_code=status.HTTP_404_NOT_FOUND,
             )
 
         status_code = (
@@ -485,7 +478,7 @@ class PurchaseFilm(views.APIView):
         )
 
         return response.Response(data=payment_response, status=status_code)
-        
+
 
 def _get_model_by_name(name: str):
     matches = [m for m in apps.get_models() if m.__name__.lower() == name.lower()]
@@ -493,8 +486,10 @@ def _get_model_by_name(name: str):
         raise LookupError(f"No model named '{name}' found.")
     if len(matches) > 1:
         labels = [f"{m._meta.app_label}.{m.__name__}" for m in matches]
-        raise LookupError(f"Ambiguous model name '{name}'. Candidates: {', '.join(labels)}")
-    return matches[0]      
+        raise LookupError(
+            f"Ambiguous model name '{name}'. Candidates: {', '.join(labels)}"
+        )
+    return matches[0]
 
 
 @extend_schema(tags=["feed"])
@@ -504,19 +499,21 @@ class Bookmark(views.APIView):
     The model name and id of the object to be bookmarked must be provided.
     The model must have a 'saved' ManyToManyField to the User model.
     """
-    http_method_names = ["post", ]
-    parser_classes = [JSONParser, ]
 
+    http_method_names = [
+        "post",
+    ]
+    parser_classes = [
+        JSONParser,
+    ]
 
     @extend_schema(
         description="endpoint to bookmark an object",
         request=serializers.Bookmark,
-        responses={201: None}
+        responses={201: None},
     )
     def post(self, request):
-        serializer = serializers.Bookmark(
-            data=request.data
-        )
+        serializer = serializers.Bookmark(data=request.data)
         serializer.is_valid(raise_exception=True)
         model_name = serializer.validated_data["model_name"]
         model = _get_model_by_name(model_name)
@@ -528,16 +525,12 @@ class Bookmark(views.APIView):
                 response_data["status"] = "success"
             else:
                 response_data["status"] = "failed"
-            
-            return response.Response(
-                data=response_data, status=status.HTTP_200_OK
-            )
+
+            return response.Response(data=response_data, status=status.HTTP_200_OK)
         except model.DoesNotExist:
             raise exceptions.CustomException(
-                message=f"{model_name} not found", 
-                status_code=status.HTTP_404_NOT_FOUND
+                message=f"{model_name} not found", status_code=status.HTTP_404_NOT_FOUND
             )
-
 
 
 @extend_schema(tags=["feed"])
@@ -547,19 +540,21 @@ class RemoveBookmark(views.APIView):
     The model name and id of the object to be un-bookmarked must be provided.
     The model must have a 'saved' ManyToManyField to the User model.
     """
-    http_method_names = ["post", ]
-    parser_classes = [JSONParser, ]
 
+    http_method_names = [
+        "post",
+    ]
+    parser_classes = [
+        JSONParser,
+    ]
 
     @extend_schema(
         description="endpoint to un-bookmark an object",
         request=serializers.Bookmark,
-        responses={201: None}
+        responses={201: None},
     )
     def post(self, request):
-        serializer = serializers.Bookmark(
-            data=request.data
-        )
+        serializer = serializers.Bookmark(data=request.data)
         serializer.is_valid(raise_exception=True)
         model_name = serializer.validated_data["model_name"]
         model = _get_model_by_name(model_name)
@@ -572,13 +567,10 @@ class RemoveBookmark(views.APIView):
             else:
                 response_data["status"] = "failed"
 
-            return response.Response(
-                data=response_data, status=status.HTTP_200_OK
-            )
+            return response.Response(data=response_data, status=status.HTTP_200_OK)
         except model.DoesNotExist:
             raise exceptions.CustomException(
-                message=f"{model_name} not found", 
-                status_code=status.HTTP_404_NOT_FOUND
+                message=f"{model_name} not found", status_code=status.HTTP_404_NOT_FOUND
             )
 
     # @extend_schema(

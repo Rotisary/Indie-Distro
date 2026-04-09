@@ -10,7 +10,7 @@ class Bookmark(serializers.Serializer):
     )
     model_name = serializers.ChoiceField(
         choices=ModelNameChoice.choices(),
-        required=True, 
-        write_only=True, 
-        help_text=_("type of object to be bookmarked e.g Film, Short")
+        required=True,
+        write_only=True,
+        help_text=_("type of object to be bookmarked e.g Film, Short"),
     )

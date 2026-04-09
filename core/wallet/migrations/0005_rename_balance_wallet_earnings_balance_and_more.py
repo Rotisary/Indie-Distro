@@ -6,23 +6,27 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('wallet', '0004_wallet_creation_status'),
+        ("wallet", "0004_wallet_creation_status"),
     ]
 
     operations = [
         migrations.RenameField(
-            model_name='wallet',
-            old_name='balance',
-            new_name='earnings_balance',
+            model_name="wallet",
+            old_name="balance",
+            new_name="earnings_balance",
         ),
         migrations.AddField(
-            model_name='wallet',
-            name='funding_balance',
-            field=models.DecimalField(blank=True, decimal_places=2, default=0, max_digits=15),
+            model_name="wallet",
+            name="funding_balance",
+            field=models.DecimalField(
+                blank=True, decimal_places=2, default=0, max_digits=15
+            ),
         ),
         migrations.AddField(
-            model_name='wallet',
-            name='total_balance',
-            field=models.DecimalField(blank=True, decimal_places=2, default=0, max_digits=15),
+            model_name="wallet",
+            name="total_balance",
+            field=models.DecimalField(
+                blank=True, decimal_places=2, default=0, max_digits=15
+            ),
         ),
     ]

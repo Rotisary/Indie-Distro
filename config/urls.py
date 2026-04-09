@@ -39,4 +39,3 @@ urlpatterns = [
 if not settings.PRODUCTION:
     urlpatterns += debug_toolbar_urls()
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-

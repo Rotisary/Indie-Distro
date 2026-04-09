@@ -6,17 +6,21 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('payment', '0012_rename_ledgerentry_journalentry_and_more'),
+        ("payment", "0012_rename_ledgerentry_journalentry_and_more"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='journalentry',
-            name='entered_at',
+            model_name="journalentry",
+            name="entered_at",
         ),
         migrations.AddField(
-            model_name='journalentry',
-            name='completed_at',
-            field=models.DateTimeField(blank=True, help_text='Date and Time the entry was marked as completed', null=True),
+            model_name="journalentry",
+            name="completed_at",
+            field=models.DateTimeField(
+                blank=True,
+                help_text="Date and Time the entry was marked as completed",
+                null=True,
+            ),
         ),
     ]

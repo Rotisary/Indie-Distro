@@ -66,24 +66,19 @@ def custom_exception_handler(exc, context):
             status=status.HTTP_400_BAD_REQUEST,
         )
 
-
     elif isinstance(exc, ClientPaymentException):
         response = Response(
             {
                 "status": status.HTTP_400_BAD_REQUEST,
                 "message": exc.message,
-                "errors": exc.errors
+                "errors": exc.errors,
             },
             status=status.HTTP_400_BAD_REQUEST,
         )
 
     elif isinstance(exc, ServiceRequestException):
         response = Response(
-            {
-                "status": exc.status_code,
-                "message": exc.message,
-                "errors": exc.errors
-            },
+            {"status": exc.status_code, "message": exc.message, "errors": exc.errors},
             status=exc.status_code,
         )
 

@@ -8,7 +8,7 @@ from django.contrib.auth import get_user_model
 
 from faker import Faker
 
-from  .mixins import BaseModelMixin
+from .mixins import BaseModelMixin
 from .enums import KeyProcessStatus
 from core.utils.enums import UserAccountType
 
@@ -56,22 +56,14 @@ class User:
 
 class IdempotencyKey(BaseModelMixin):
     key = models.CharField(max_length=128, null=False, blank=False)
-    user = models.ForeignKey(
-        UserModel, 
-        on_delete=models.CASCADE, 
-        null=True, 
-        blank=True
-    )
+    user = models.ForeignKey(UserModel, on_delete=models.CASCADE, null=True, blank=True)
     request_hash = models.CharField(
-        _("Hashed Request Data"),
-        max_length=64, 
-        blank=False, 
-        null=False
+        _("Hashed Request Data"), max_length=64, blank=False, null=False
     )
     status = models.CharField(
         choices=KeyProcessStatus.choices(),
-        max_length=16, 
-        default=KeyProcessStatus.IN_PROGRESS.value
+        max_length=16,
+        default=KeyProcessStatus.IN_PROGRESS.value,
     )
     locked_until = models.DateTimeField(null=True, blank=True)
     response_status = models.IntegerField(null=True, blank=True)
@@ -80,6 +72,6 @@ class IdempotencyKey(BaseModelMixin):
 
     class Meta:
         unique_together = (("key", "user"),)
- 
+
     def is_locked(self):
         return bool(self.locked_until and self.locked_until > timezone.now())

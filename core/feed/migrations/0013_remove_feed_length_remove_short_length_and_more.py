@@ -6,30 +6,34 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('feed', '0012_remove_feed_film_file'),
+        ("feed", "0012_remove_feed_film_file"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='feed',
-            name='length',
+            model_name="feed",
+            name="length",
         ),
         migrations.RemoveField(
-            model_name='short',
-            name='length',
+            model_name="short",
+            name="length",
         ),
         migrations.RemoveField(
-            model_name='short',
-            name='title',
+            model_name="short",
+            name="title",
         ),
         migrations.AddField(
-            model_name='feed',
-            name='duration',
-            field=models.DurationField(blank=True, null=True, verbose_name='Film duration(Runtime)'),
+            model_name="feed",
+            name="duration",
+            field=models.DurationField(
+                blank=True, null=True, verbose_name="Film duration(Runtime)"
+            ),
         ),
         migrations.AddField(
-            model_name='short',
-            name='duration',
-            field=models.DurationField(blank=True, null=True, verbose_name='Short Duration (Runtime)'),
+            model_name="short",
+            name="duration",
+            field=models.DurationField(
+                blank=True, null=True, verbose_name="Short Duration (Runtime)"
+            ),
         ),
     ]

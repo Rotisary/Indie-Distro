@@ -15,22 +15,70 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='Wallet',
+            name="Wallet",
             fields=[
-                ('date_added', models.DateTimeField(auto_now_add=True)),
-                ('date_last_modified', models.DateTimeField(auto_now=True)),
-                ('account_reference', models.CharField(max_length=20, primary_key=True, serialize=False, unique=True, verbose_name='Flutterwave Sub-Account Reference')),
-                ('barter_id', models.CharField(max_length=15, unique=True, verbose_name='Flutterwave Barter ID')),
-                ('virtual_account_number', models.CharField(max_length=10, verbose_name='Virtual Account Number')),
-                ('virtual_bank_name', models.CharField(blank=True, max_length=100, null=True, verbose_name='Virtual Bank Name')),
-                ('created_at', models.DateTimeField(blank=True, help_text='Date when the Flutterwave sub-account was created', null=True, verbose_name='Flutterwave Sub-Account Creation Date')),
-                ('balance', models.DecimalField(blank=True, decimal_places=2, default=0, max_digits=15)),
-                ('wallet_pin', models.CharField(blank=True, null=True)),
-                ('owner', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='wallet', to=settings.AUTH_USER_MODEL, verbose_name='Wallet Owner')),
+                ("date_added", models.DateTimeField(auto_now_add=True)),
+                ("date_last_modified", models.DateTimeField(auto_now=True)),
+                (
+                    "account_reference",
+                    models.CharField(
+                        max_length=20,
+                        primary_key=True,
+                        serialize=False,
+                        unique=True,
+                        verbose_name="Flutterwave Sub-Account Reference",
+                    ),
+                ),
+                (
+                    "barter_id",
+                    models.CharField(
+                        max_length=15, unique=True, verbose_name="Flutterwave Barter ID"
+                    ),
+                ),
+                (
+                    "virtual_account_number",
+                    models.CharField(
+                        max_length=10, verbose_name="Virtual Account Number"
+                    ),
+                ),
+                (
+                    "virtual_bank_name",
+                    models.CharField(
+                        blank=True,
+                        max_length=100,
+                        null=True,
+                        verbose_name="Virtual Bank Name",
+                    ),
+                ),
+                (
+                    "created_at",
+                    models.DateTimeField(
+                        blank=True,
+                        help_text="Date when the Flutterwave sub-account was created",
+                        null=True,
+                        verbose_name="Flutterwave Sub-Account Creation Date",
+                    ),
+                ),
+                (
+                    "balance",
+                    models.DecimalField(
+                        blank=True, decimal_places=2, default=0, max_digits=15
+                    ),
+                ),
+                ("wallet_pin", models.CharField(blank=True, null=True)),
+                (
+                    "owner",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="wallet",
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name="Wallet Owner",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Wallet',
-                'verbose_name_plural': 'Wallets',
+                "verbose_name": "Wallet",
+                "verbose_name_plural": "Wallets",
             },
         ),
     ]

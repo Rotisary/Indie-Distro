@@ -7,19 +7,33 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('feed', '0013_remove_feed_length_remove_short_length_and_more'),
-        ('payment', '0013_remove_journalentry_entered_at_and_more'),
+        ("feed", "0013_remove_feed_length_remove_short_length_and_more"),
+        ("payment", "0013_remove_journalentry_entered_at_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='purchase',
-            name='payment_status',
-            field=models.CharField(choices=[('pending', 'PENDING'), ('completed', 'COMPLETED'), ('failed', 'FAILED')], default='pending', verbose_name='The current payment status of the purchase'),
+            model_name="purchase",
+            name="payment_status",
+            field=models.CharField(
+                choices=[
+                    ("pending", "PENDING"),
+                    ("completed", "COMPLETED"),
+                    ("failed", "FAILED"),
+                ],
+                default="pending",
+                verbose_name="The current payment status of the purchase",
+            ),
         ),
         migrations.AddField(
-            model_name='purchase',
-            name='transaction',
-            field=models.ForeignKey(help_text='The transaction associated with this purchase', null=True, on_delete=django.db.models.deletion.PROTECT, related_name='purchases', to='payment.transaction'),
+            model_name="purchase",
+            name="transaction",
+            field=models.ForeignKey(
+                help_text="The transaction associated with this purchase",
+                null=True,
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name="purchases",
+                to="payment.transaction",
+            ),
         ),
     ]

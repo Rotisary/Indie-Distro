@@ -3,7 +3,7 @@ from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.hashers import make_password
 from core.users.models import User
 from phonenumbers import parse, is_valid_number
-from phonenumbers.phonenumberutil import  NumberParseException
+from phonenumbers.phonenumberutil import NumberParseException
 
 
 class BaseUserSerializer(serializers.ModelSerializer):
@@ -35,7 +35,7 @@ class UserSerializer:
                 "user_permissions",
                 "last_login",
             ]
-    
+
     class Create(serializers.ModelSerializer):
         password2 = serializers.CharField(
             write_only=True,
@@ -75,7 +75,7 @@ class UserSerializer:
                 )
 
             return attrs
-        
+
         def validate_phone_number(self, value):
             value = ("+" + value) if not value.startswith("+") else value
             try:
@@ -90,12 +90,11 @@ class UserSerializer:
                 message = err._msg
                 raise serializers.ValidationError(message, "invalid phone number")
             return value
-        
+
         def create(self, validated_data):
             validated_data["password"] = make_password(validated_data["password"])
             return super().create(validated_data)
-        
-        
+
     class Update(serializers.ModelSerializer):
 
         class Meta:
@@ -112,7 +111,7 @@ class UserSerializer:
                 "is_banned",
                 "location",
             ]
-        
+
         def validate_phone_number(self, value):
             value = ("+" + value) if not value.startswith("+") else value
             try:
@@ -139,22 +138,21 @@ class AuthSerializer:
     class Login(serializers.Serializer):
         email = serializers.EmailField(required=True, help_text=_("Email"))
         password = serializers.CharField(
-            write_only=True, required=True, style={"input_type": "password"}, help_text=_("Password")
+            write_only=True,
+            required=True,
+            style={"input_type": "password"},
+            help_text=_("Password"),
         )
-
 
     class AccountRetrieve(serializers.Serializer):
         user = UserSerializer.Retrieve(help_text=_("User details"))
         token = TokenSerializer(help_text=_("JWT token pair"))
 
-
     class TokenRefresh(serializers.Serializer):
         refresh = serializers.CharField(
             required=True,
             help_text=_("This is the 'refresh' key in account AccessToken"),
-        ) 
-    
+        )
 
     class Logout(serializers.Serializer):
         refresh = serializers.CharField()
-            

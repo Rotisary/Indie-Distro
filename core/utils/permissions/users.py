@@ -12,7 +12,7 @@ class IsGuestUser(BasePermission):
     def has_permission(self, request, view):
         self.message = "You are already logged in"
         return not request.user.is_authenticated
-    
+
 
 class IsAccountType:
     class SuperAdminUser(BasePermission):
@@ -57,22 +57,20 @@ class IsAccountType:
                 and request.user.is_creator
             )
 
-         
     class IsAdminOrCreator(BasePermission):
         def has_permission(self, request, view):
-            return (
-                IsAccountType.AdminUser().has_permission(request, view)
-                or IsAccountType.IsCreatorAccount().has_permission(request, view)
-            )
-        
+            return IsAccountType.AdminUser().has_permission(
+                request, view
+            ) or IsAccountType.IsCreatorAccount().has_permission(request, view)
+
 
 class IsObjOwner(BaseException):
     """
     Allows access only to the owner of an object.
-    """  
+    """
+
     message: str
 
     def has_object_permissions(self, request, view, obj):
         self.message = "You do not have permission to access this object."
         return obj.owner == request.user
-    

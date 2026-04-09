@@ -21,12 +21,11 @@ from channels.security.websocket import AllowedHostsOriginValidator
 from core.utils.middlewares.websocket import JWTAuthMiddleware
 from core.websocket.routing import websocket_urlpatterns
 
-
-application = ProtocolTypeRouter({
-    "http": get_asgi_application(),
-    "websocket": AllowedHostsOriginValidator(
-        JWTAuthMiddleware(
-            URLRouter(websocket_urlpatterns)
-        )
-    ),
-})
+application = ProtocolTypeRouter(
+    {
+        "http": get_asgi_application(),
+        "websocket": AllowedHostsOriginValidator(
+            JWTAuthMiddleware(URLRouter(websocket_urlpatterns))
+        ),
+    }
+)

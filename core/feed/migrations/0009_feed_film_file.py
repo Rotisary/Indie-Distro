@@ -7,14 +7,20 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('feed', '0008_alter_purchase_options'),
-        ('file_storage', '0001_initial'),
+        ("feed", "0008_alter_purchase_options"),
+        ("file_storage", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='feed',
-            name='film_file',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='file_storage.filemodel', verbose_name='The File of the Film'),
+            model_name="feed",
+            name="film_file",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="file_storage.filemodel",
+                verbose_name="The File of the Film",
+            ),
         ),
     ]

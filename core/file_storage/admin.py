@@ -20,13 +20,7 @@ class FileModelAdmin(ModelAdmin):
             _("Personal Info"),
             {
                 "classes": ["tab"],
-                "fields": (
-                    "film",
-                    "file_purpose",
-                    "file_key",
-                    "mime_type",
-                    "checksum"
-                ),
+                "fields": ("film", "file_purpose", "file_key", "mime_type", "checksum"),
             },
         ),
         (
@@ -40,7 +34,7 @@ class FileModelAdmin(ModelAdmin):
                     "has_audio",
                     "hls_master_key",
                     "dash_mpd_key",
-                    "last_error"
+                    "last_error",
                 ),
             },
         ),
@@ -48,12 +42,8 @@ class FileModelAdmin(ModelAdmin):
             _("Status"),
             {
                 "classes": ["tab"],
-                "fields": (
-                    "is_verified",
-                    "processing_status",
-                    "last_processed_at"
-                )
-            }
+                "fields": ("is_verified", "processing_status", "last_processed_at"),
+            },
         ),
         (
             _("Important dates"),
@@ -65,7 +55,9 @@ class FileModelAdmin(ModelAdmin):
     )
 
     list_display = ["id", "owner__first_name", "file_purpose", "mime_type"]
-    search_fields = ["id",]
+    search_fields = [
+        "id",
+    ]
     readonly_fields = ["date_added", "date_last_modified"]
     ordering = ["date_added"]
 
@@ -91,7 +83,7 @@ class FileProcessingJobModelAdmin(ModelAdmin):
                     "packaging",
                     "thumbnails",
                     "audio",
-                    "error"
+                    "error",
                 ),
             },
         ),

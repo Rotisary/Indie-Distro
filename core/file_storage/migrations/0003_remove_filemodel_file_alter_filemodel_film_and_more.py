@@ -8,24 +8,37 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('feed', '0010_alter_feed_film_file'),
-        ('file_storage', '0002_filemodel_file_key'),
+        ("feed", "0010_alter_feed_film_file"),
+        ("file_storage", "0002_filemodel_file_key"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='filemodel',
-            name='file',
+            model_name="filemodel",
+            name="file",
         ),
         migrations.AlterField(
-            model_name='filemodel',
-            name='film',
-            field=models.ForeignKey(blank=True, help_text='The film related to the file', null=True, on_delete=django.db.models.deletion.CASCADE, related_name='content_files', to='feed.feed', verbose_name='File Film'),
+            model_name="filemodel",
+            name="film",
+            field=models.ForeignKey(
+                blank=True,
+                help_text="The film related to the file",
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="content_files",
+                to="feed.feed",
+                verbose_name="File Film",
+            ),
         ),
         migrations.AlterField(
-            model_name='filemodel',
-            name='owner',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='files', to=settings.AUTH_USER_MODEL, verbose_name='File Owner'),
+            model_name="filemodel",
+            name="owner",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="files",
+                to=settings.AUTH_USER_MODEL,
+                verbose_name="File Owner",
+            ),
         ),
     ]

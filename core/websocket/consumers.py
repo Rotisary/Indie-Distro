@@ -25,11 +25,13 @@ class NotificationConsumer(AsyncJsonWebsocketConsumer):
         self.group_name = self.user.push_notification_channel_id
         await self.accept()
         await self.channel_layer.group_add(self.group_name, self.channel_name)
-        await self.send_json({
-            "type": "connection_established",
-            "message": "Connected to notification service",
-            "user_id": self.user.id,
-        })
+        await self.send_json(
+            {
+                "type": "connection_established",
+                "message": "Connected to notification service",
+                "user_id": self.user.id,
+            }
+        )
         logger.info(f"WebSocket connected user={self.user.id}")
 
     async def disconnect(self, close_code):
@@ -47,10 +49,12 @@ class NotificationConsumer(AsyncJsonWebsocketConsumer):
             group = data.get("group")
             if group:
                 if group != self.user.push_notification_channel_id:
-                    await self.send_json({
-                        "type": "error",
-                        "message": "Unauthorized group subscription",
-                    })
+                    await self.send_json(
+                        {
+                            "type": "error",
+                            "message": "Unauthorized group subscription",
+                        }
+                    )
                     return
                 if message_type == "subscribe":
                     await self.channel_layer.group_add(group, self.channel_name)

@@ -15,7 +15,14 @@ class UserAdmin(BaseUserAdmin, ModelAdmin):
             None,
             {
                 "classes": ("wide",),
-                "fields": ("email", "username", "first_name", "last_name", "password1", "password2"),
+                "fields": (
+                    "email",
+                    "username",
+                    "first_name",
+                    "last_name",
+                    "password1",
+                    "password2",
+                ),
             },
         ),
     )
@@ -107,7 +114,7 @@ class AccountSessionAdmin(ModelAdmin):
 #     @admin.display(description="wallet user's name")
 #     def get_name(self, obj):
 #         return obj.user.name
-    
+
 
 # class SubAccountAdmin(admin.ModelAdmin):
 #     list_display = ['account_reference', 'barter_id', 'virtual_account_number', 'virtual_bank_name']

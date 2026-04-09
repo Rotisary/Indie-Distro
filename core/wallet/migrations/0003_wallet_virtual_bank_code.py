@@ -6,13 +6,15 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('wallet', '0002_alter_wallet_virtual_account_number'),
+        ("wallet", "0002_alter_wallet_virtual_account_number"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='wallet',
-            name='virtual_bank_code',
-            field=models.CharField(blank=True, max_length=50, null=True, verbose_name='Virtual Bank Code'),
+            model_name="wallet",
+            name="virtual_bank_code",
+            field=models.CharField(
+                blank=True, max_length=50, null=True, verbose_name="Virtual Bank Code"
+            ),
         ),
     ]

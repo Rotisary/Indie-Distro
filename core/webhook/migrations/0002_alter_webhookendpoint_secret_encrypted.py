@@ -6,13 +6,17 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('webhook', '0001_initial'),
+        ("webhook", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='webhookendpoint',
-            name='secret_encrypted',
-            field=models.TextField(blank=True, help_text='Encrypted secret for verification by client', verbose_name='Encrypted Secret'),
+            model_name="webhookendpoint",
+            name="secret_encrypted",
+            field=models.TextField(
+                blank=True,
+                help_text="Encrypted secret for verification by client",
+                verbose_name="Encrypted Secret",
+            ),
         ),
     ]

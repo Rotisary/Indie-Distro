@@ -51,7 +51,7 @@ class TransactionAdmin(ModelAdmin):
                     "status",
                     "description",
                     "currency",
-                    "metadata"
+                    "metadata",
                 ),
             },
         ),
@@ -77,9 +77,7 @@ class LedgerJournalAdmin(ModelAdmin):
             _("Personal Info"),
             {
                 "classes": ["tab"],
-                "fields": (
-                    "transaction",
-                ),
+                "fields": ("transaction",),
             },
         ),
         (
@@ -104,14 +102,7 @@ class JournalEntryAdmin(ModelAdmin):
             _("Personal Info"),
             {
                 "classes": ["tab"],
-                "fields": (
-                    "account",
-                    "journal",
-                    "line_no",
-                    "type",
-                    "status",
-                    "amount"
-                ),
+                "fields": ("account", "journal", "line_no", "type", "status", "amount"),
             },
         ),
         (
@@ -124,13 +115,13 @@ class JournalEntryAdmin(ModelAdmin):
     )
 
     list_display = [
-        "id", 
-        "journal__transaction__reference", 
-        "account__type", 
-        "line_no", 
-        "type", 
-        "status", 
-        "completed_at"
+        "id",
+        "journal__transaction__reference",
+        "account__type",
+        "line_no",
+        "type",
+        "status",
+        "completed_at",
     ]
     search_fields = ["journal__transaction__reference"]
     readonly_fields = ["date_added", "date_last_modified", "completed_at"]

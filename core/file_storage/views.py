@@ -13,7 +13,10 @@ from .models import FileModel, FileProcessingJob
 from .serializers import FileSerializer, SignedURLSerializer
 from .tasks import start_pipeline
 from core.utils import mixins as global_mixins, exceptions
-from core.utils.helpers.decorators import RequestDataManipulationsDecorators, IdempotencyDecorator
+from core.utils.helpers.decorators import (
+    RequestDataManipulationsDecorators,
+    IdempotencyDecorator,
+)
 from core.utils.helpers.file_storage import FileUploadUtils
 from core.utils.permissions import IsAccountType, FileMediaNotReleased
 
@@ -24,43 +27,39 @@ class GetSignedUploadURL(views.APIView):
     parser_classes = [JSONParser]
     renderer_classes = [JSONRenderer]
 
-
     @extend_schema(
         description="endpoint to get signed url that would be used for S3 upload by the client",
         request=SignedURLSerializer.SignedURLRequestSerializer,
-        responses={200: SignedURLSerializer.SignedURLResponseSerializer}
+        responses={200: SignedURLSerializer.SignedURLResponseSerializer},
     )
     @IdempotencyDecorator.make_endpoint_idempotent(ttl=3600)
     def post(self, request, *args, **kwargs):
-        serializer = SignedURLSerializer.SignedURLRequestSerializer(
-            data=request.data
-        )
+        serializer = SignedURLSerializer.SignedURLRequestSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         file_name = serializer.validated_data["file_name"]
         file_purpose = serializer.validated_data["purpose"]
 
-        file_metadata = FileUploadUtils.get_file_key(request.user, file_name, file_purpose) 
+        file_metadata = FileUploadUtils.get_file_key(
+            request.user, file_name, file_purpose
+        )
         signed_url = FileUploadUtils.generate_presigned_upload_url(
             file_metadata["file_key"], file_name
         )
-        response_data = {
-            "file_id": file_metadata["file_id"],
-            "signed_url": signed_url
-        }
+        response_data = {"file_id": file_metadata["file_id"], "signed_url": signed_url}
         return response.Response(data=response_data, status=status.HTTP_200_OK)
-    
+
 
 @extend_schema(tags=["Files"])
 class CreateFileObject(views.APIView):
     """
-        Client makes a call to this endpoint after direct upload to S3 is completed. 
-        Client sends file metadata in post data to create File object in server database
+    Client makes a call to this endpoint after direct upload to S3 is completed.
+    Client sends file metadata in post data to create File object in server database
     """
+
     http_method_names = ["post"]
     parser_classes = [JSONParser]
     renderer_classes = [JSONRenderer]
-
 
     @staticmethod
     def get_mime_type(file_name=None):
@@ -73,8 +72,8 @@ class CreateFileObject(views.APIView):
     @extend_schema(
         description="endpoint to create file object",
         request=FileSerializer.FileCreate,
-        responses={202: FileSerializer.ListRetrieve}
-    )   
+        responses={202: FileSerializer.ListRetrieve},
+    )
     @RequestDataManipulationsDecorators.update_request_data_with_owner_data("owner")
     def post(self, request):
         serializer = FileSerializer.FileCreate(data=request.data)
@@ -86,50 +85,52 @@ class CreateFileObject(views.APIView):
         if not cached_metadata:
             raise exceptions.CustomException(
                 message="Expired or Invalid file id!",
-                status_code=status.HTTP_400_BAD_REQUEST
+                status_code=status.HTTP_400_BAD_REQUEST,
             )
-        
+
         if cached_metadata["owner"] != request.user.id:
             raise exceptions.CustomException(
-                message="Permssion Denied",
-                status_code=status.HTTP_403_FORBIDDEN
+                message="Permssion Denied", status_code=status.HTTP_403_FORBIDDEN
             )
         file = serializer.save(
-            file_key=cached_metadata["file_key"], 
-            mime_type=self.get_mime_type(file_name=file_name)
+            file_key=cached_metadata["file_key"],
+            mime_type=self.get_mime_type(file_name=file_name),
         )
         cache.delete(f"pending_upload-{file_id}")
 
         # create job and start file processing pipeline
         job, created = FileProcessingJob.objects.get_or_create(
-            owner=request.user, 
-            file=file,
-            source_key=file.file_key
+            owner=request.user, file=file, source_key=file.file_key
         )
         start_pipeline.delay(job.id)
-        logger.info(f"processing pipeline started for file {file.id}. key {file.file_key}")
+        logger.info(
+            f"processing pipeline started for file {file.id}. key {file.file_key}"
+        )
 
         serializer = FileSerializer.ListRetrieve(instance=file)
         return response.Response(
-            data={
-                "message": "file currently being processed",
-                "data": serializer.data
-            },
-            status=status.HTTP_202_ACCEPTED
+            data={"message": "file currently being processed", "data": serializer.data},
+            status=status.HTTP_202_ACCEPTED,
         )
-    
+
 
 @extend_schema(tags=["Files"])
 class RetrieveFile(views.APIView):
-    http_method_names = ["get", ]
-    permission_classes = [IsAuthenticated, IsAccountType.IsCreatorAccount, ]
-    renderer_classes = [JSONRenderer, ]
-
+    http_method_names = [
+        "get",
+    ]
+    permission_classes = [
+        IsAuthenticated,
+        IsAccountType.IsCreatorAccount,
+    ]
+    renderer_classes = [
+        JSONRenderer,
+    ]
 
     @extend_schema(
         description="retrieve a particular File object",
         request=None,
-        responses={200: FileSerializer.ListRetrieve}
+        responses={200: FileSerializer.ListRetrieve},
     )
     def get(self, request, pk):
         try:
@@ -140,8 +141,7 @@ class RetrieveFile(views.APIView):
         except FileModel.DoesNotExist:
             logger.error(f"file with id {pk} not found")
             raise exceptions.CustomException(
-                message="file not found",
-                status_code=status.HTTP_404_NOT_FOUND
+                message="file not found", status_code=status.HTTP_404_NOT_FOUND
             )
 
 
@@ -149,16 +149,15 @@ class RetrieveFile(views.APIView):
 class DeleteFile(views.APIView):
     http_method_names = ["delete"]
     permission_classes = [
-        IsAuthenticated, 
-        IsAccountType.IsCreatorAccount, 
-        FileMediaNotReleased
+        IsAuthenticated,
+        IsAccountType.IsCreatorAccount,
+        FileMediaNotReleased,
     ]
-
 
     @extend_schema(
         description="delete a file object if related film/short is not released",
         request=None,
-        responses={204: None}
+        responses={204: None},
     )
     def delete(self, request, pk):
         try:
@@ -174,5 +173,3 @@ class DeleteFile(views.APIView):
         file.delete()
         logger.success(f"file {file.id} deleted successfully")
         return response.Response(status=status.HTTP_204_NO_CONTENT)
-        
-        

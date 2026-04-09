@@ -1,8 +1,9 @@
 from rest_framework import serializers
 from django.core.validators import RegexValidator
-from django.utils.translation import gettext_lazy as _ 
+from django.utils.translation import gettext_lazy as _
 
 from core.users.models import User
+
 
 class FundWalletSerializer:
 
@@ -12,15 +13,15 @@ class FundWalletSerializer:
 
     class InitiateBankChargeFundingSerializer(serializers.Serializer):
         owner = serializers.PrimaryKeyRelatedField(
-            queryset=User.objects.all(), 
-            required=True, 
-            help_text=_("The user that wants to fund their wallet.")
+            queryset=User.objects.all(),
+            required=True,
+            help_text=_("The user that wants to fund their wallet."),
         )
         amount = serializers.DecimalField(
-            required=True, 
-            max_digits=17, 
+            required=True,
+            max_digits=17,
             decimal_places=2,
-            help_text=_("The amount to fund the wallet with.")
+            help_text=_("The amount to fund the wallet with."),
         )
         wallet_pin = serializers.CharField(
             required=True,
@@ -28,7 +29,7 @@ class FundWalletSerializer:
             validators=[RegexValidator(r"^\d{4}$", "PIN must be exactly 4 digits")],
             help_text=_("4-digit wallet PIN for payout authorization"),
         )
-    
+
     class InitiateBankChargeFundingResponseSerializer(serializers.Serializer):
         status = serializers.CharField(
             read_only=True, help_text=_("The status of the funding initiation")

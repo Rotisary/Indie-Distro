@@ -15,22 +15,52 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='IdempotencyKey',
+            name="IdempotencyKey",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('date_added', models.DateTimeField(auto_now_add=True)),
-                ('date_last_modified', models.DateTimeField(auto_now=True)),
-                ('key', models.CharField(max_length=128)),
-                ('request_hash', models.CharField(max_length=64, verbose_name='Hashed Request Data')),
-                ('status', models.CharField(choices=[('in progress', 'IN_PROGRESS'), ('succeeded', 'SUCCEEDED'), ('failed', 'FAILED')], default='in progress', max_length=16)),
-                ('locked_until', models.DateTimeField(blank=True, null=True)),
-                ('response_status', models.IntegerField(blank=True, null=True)),
-                ('response_body', models.JSONField(blank=True, null=True)),
-                ('expires_at', models.DateTimeField(blank=True, null=True)),
-                ('user', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("date_added", models.DateTimeField(auto_now_add=True)),
+                ("date_last_modified", models.DateTimeField(auto_now=True)),
+                ("key", models.CharField(max_length=128)),
+                (
+                    "request_hash",
+                    models.CharField(max_length=64, verbose_name="Hashed Request Data"),
+                ),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("in progress", "IN_PROGRESS"),
+                            ("succeeded", "SUCCEEDED"),
+                            ("failed", "FAILED"),
+                        ],
+                        default="in progress",
+                        max_length=16,
+                    ),
+                ),
+                ("locked_until", models.DateTimeField(blank=True, null=True)),
+                ("response_status", models.IntegerField(blank=True, null=True)),
+                ("response_body", models.JSONField(blank=True, null=True)),
+                ("expires_at", models.DateTimeField(blank=True, null=True)),
+                (
+                    "user",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'unique_together': {('key', 'user')},
+                "unique_together": {("key", "user")},
             },
         ),
     ]

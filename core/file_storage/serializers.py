@@ -8,7 +8,6 @@ from core.utils.enums import FilePurposeType
 from .models import FileModel
 
 
-
 class FileSerializer:
     class FileCreate(serializers.ModelSerializer):
         class Meta:
@@ -21,13 +20,12 @@ class FileSerializer:
                 "hls_master_key",
                 "dash_mpd_key",
                 "has_audio",
-                "last_error"
+                "last_error",
             ]
-    
-          
+
     class ListRetrieve(serializers.ModelSerializer):
         owner = BaseUserSerializer()
-        film =  FeedSerializer.FeedRetrieve()
+        film = FeedSerializer.FeedRetrieve()
 
         class Meta:
             model = FileModel
@@ -40,8 +38,7 @@ class SignedURLSerializer:
         purpose = serializers.ChoiceField(
             choices=FilePurposeType.choices(), required=True
         )
-    
+
     class SignedURLResponseSerializer(serializers.Serializer):
         file_id = serializers.CharField(read_only=True)
         signed_url = serializers.CharField(read_only=True)
-

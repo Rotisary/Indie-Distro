@@ -54,8 +54,7 @@ def emit_websocket_event(instance, event_type: str, save: bool = True) -> None:
         }
         channel_layer = get_channel_layer()
         async_to_sync(channel_layer.group_send)(
-            user.push_notification_channel_id,
-            envelope
+            user.push_notification_channel_id, envelope
         )
         logger.info(
             f"event emitted: type={event_type}, "
@@ -63,9 +62,7 @@ def emit_websocket_event(instance, event_type: str, save: bool = True) -> None:
         )
     except Exception as e:
         logger.error(f"Failed to emit event: {e}")
-        raise exceptions.CustomException(
-            message=f"Event emission failed: {e}"
-        )
+        raise exceptions.CustomException(message=f"Event emission failed: {e}")
 
 
 def emit_user_event(
@@ -113,11 +110,8 @@ def emit_user_event(
             event,
         )
         logger.info(
-            f"event emitted: type={event_type}, "
-            f"entity={entity}, user={user.id}"
+            f"event emitted: type={event_type}, " f"entity={entity}, user={user.id}"
         )
     except Exception as e:
         logger.error(f"Failed to emit event: {e}")
-        raise exceptions.CustomException(
-            message=f"Event emission failed: {e}"
-        )
+        raise exceptions.CustomException(message=f"Event emission failed: {e}")

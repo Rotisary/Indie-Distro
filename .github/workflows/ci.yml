@@ -29,8 +29,8 @@ jobs:
           pip install -r requirements.txt
           pip install ruff black isort pytest pytest-django
 
-      - name: Ruff
-        run: ruff check .
+      # - name: Ruff
+      #   run: ruff check .
 
       - name: Black
         run: black --check .

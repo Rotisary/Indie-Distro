@@ -12,5 +12,5 @@ class Handlers:
             raise ServiceRequestException(
                 message=message,
                 errors=[f"{response.text}"],
-                status_code=response.status_code
+                status_code=response.status_code,
             )

@@ -77,7 +77,7 @@ class RequestDataManipulationsDecorators:
 
         function_to_execute.__name__ = function.__name__
         return function_to_execute
-    
+
 
 class IdempotencyDecorator:
 
@@ -89,92 +89,104 @@ class IdempotencyDecorator:
             b = bytes(data)
         else:
             b = json.dumps(
-                data, 
-                sort_keys=True, 
-                separators=(",", ":"), 
-                ensure_ascii=False
+                data, sort_keys=True, separators=(",", ":"), ensure_ascii=False
             ).encode("utf-8")
         return hashlib.sha256(b).hexdigest()
 
-
     @staticmethod
-    def _cache_key(
-            namespace: str, 
-            user_id: Optional[int], 
-            idem_key: str
-        ) -> str:
+    def _cache_key(namespace: str, user_id: Optional[int], idem_key: str) -> str:
         uid = user_id if user_id is not None else "anon"
         return f"{namespace}:{uid}:{idem_key}"
-
 
     @staticmethod
     def _return_response(message: str, response_status=http_status.HTTP_409_CONFLICT):
         return Response({"detail": message}, status=response_status)
-    
 
     @staticmethod
     def _persist_db(idem_key: IdempotencyKey, response, *, now, expires_at):
         idem_key.status = (
-            enums.KeyProcessStatus.SUCCEEDED.value if 200 <= response.status_code < 300 
+            enums.KeyProcessStatus.SUCCEEDED.value
+            if 200 <= response.status_code < 300
             else enums.KeyProcessStatus.FAILED.value
         )
         idem_key.response_status = response.status_code
         idem_key.response_body = getattr(response, "data", None)
         idem_key.locked_until = now
         idem_key.expires_at = expires_at
-        idem_key.save(update_fields=[
-                "status", 
-                "response_status", 
-                "response_body", 
-                "locked_until", 
-                "expires_at", 
-                "date_last_modified"
-            ])
-
+        idem_key.save(
+            update_fields=[
+                "status",
+                "response_status",
+                "response_body",
+                "locked_until",
+                "expires_at",
+                "date_last_modified",
+            ]
+        )
 
     @staticmethod
-    def make_endpoint_idempotent(ttl: int = 24 * 3600, lock_for: int = 60, namespace: str = "idem"):
+    def make_endpoint_idempotent(
+        ttl: int = 24 * 3600, lock_for: int = 60, namespace: str = "idem"
+    ):
         """
         makes an endpoint idempotent:
         - saves keys and response data to cache and DB.
         - For read, looks through cache first and checks DB if there is a miss.
         """
+
         def inner(function):
             def function_to_execute(self, request, *args, **kwargs):
-                idempotency_key = request.headers.get(settings.IDEMPOTENCY_KEY_HEADER_NAME) or None
+                idempotency_key = (
+                    request.headers.get(settings.IDEMPOTENCY_KEY_HEADER_NAME) or None
+                )
                 if not idempotency_key:
                     return function(self, request, *args, **kwargs)
 
                 now = timezone.now()
-                body_hash = IdempotencyDecorator._hash_body(getattr(request, "data", None))
-                user = request.user if getattr(request, "user", None) and request.user.is_authenticated else None
-                user_id = getattr(user, "id", None)
-                cache_key = IdempotencyDecorator._cache_key(namespace, user_id, idempotency_key)
-           
-                # check cache for idempotency key
-                cache_instance = redis.RedisTools(
-                    cache_key, ttl=ttl
+                body_hash = IdempotencyDecorator._hash_body(
+                    getattr(request, "data", None)
                 )
+                user = (
+                    request.user
+                    if getattr(request, "user", None) and request.user.is_authenticated
+                    else None
+                )
+                user_id = getattr(user, "id", None)
+                cache_key = IdempotencyDecorator._cache_key(
+                    namespace, user_id, idempotency_key
+                )
+
+                # check cache for idempotency key
+                cache_instance = redis.RedisTools(cache_key, ttl=ttl)
                 cached = cache_instance.cache_value
                 if cached:
-                    if cached.get("request_hash") and cached["request_hash"] != body_hash:
-                        return IdempotencyDecorator._return_response("Idempotency key conflict (different payload)")
-
-                    if ( 
-                        cached.get("status") == enums.KeyProcessStatus.IN_PROGRESS.value 
-                        and cached.get("lock_until", 0) > now.timestamp()
+                    if (
+                        cached.get("request_hash")
+                        and cached["request_hash"] != body_hash
                     ):
-                        return IdempotencyDecorator._return_response("operation is still being processed")
+                        return IdempotencyDecorator._return_response(
+                            "Idempotency key conflict (different payload)"
+                        )
 
                     if (
-                        cached.get("status") in (
-                            enums.KeyProcessStatus.SUCCEEDED.value, enums.KeyProcessStatus.FAILED.value
-                        ) 
+                        cached.get("status") == enums.KeyProcessStatus.IN_PROGRESS.value
+                        and cached.get("lock_until", 0) > now.timestamp()
+                    ):
+                        return IdempotencyDecorator._return_response(
+                            "operation is still being processed"
+                        )
+
+                    if (
+                        cached.get("status")
+                        in (
+                            enums.KeyProcessStatus.SUCCEEDED.value,
+                            enums.KeyProcessStatus.FAILED.value,
+                        )
                         and "response_status" in cache_instance.cache_value
                     ):
                         return Response(
-                            cached.get("response_body") or {}, 
-                            status=cached.get("response_status")
+                            cached.get("response_body") or {},
+                            status=cached.get("response_status"),
                         )
 
                 # check DB is there is a cache miss
@@ -189,7 +201,7 @@ class IdempotencyDecorator:
                             request_hash=body_hash,
                             locked_until=locked_until,
                             expires_at=expires_at,
-                        )                    
+                        )
 
                         # set cache
                         cached = {
@@ -200,18 +212,21 @@ class IdempotencyDecorator:
                 except IntegrityError:
                     with transaction.atomic():
                         record = (
-                            IdempotencyKey.objects
-                            .select_for_update(skip_locked=True)
+                            IdempotencyKey.objects.select_for_update(skip_locked=True)
                             .filter(key=idempotency_key, user=user)
                             .first()
                         )
                         if not record:
-                            return IdempotencyDecorator._return_response("operation is still being processed")
+                            return IdempotencyDecorator._return_response(
+                                "operation is still being processed"
+                            )
 
                         if record.request_hash and record.request_hash != body_hash:
-                            return IdempotencyDecorator._return_response("Idempotency key conflict (different payload)")
+                            return IdempotencyDecorator._return_response(
+                                "Idempotency key conflict (different payload)"
+                            )
 
-                        if ( 
+                        if (
                             record.status == enums.KeyProcessStatus.IN_PROGRESS.value
                             and record.is_locked()
                         ):
@@ -219,13 +234,21 @@ class IdempotencyDecorator:
                             cached = {
                                 "status": enums.KeyProcessStatus.IN_PROGRESS.value,
                                 "request_hash": record.request_hash,
-                                "lock_until": record.locked_until.timestamp() if record.locked_until else now.timestamp(),
+                                "lock_until": (
+                                    record.locked_until.timestamp()
+                                    if record.locked_until
+                                    else now.timestamp()
+                                ),
                             }
-                            return IdempotencyDecorator._return_response("operation is still being processed")
+                            return IdempotencyDecorator._return_response(
+                                "operation is still being processed"
+                            )
 
                         if (
-                            record.status in (
-                                enums.KeyProcessStatus.SUCCEEDED.value, enums.KeyProcessStatus.FAILED.value
+                            record.status
+                            in (
+                                enums.KeyProcessStatus.SUCCEEDED.value,
+                                enums.KeyProcessStatus.FAILED.value,
                             )
                             and record.response_status
                         ):
@@ -237,31 +260,38 @@ class IdempotencyDecorator:
                                 "response_body": record.response_body,
                                 "lock_until": now.timestamp(),
                             }
-                            return Response(record.response_body or {}, status=record.response_status)
-            
+                            return Response(
+                                record.response_body or {},
+                                status=record.response_status,
+                            )
+
                 response: Response = function(self, request, *args, **kwargs)
 
                 # Persist result to DB, then cache it
                 try:
                     with transaction.atomic():
-                        idem_key = IdempotencyKey.objects.select_for_update().get(pk=record.pk)
-                        IdempotencyDecorator._persist_db(idem_key, response, now=now, expires_at=expires_at)
+                        idem_key = IdempotencyKey.objects.select_for_update().get(
+                            pk=record.pk
+                        )
+                        IdempotencyDecorator._persist_db(
+                            idem_key, response, now=now, expires_at=expires_at
+                        )
                 finally:
                     cached = {
                         "status": (
-                            enums.KeyProcessStatus.SUCCEEDED.value if 200 <= response.status_code < 300 
+                            enums.KeyProcessStatus.SUCCEEDED.value
+                            if 200 <= response.status_code < 300
                             else enums.KeyProcessStatus.FAILED.value
                         ),
                         "request_hash": body_hash,
                         "response_status": response.status_code,
                         "response_body": getattr(response, "data", None),
-                        "lock_until": now.timestamp()
+                        "lock_until": now.timestamp(),
                     }
 
                 return response
-            
+
             function_to_execute.__name__ = function.__name__
             return function_to_execute
-        return inner
-    
 
+        return inner

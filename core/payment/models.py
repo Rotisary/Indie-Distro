@@ -21,14 +21,14 @@ class LedgerAccount(BaseModelMixin):
         verbose_name=_("Ledger Account Owner"),
         related_name="ledger_accounts",
         null=True,
-        blank=True
+        blank=True,
     )
     type = models.CharField(
-        _("Ledger Account Type"), 
-        choices=enums.LedgerAccountType.choices(), 
+        _("Ledger Account Type"),
+        choices=enums.LedgerAccountType.choices(),
         max_length=50,
-        null=False, 
-        blank=False
+        null=False,
+        blank=False,
     )
     currency = models.CharField(
         _("currency"),
@@ -43,30 +43,23 @@ class LedgerAccount(BaseModelMixin):
         verbose_name_plural = _("Ledger Accounts")
         unique_together = [("owner", "type", "currency")]
 
-    
     def __str__(self):
         return f"{self.owner.first_name} ({self.type})"
 
 
 class Transaction(BaseModelMixin):
     reference = models.CharField(
-        _("Transaction Reference"), 
-        null=False, 
-        blank=False,
-        unique=True, 
-        max_length=15
+        _("Transaction Reference"), null=False, blank=False, unique=True, max_length=15
     )
     status = models.CharField(
-        _("Transaction Status"), 
+        _("Transaction Status"),
         choices=enums.TransactionStatus.choices(),
         default=enums.TransactionStatus.PENDING.value,
-        null=False, 
-        blank=False, 
-        max_length=20
+        null=False,
+        blank=False,
+        max_length=20,
     )
-    description = models.CharField(
-        blank=True, null=True, max_length=50
-    )
+    description = models.CharField(blank=True, null=True, max_length=50)
     currency = models.CharField(
         _("currency"),
         null=False,
@@ -78,7 +71,7 @@ class Transaction(BaseModelMixin):
         choices=enums.TransactionPurpose.choices(),
         blank=False,
         null=True,
-        help_text=_("The purpose of the transaction(funding, purchase, payout)")
+        help_text=_("The purpose of the transaction(funding, purchase, payout)"),
     )
     parent_transaction = models.ForeignKey(
         "self",
@@ -88,28 +81,21 @@ class Transaction(BaseModelMixin):
         related_name="child_transactions",
         help_text=_("Parent transaction used to link related payment steps"),
     )
-    metadata = JSONField(
-        _("Metadata"), 
-        null=True, 
-        blank=True,
-        default=dict
-    )
+    metadata = JSONField(_("Metadata"), null=True, blank=True, default=dict)
     successful_at = models.DateTimeField(
-        null=True, 
+        null=True,
         blank=True,
-        help_text=_("Date and Time the transaction was marked as successful") 
+        help_text=_("Date and Time the transaction was marked as successful"),
     )
     failed_at = models.DateTimeField(
         null=True,
         blank=True,
-        help_text=_("Date and Time the transaction was marked as failed")
+        help_text=_("Date and Time the transaction was marked as failed"),
     )
-
 
     class Meta:
         verbose_name = _("Transaction")
         verbose_name_plural = _("Transactions")
-
 
     def __str__(self):
         return f"{self.reference} ({self.status})"
@@ -117,11 +103,11 @@ class Transaction(BaseModelMixin):
 
 class LedgerJournal(BaseModelMixin):
     transaction = models.OneToOneField(
-        "Transaction", 
-        on_delete=models.PROTECT, 
+        "Transaction",
+        on_delete=models.PROTECT,
         related_name="journal",
         null=False,
-        blank=False
+        blank=False,
     )
 
     class Meta:
@@ -136,7 +122,7 @@ class JournalEntry(BaseModelMixin):
         blank=False,
         on_delete=models.CASCADE,
         related_name="entries",
-        help_text=_("Ledger account that the money was moved out of or into")
+        help_text=_("Ledger account that the money was moved out of or into"),
     )
     journal = models.ForeignKey(
         to="LedgerJournal",
@@ -150,23 +136,25 @@ class JournalEntry(BaseModelMixin):
         choices=enums.EntryType.choices(),
         null=False,
         blank=False,
-        verbose_name=_("Entry Type")
+        verbose_name=_("Entry Type"),
     )
     status = models.CharField(
         choices=enums.EntryStatus.choices(),
         default=enums.EntryStatus.PENDING.value,
         null=False,
         blank=False,
-        verbose_name=_("Entry Status")     
+        verbose_name=_("Entry Status"),
     )
     amount = models.DecimalField(
-        _("Entry Amount"), 
-        decimal_places=2, 
+        _("Entry Amount"),
+        decimal_places=2,
         max_digits=17,
         validators=[MinValueValidator(Decimal("0.01"))],
     )
     completed_at = models.DateTimeField(
-        blank=True, null=True, help_text=_("Date and Time the entry was marked as completed") 
+        blank=True,
+        null=True,
+        help_text=_("Date and Time the entry was marked as completed"),
     )
 
     class Meta:

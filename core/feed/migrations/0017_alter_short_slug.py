@@ -6,13 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('feed', '0016_alter_purchase_expiry_time_to_datetime'),
+        ("feed", "0016_alter_purchase_expiry_time_to_datetime"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='short',
-            name='slug',
-            field=models.SlugField(blank=True, help_text='Auto-generated slug from title', max_length=255, verbose_name='Slug'),
+            model_name="short",
+            name="slug",
+            field=models.SlugField(
+                blank=True,
+                help_text="Auto-generated slug from title",
+                max_length=255,
+                verbose_name="Slug",
+            ),
         ),
     ]

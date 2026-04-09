@@ -8,44 +8,107 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('feed', '0006_feed_price'),
+        ("feed", "0006_feed_price"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='feed',
-            name='rental_duration',
-            field=models.IntegerField(blank=True, null=True, verbose_name='Rental Duration(in hours)'),
+            model_name="feed",
+            name="rental_duration",
+            field=models.IntegerField(
+                blank=True, null=True, verbose_name="Rental Duration(in hours)"
+            ),
         ),
         migrations.AddField(
-            model_name='feed',
-            name='sale_type',
-            field=models.CharField(blank=True, choices=[('one-time sale', 'ONE_TIME_SALE'), ('rental', 'RENTAL')], default='one-time sale', help_text='The sale type of the film,(one time sale, rental)', verbose_name='Sale Type'),
+            model_name="feed",
+            name="sale_type",
+            field=models.CharField(
+                blank=True,
+                choices=[("one-time sale", "ONE_TIME_SALE"), ("rental", "RENTAL")],
+                default="one-time sale",
+                help_text="The sale type of the film,(one time sale, rental)",
+                verbose_name="Sale Type",
+            ),
         ),
         migrations.AlterField(
-            model_name='feed',
-            name='length',
-            field=models.DurationField(blank=True, null=True, verbose_name='Film Length(Runtime)'),
+            model_name="feed",
+            name="length",
+            field=models.DurationField(
+                blank=True, null=True, verbose_name="Film Length(Runtime)"
+            ),
         ),
         migrations.CreateModel(
-            name='Purchase',
+            name="Purchase",
             fields=[
-                ('date_added', models.DateTimeField(auto_now_add=True)),
-                ('date_last_modified', models.DateTimeField(auto_now=True)),
-                ('id', models.CharField(blank=True, max_length=100, primary_key=True, serialize=False, unique=True)),
-                ('status', models.CharField(choices=[('active', 'ACTIVE'), ('revoked', 'REVOKED'), ('expired', 'EXPIRED'), ('chargeback', 'CHARGEBACK')], default='revoked', verbose_name='The current status of the purchase')),
-                ('expiry_time', models.TimeField(blank=True, help_text='film time of expiry for rented films', null=True, verbose_name='Time of Expiry')),
-                ('film', models.ForeignKey(help_text='the film that the purchase was made for', on_delete=django.db.models.deletion.CASCADE, related_name='purchases', to='feed.feed', verbose_name='Film of Purchase')),
-                ('owner', models.ForeignKey(help_text='User that made purchase', on_delete=django.db.models.deletion.DO_NOTHING, related_name='purchases_made', to=settings.AUTH_USER_MODEL, verbose_name='Purchase Owner')),
+                ("date_added", models.DateTimeField(auto_now_add=True)),
+                ("date_last_modified", models.DateTimeField(auto_now=True)),
+                (
+                    "id",
+                    models.CharField(
+                        blank=True,
+                        max_length=100,
+                        primary_key=True,
+                        serialize=False,
+                        unique=True,
+                    ),
+                ),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("active", "ACTIVE"),
+                            ("revoked", "REVOKED"),
+                            ("expired", "EXPIRED"),
+                            ("chargeback", "CHARGEBACK"),
+                        ],
+                        default="revoked",
+                        verbose_name="The current status of the purchase",
+                    ),
+                ),
+                (
+                    "expiry_time",
+                    models.TimeField(
+                        blank=True,
+                        help_text="film time of expiry for rented films",
+                        null=True,
+                        verbose_name="Time of Expiry",
+                    ),
+                ),
+                (
+                    "film",
+                    models.ForeignKey(
+                        help_text="the film that the purchase was made for",
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="purchases",
+                        to="feed.feed",
+                        verbose_name="Film of Purchase",
+                    ),
+                ),
+                (
+                    "owner",
+                    models.ForeignKey(
+                        help_text="User that made purchase",
+                        on_delete=django.db.models.deletion.DO_NOTHING,
+                        related_name="purchases_made",
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name="Purchase Owner",
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.AddField(
-            model_name='feed',
-            name='bought',
-            field=models.ManyToManyField(blank=True, related_name='bought_films', through='feed.Purchase', to=settings.AUTH_USER_MODEL, verbose_name='Users Who Have Paid for the film'),
+            model_name="feed",
+            name="bought",
+            field=models.ManyToManyField(
+                blank=True,
+                related_name="bought_films",
+                through="feed.Purchase",
+                to=settings.AUTH_USER_MODEL,
+                verbose_name="Users Who Have Paid for the film",
+            ),
         ),
     ]

@@ -8,7 +8,6 @@ from core.utils.services import FlutterwaveService
 from core.utils.exceptions import exceptions
 
 
-
 @shared_task(bind=True)
 def initiate_subaccount_transfer_task(self, charge_tx_ref: str, amount: str):
     """
@@ -42,14 +41,22 @@ def verify_charge_and_initiate_subaccount_transfer_task(
         verification_response = service.verify_charge(tx_id)
 
         if verification_response.lower() not in ["success", "successful"]:
-            error_data = {"webhook": webhook_payload, "verif_status": verification_response}
-            PaymentHandlers._finalise_failed_charge(tx, error_data, verification_response)
+            error_data = {
+                "webhook": webhook_payload,
+                "verif_status": verification_response,
+            }
+            PaymentHandlers._finalise_failed_charge(
+                tx, error_data, verification_response
+            )
             logger.error(f"Verification failed for tx {tx.reference}")
             return {
                 "verification": verification_response,
             }
 
-        success_data = {"webhook": webhook_payload, "verif_status": verification_response}
+        success_data = {
+            "webhook": webhook_payload,
+            "verif_status": verification_response,
+        }
         PostLedgerData.as_successful(tx, success_data, "charge")
         initiate_subaccount_transfer_task.delay(tx_ref, amount)
         logger.info(
@@ -59,9 +66,7 @@ def verify_charge_and_initiate_subaccount_transfer_task(
             "verification": verification_response,
         }
     except exceptions.ServiceRequestException as exc:
-        logger.error(
-            f"Verification error for charge tx_ref={tx_ref}: {str(exc)}"
-        )
+        logger.error(f"Verification error for charge tx_ref={tx_ref}: {str(exc)}")
         delay = 5 * (self.request.retries + 1)
         raise self.retry(exc=exc, countdown=delay)
     except Exception as exc:
@@ -88,23 +93,27 @@ def verify_transfer_and_finalize_task(
         service = FlutterwaveService()
         verification_response = service.verify_transfer(tx_id)
         if verification_response.lower() not in ["success", "successful"]:
-            error_data = {"webhook": webhook_payload, "verif_status": verification_response}
-            PaymentHandlers._finalise_failed_transfer(tx, error_data, verification_response)
+            error_data = {
+                "webhook": webhook_payload,
+                "verif_status": verification_response,
+            }
+            PaymentHandlers._finalise_failed_transfer(
+                tx, error_data, verification_response
+            )
             logger.error(f"Verification failed for tx {tx.reference}")
             return {
                 "verification": verification_response,
             }
 
-        success_data = {"webhook": webhook_payload, "verif_status": verification_response}
-        PaymentHandlers._finalise_successful_transfer(
-            tx, success_data, Decimal(amount)
-        )
+        success_data = {
+            "webhook": webhook_payload,
+            "verif_status": verification_response,
+        }
+        PaymentHandlers._finalise_successful_transfer(tx, success_data, Decimal(amount))
         logger.info(
             f"Transfer verification and finalisation completed for tx={tx.reference}"
         )
-        return {
-            "verification": verification_response
-        }
+        return {"verification": verification_response}
     except (exceptions.ServiceRequestException,) as exc:
         logger.error(
             f"Verification error for transfer tx_id={tx_id}: {getattr(exc, 'message', str(exc))}"

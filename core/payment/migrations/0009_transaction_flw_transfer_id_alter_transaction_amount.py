@@ -6,18 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('payment', '0008_transaction_transaction_type'),
+        ("payment", "0008_transaction_transaction_type"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='transaction',
-            name='flw_transfer_id',
+            model_name="transaction",
+            name="flw_transfer_id",
             field=models.IntegerField(blank=True, null=True),
         ),
         migrations.AlterField(
-            model_name='transaction',
-            name='amount',
+            model_name="transaction",
+            name="amount",
             field=models.FloatField(default=50),
         ),
     ]

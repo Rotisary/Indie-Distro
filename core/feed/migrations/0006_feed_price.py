@@ -6,13 +6,19 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('feed', '0005_feed_is_released'),
+        ("feed", "0005_feed_is_released"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='feed',
-            name='price',
-            field=models.DecimalField(blank=True, decimal_places=2, max_digits=17, null=True, verbose_name='Film price'),
+            model_name="feed",
+            name="price",
+            field=models.DecimalField(
+                blank=True,
+                decimal_places=2,
+                max_digits=17,
+                null=True,
+                verbose_name="Film price",
+            ),
         ),
     ]

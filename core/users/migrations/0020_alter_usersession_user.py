@@ -8,13 +8,17 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('users', '0019_alter_user_is_creator'),
+        ("users", "0019_alter_user_is_creator"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='usersession',
-            name='user',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='sessions', to=settings.AUTH_USER_MODEL),
+            model_name="usersession",
+            name="user",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="sessions",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
     ]

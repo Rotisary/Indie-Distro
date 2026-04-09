@@ -18,13 +18,7 @@ class FeedAdmin(ModelAdmin):
             _("Meta Information"),
             {
                 "classes": ["tab"],
-                "fields": (
-                    "title",
-                    "slug",
-                    "genre",
-                    "type",
-                    "sale_type"
-                ),
+                "fields": ("title", "slug", "genre", "type", "sale_type"),
             },
         ),
         (
@@ -53,7 +47,13 @@ class FeedAdmin(ModelAdmin):
         ),
     )
 
-    list_display = ["owner__first_name", "owner__last_name", "title", "duration", "price"]
+    list_display = [
+        "owner__first_name",
+        "owner__last_name",
+        "title",
+        "duration",
+        "price",
+    ]
     search_fields = ["title", "type", "sale_type"]
     readonly_fields = ["date_added", "date_last_modified"]
     ordering = ["title"]
@@ -66,10 +66,7 @@ class PurchaseAdmin(ModelAdmin):
             _("Owner"),
             {
                 "classes": ["tab"],
-                "fields": (
-                    "owner",
-                    "film"
-                ),
+                "fields": ("owner", "film"),
             },
         ),
         (
@@ -95,18 +92,8 @@ class PurchaseAdmin(ModelAdmin):
         ),
     )
 
-    list_display = [
-        "id", 
-        "film__id", 
-        "owner__first_name", 
-        "status", 
-        "payment_status"
-    ]
-    search_fields = [
-        "owner__first_name", 
-        "owner__last_name",
-        "film__title"
-    ]
+    list_display = ["id", "film__id", "owner__first_name", "status", "payment_status"]
+    search_fields = ["owner__first_name", "owner__last_name", "film__title"]
     readonly_fields = ["date_added", "date_last_modified"]
     ordering = ["-date_added"]
 

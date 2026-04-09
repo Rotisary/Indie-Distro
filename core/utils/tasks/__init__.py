@@ -32,6 +32,8 @@ def delete_expired_idempotency_keys():
         deleted_count, details = IdempotencyKey.objects.filter(
             expires_at__lte=timezone.now()
         ).delete()
-        print(f"[delete_expired_idempotency_keys] Deleted: {deleted_count} -> {details}")
+        print(
+            f"[delete_expired_idempotency_keys] Deleted: {deleted_count} -> {details}"
+        )
     except Exception as e:
         print(f"[delete_expired_idempotency_keys] Error: {e}")

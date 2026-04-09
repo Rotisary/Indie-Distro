@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('feed', '0001_initial'),
+        ("feed", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='feed',
-            name='length',
-            field=models.TimeField(blank=True, null=True, verbose_name='Film Length'),
+            model_name="feed",
+            name="length",
+            field=models.TimeField(blank=True, null=True, verbose_name="Film Length"),
         ),
     ]

@@ -6,18 +6,35 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('feed', '0014_purchase_payment_status_purchase_transaction'),
+        ("feed", "0014_purchase_payment_status_purchase_transaction"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='purchase',
-            name='payment_status',
-            field=models.CharField(choices=[('pending', 'PENDING'), ('completed', 'COMPLETED'), ('failed', 'FAILED')], default='pending', verbose_name='Purchase Payment Status'),
+            model_name="purchase",
+            name="payment_status",
+            field=models.CharField(
+                choices=[
+                    ("pending", "PENDING"),
+                    ("completed", "COMPLETED"),
+                    ("failed", "FAILED"),
+                ],
+                default="pending",
+                verbose_name="Purchase Payment Status",
+            ),
         ),
         migrations.AlterField(
-            model_name='purchase',
-            name='status',
-            field=models.CharField(choices=[('active', 'ACTIVE'), ('revoked', 'REVOKED'), ('expired', 'EXPIRED'), ('chargeback', 'CHARGEBACK')], default='revoked', verbose_name='Purchase Status'),
+            model_name="purchase",
+            name="status",
+            field=models.CharField(
+                choices=[
+                    ("active", "ACTIVE"),
+                    ("revoked", "REVOKED"),
+                    ("expired", "EXPIRED"),
+                    ("chargeback", "CHARGEBACK"),
+                ],
+                default="revoked",
+                verbose_name="Purchase Status",
+            ),
         ),
     ]

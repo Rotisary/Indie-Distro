@@ -5,7 +5,6 @@ import environ
 
 from .celery import app as celery_app
 
-
 BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
 # This allows easy placement of apps within the interior
 # core directory.

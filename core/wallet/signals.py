@@ -10,4 +10,6 @@ from core.wallet.tasks import create_wallet_for_user
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def create_wallet(sender, instance, **kwargs):
     if instance.is_creator and not Wallet.objects.filter(owner=instance).exists():
-        transaction.on_commit(lambda: create_wallet_for_user.delay(instance.id, trigger_webhook=True))
+        transaction.on_commit(
+            lambda: create_wallet_for_user.delay(instance.id, trigger_webhook=True)
+        )

@@ -8,28 +8,50 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('payment', '0001_initial'),
-        ('users', '0010_wallet_created_at'),
+        ("payment", "0001_initial"),
+        ("users", "0010_wallet_created_at"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Transaction',
+            name="Transaction",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('transaction_id', models.CharField(max_length=15, unique=True)),
-                ('amount', models.IntegerField(default=50)),
-                ('pending', models.BooleanField(default=True)),
-                ('successful', models.BooleanField(default=False)),
-                ('failed', models.BooleanField(default=False)),
-                ('narration', models.TextField(blank=True, max_length=50, null=True)),
-                ('sent_at', models.DateTimeField(auto_now_add=True)),
-                ('receiving_wallet', models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, related_name='money_received', to='users.wallet')),
-                ('sender', models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, related_name='transactions', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("transaction_id", models.CharField(max_length=15, unique=True)),
+                ("amount", models.IntegerField(default=50)),
+                ("pending", models.BooleanField(default=True)),
+                ("successful", models.BooleanField(default=False)),
+                ("failed", models.BooleanField(default=False)),
+                ("narration", models.TextField(blank=True, max_length=50, null=True)),
+                ("sent_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "receiving_wallet",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.DO_NOTHING,
+                        related_name="money_received",
+                        to="users.wallet",
+                    ),
+                ),
+                (
+                    "sender",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.DO_NOTHING,
+                        related_name="transactions",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
         ),
         migrations.DeleteModel(
-            name='Payment',
+            name="Payment",
         ),
     ]

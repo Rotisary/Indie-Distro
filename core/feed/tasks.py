@@ -33,14 +33,18 @@ def release_object(self, object_id: int, object_model_name: str = None):
             else:
                 logger.info(f"{object_model_name}({obj.pk}) already released")
             return "ok"
-        
+
         logger.info(f"{object_model_name}({obj.pk}) has no is_released field")
         return "false"
     except model.DoesNotExist:
-        logger.warning(f"release_object_task: missing model {object_model_name} id={object_id}")
+        logger.warning(
+            f"release_object_task: missing model {object_model_name} id={object_id}"
+        )
         return "missing"
     except Exception as e:
-        logger.error(f"release_object_task error for {object_model_name}({object_id}): {e}")
+        logger.error(
+            f"release_object_task error for {object_model_name}({object_id}): {e}"
+        )
         raise
 
 

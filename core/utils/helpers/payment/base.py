@@ -3,31 +3,25 @@ from decimal import Decimal
 from dataclasses import dataclass
 from requests import RequestException
 
-from core.payment.models import (
-    LedgerAccount, 
-    Transaction, 
-    JournalEntry, 
-    LedgerJournal
-)
+from core.payment.models import LedgerAccount, Transaction, JournalEntry, LedgerJournal
 from core.users.models import User
 from core.utils import enums
 from core.utils.commons.utils.identifiers import ObjectIdentifiers
 from core.utils.services import FlutterwaveService
 from core.utils.exceptions import exceptions
- 
 
 
 class PaymentHelper:
 
     def __init__(
-            self, 
-            user: User, 
-            transaction: Transaction,
-            amount: Decimal,
-            payment_type: str,
-            *,
-            charge_type: str = None,
-        ):
+        self,
+        user: User,
+        transaction: Transaction,
+        amount: Decimal,
+        payment_type: str,
+        *,
+        charge_type: str = None,
+    ):
         self.user = user
         self.payment_type = payment_type
         self.transaction = transaction
@@ -49,8 +43,9 @@ class PaymentHelper:
         error: str = None
         message: str = None
 
-
-    def _build_failure_payload(self, exc: Exception = None) -> tuple[dict, list | None, str | None]:
+    def _build_failure_payload(
+        self, exc: Exception = None
+    ) -> tuple[dict, list | None, str | None]:
         error_list = getattr(exc, "errors", None) if exc else None
         message = getattr(exc, "message", None) if exc else None
         if not message and exc:
@@ -62,8 +57,7 @@ class PaymentHelper:
         }
         return data, error_list, message
 
-
-    def _handle_initiation_failure(self, kind: str, exc = None) -> "PaymentResponse":
+    def _handle_initiation_failure(self, kind: str, exc=None) -> "PaymentResponse":
         from core.utils.helpers.payment import PostLedgerData
         from core.utils.helpers.payment.handlers import PaymentHandlers
 
@@ -78,10 +72,8 @@ class PaymentHelper:
 
         return self.PaymentResponse(status="failed", error=error_list, message=message)
 
-
     def charge_bank(self) -> PaymentResponse:
         return getattr(self, f"charge_{self.charge_type.lower()}_account")()
-
 
     def charge_nigerian_account(self) -> PaymentResponse:
         try:
@@ -89,7 +81,7 @@ class PaymentHelper:
             data = service.charge_nigerian_bank(
                 user=self.user,
                 amount=self.amount,
-                tx_reference=self.transaction.reference
+                tx_reference=self.transaction.reference,
             )
             logger.success("nigerian bank charge initiated")
             self.transaction.status = enums.TransactionStatus.INITIATED.value
@@ -101,15 +93,20 @@ class PaymentHelper:
         except (
             RequestException,
             exceptions.ServiceRequestException,
-            exceptions.CustomException, 
-            exceptions.ClientPaymentException
+            exceptions.CustomException,
+            exceptions.ClientPaymentException,
         ) as exc:
-            logger.error(f"nigerian account charge failed ({self.transaction.reference}): {str(exc)}")
+            logger.error(
+                f"nigerian account charge failed ({self.transaction.reference}): {str(exc)}"
+            )
             return self._handle_initiation_failure("charge", exc)
-               
+
     def transfer(
-            self, beneficiary: dict, description: str, debit_subaccount: str=None, 
-        ) -> PaymentResponse:
+        self,
+        beneficiary: dict,
+        description: str,
+        debit_subaccount: str = None,
+    ) -> PaymentResponse:
         try:
             service = FlutterwaveService()
             data = service.make_transfer(
@@ -117,21 +114,21 @@ class PaymentHelper:
                 amount=self.amount,
                 tx_reference=self.transaction.reference,
                 description=description,
-                debit_subaccount=debit_subaccount
+                debit_subaccount=debit_subaccount,
             )
             logger.success("transfer initiated")
             self.transaction.status = enums.TransactionStatus.INITIATED.value
             self.transaction.metadata["transfer_initiation_data"] = data.get("data", {})
             self.transaction.save(update_fields=["status", "metadata"])
-            return self.PaymentResponse(
-                status="initiated", data=data
-            )
+            return self.PaymentResponse(status="initiated", data=data)
         except (
             RequestException,
             exceptions.ServiceRequestException,
-            exceptions.CustomException
+            exceptions.CustomException,
         ) as exc:
-            logger.error(f"transfer initiation failed ({self.transaction.reference}): {str(exc)}")
+            logger.error(
+                f"transfer initiation failed ({self.transaction.reference}): {str(exc)}"
+            )
             return self._handle_initiation_failure("transfer", exc)
 
 
@@ -139,23 +136,20 @@ class PaymentLedgerCreatorHelpers:
 
     @staticmethod
     def get_or_create_ledger_account(
-        user: User, type: str, currency: str="NGN"
+        user: User, type: str, currency: str = "NGN"
     ) -> LedgerAccount:
         account, created = LedgerAccount.objects.get_or_create(
-            owner=user,
-            type=type,
-            currency=currency
+            owner=user, type=type, currency=currency
         )
         return account
 
-
     @staticmethod
-    def create_ledger_transaction( 
-            tx_purpose: str,
-            description: str = None,
-            currency: str = "NGN",
-            parent_transaction: Transaction = None,
-        ) -> Transaction:
+    def create_ledger_transaction(
+        tx_purpose: str,
+        description: str = None,
+        currency: str = "NGN",
+        parent_transaction: Transaction = None,
+    ) -> Transaction:
         hex_id = ObjectIdentifiers.unique_hex_id()
         tx_reference = f"tx_{hex_id[:13]}"
         transaction = Transaction.objects.create(
@@ -167,29 +161,22 @@ class PaymentLedgerCreatorHelpers:
             parent_transaction=parent_transaction,
         )
         return transaction
-    
 
     @staticmethod
-    def add_transaction_to_journal(
-            transaction: Transaction
-        ) -> LedgerJournal:
-        journal, created = LedgerJournal.objects.get_or_create(
-            transaction=transaction
-        )
+    def add_transaction_to_journal(transaction: Transaction) -> LedgerJournal:
+        journal, created = LedgerJournal.objects.get_or_create(transaction=transaction)
         return journal
-    
 
     @staticmethod
     def create_ledger_entry(
-            journal: LedgerJournal,
-            account: LedgerAccount,
-            entry_type: str,
-            amount: Decimal,
-            currency: str="NGN",
-        ) -> JournalEntry:
+        journal: LedgerJournal,
+        account: LedgerAccount,
+        entry_type: str,
+        amount: Decimal,
+        currency: str = "NGN",
+    ) -> JournalEntry:
         recent = (
-            JournalEntry.objects.filter(journal=journal)
-            .order_by("-created_at").first()
+            JournalEntry.objects.filter(journal=journal).order_by("-created_at").first()
         )
         line_no = 0
         if not recent:
@@ -204,6 +191,6 @@ class PaymentLedgerCreatorHelpers:
             type=entry_type,
             status=enums.EntryStatus.PENDING.value,
             amount=amount,
-            currency=currency
+            currency=currency,
         )
         return entry

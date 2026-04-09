@@ -29,8 +29,8 @@ def create_wallet_for_user(self, user_id: int) -> None:
         with transaction.atomic():
             wallet = Wallet.objects.create(
                 owner=user,
-                account_reference=data['account_reference'],
-                barter_id=data['barter_id'],
+                account_reference=data["account_reference"],
+                barter_id=data["barter_id"],
             )
             wallet.creation_status = enums.WalletCreationStatus.COMPLETED.value
             wallet.save(update_fields=["creation_status", "date_last_modified"])
@@ -53,9 +53,7 @@ def create_wallet_for_user(self, user_id: int) -> None:
             )
             raise exc
 
-        logger.error(
-            f"Wallet creation failed for user {user.id}: {str(exc)}. Retrying"
-        )
+        logger.error(f"Wallet creation failed for user {user.id}: {str(exc)}. Retrying")
         emit_user_event(
             user,
             enums.WalletEventType.WALLET_RETRYING.value,
@@ -86,7 +84,7 @@ def create_wallet_for_user(self, user_id: int) -> None:
         # Rollback subaccount creation on Flutterwave if wallet creation fails
         if data and data.get("account_reference"):
             try:
-                service.delete_subaccount(account_reference=data['account_reference'])
+                service.delete_subaccount(account_reference=data["account_reference"])
             except (Timeout, ConnectionError) as exc:
                 if self.request.retries >= self.max_retries:
                     logger.error(
@@ -99,11 +97,9 @@ def create_wallet_for_user(self, user_id: int) -> None:
                 delay = 5 * (self.request.retries + 1)
                 raise self.retry(exc=exc, countdown=delay)
             except (exceptions.ServiceRequestException, RequestException) as exc:
-                logger.error(
-                    f"Wallet deletion failed for user {user.id}: {str(exc)}"
-                )
+                logger.error(f"Wallet deletion failed for user {user.id}: {str(exc)}")
                 raise exc
-        
+
         emit_user_event(
             user,
             enums.WalletEventType.WALLET_FAILED.value,
@@ -118,17 +114,13 @@ def create_wallet_for_user(self, user_id: int) -> None:
         raise general_exc
 
 
-
 @shared_task(bind=True, max_retries=3, queue="service")
-def fetch_virtual_account_for_wallet(
-        self, wallet_pk: str
-    ) -> None:
+def fetch_virtual_account_for_wallet(self, wallet_pk: str) -> None:
     wallet = Wallet.objects.get(pk=wallet_pk)
     service = FlutterwaveService()
     try:
         service.fetch_static_virtual_account(
-            account_reference=wallet.account_reference,
-            wallet=wallet
+            account_reference=wallet.account_reference, wallet=wallet
         )
         logger.info(f"Virtual account fetched successfully for wallet {wallet.id}")
         wallet.emit_event(enums.WalletEventType.VIRTUAL_ACCOUNT_FETCHED.value)
@@ -139,7 +131,9 @@ def fetch_virtual_account_for_wallet(
             )
             wallet.emit_event(enums.WalletEventType.VIRTUAL_ACCOUNT_FAILED.value)
             raise exc
-        logger.error(f"Virtual account fetch failed for wallet {wallet.id}: {str(exc)}. Retrying")
+        logger.error(
+            f"Virtual account fetch failed for wallet {wallet.id}: {str(exc)}. Retrying"
+        )
         wallet.emit_event(enums.WalletEventType.VIRTUAL_ACCOUNT_RETRYING.value)
         delay = 5 * (self.request.retries + 1)
         raise self.retry(exc=exc, countdown=delay)

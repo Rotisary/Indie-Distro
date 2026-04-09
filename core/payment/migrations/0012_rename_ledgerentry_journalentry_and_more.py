@@ -6,17 +6,29 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('payment', '0011_initial'),
+        ("payment", "0011_initial"),
     ]
 
     operations = [
         migrations.RenameModel(
-            old_name='LedgerEntry',
-            new_name='JournalEntry',
+            old_name="LedgerEntry",
+            new_name="JournalEntry",
         ),
         migrations.AlterField(
-            model_name='transaction',
-            name='status',
-            field=models.CharField(choices=[('Pending', 'PENDING'), ('Initiated', 'INITIATED'), ('Successful', 'SUCCESSFUL'), ('Failed', 'FAILED'), ('Cancelled', 'CANCELLED'), ('Reversed', 'REVERSED')], default='Pending', max_length=20, verbose_name='Transaction Status'),
+            model_name="transaction",
+            name="status",
+            field=models.CharField(
+                choices=[
+                    ("Pending", "PENDING"),
+                    ("Initiated", "INITIATED"),
+                    ("Successful", "SUCCESSFUL"),
+                    ("Failed", "FAILED"),
+                    ("Cancelled", "CANCELLED"),
+                    ("Reversed", "REVERSED"),
+                ],
+                default="Pending",
+                max_length=20,
+                verbose_name="Transaction Status",
+            ),
         ),
     ]

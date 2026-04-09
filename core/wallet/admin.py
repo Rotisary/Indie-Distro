@@ -13,9 +13,7 @@ class WalletAdmin(ModelAdmin):
             _("User"),
             {
                 "classes": ["tab"],
-                "fields": (
-                    "owner",
-                ),
+                "fields": ("owner",),
             },
         ),
         (

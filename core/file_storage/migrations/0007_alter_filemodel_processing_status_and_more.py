@@ -6,18 +6,40 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('file_storage', '0006_filemodel_file_size_alter_filemodel_film'),
+        ("file_storage", "0006_filemodel_file_size_alter_filemodel_film"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='filemodel',
-            name='processing_status',
-            field=models.CharField(choices=[('pending', 'PENDING'), ('running', 'RUNNING'), ('retrying', 'RETRYING'), ('failed', 'FAILED'), ('completed', 'COMPLETED')], default='pending', max_length=16, verbose_name='Processing Status'),
+            model_name="filemodel",
+            name="processing_status",
+            field=models.CharField(
+                choices=[
+                    ("pending", "PENDING"),
+                    ("running", "RUNNING"),
+                    ("retrying", "RETRYING"),
+                    ("failed", "FAILED"),
+                    ("completed", "COMPLETED"),
+                ],
+                default="pending",
+                max_length=16,
+                verbose_name="Processing Status",
+            ),
         ),
         migrations.AlterField(
-            model_name='fileprocessingjob',
-            name='status',
-            field=models.CharField(choices=[('pending', 'PENDING'), ('running', 'RUNNING'), ('retrying', 'RETRYING'), ('failed', 'FAILED'), ('completed', 'COMPLETED')], default='pending', help_text='The status of the file processing job', max_length=32),
+            model_name="fileprocessingjob",
+            name="status",
+            field=models.CharField(
+                choices=[
+                    ("pending", "PENDING"),
+                    ("running", "RUNNING"),
+                    ("retrying", "RETRYING"),
+                    ("failed", "FAILED"),
+                    ("completed", "COMPLETED"),
+                ],
+                default="pending",
+                help_text="The status of the file processing job",
+                max_length=32,
+            ),
         ),
     ]

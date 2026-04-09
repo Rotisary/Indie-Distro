@@ -6,12 +6,15 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('feed', '0007_feed_rental_duration_feed_sale_type_and_more'),
+        ("feed", "0007_feed_rental_duration_feed_sale_type_and_more"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='purchase',
-            options={'verbose_name': 'Film Purchase', 'verbose_name_plural': 'Film Purchases'},
+            name="purchase",
+            options={
+                "verbose_name": "Film Purchase",
+                "verbose_name_plural": "Film Purchases",
+            },
         ),
     ]

@@ -11,7 +11,7 @@ from .views import (
     PublicShortsList,
     PurchaseFilm,
     UserFeedsList,
-    UserShortsList
+    UserShortsList,
 )
 
 urlpatterns = [

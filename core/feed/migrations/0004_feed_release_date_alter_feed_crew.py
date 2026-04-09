@@ -6,18 +6,29 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('feed', '0003_alter_feed_crew'),
+        ("feed", "0003_alter_feed_crew"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='feed',
-            name='release_date',
-            field=models.DateField(blank=True, help_text='The date the film was/is to be released', null=True, verbose_name='Release Date '),
+            model_name="feed",
+            name="release_date",
+            field=models.DateField(
+                blank=True,
+                help_text="The date the film was/is to be released",
+                null=True,
+                verbose_name="Release Date ",
+            ),
         ),
         migrations.AlterField(
-            model_name='feed',
-            name='crew',
-            field=models.JSONField(blank=True, default=dict, help_text='List of the names of film crew members', null=True, verbose_name='Film Crew'),
+            model_name="feed",
+            name="crew",
+            field=models.JSONField(
+                blank=True,
+                default=dict,
+                help_text="List of the names of film crew members",
+                null=True,
+                verbose_name="Film Crew",
+            ),
         ),
     ]

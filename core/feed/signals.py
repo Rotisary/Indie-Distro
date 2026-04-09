@@ -46,9 +46,11 @@ def capture_feed_release_date(sender, instance: Feed, **kwargs):
         instance._previous_release_date = None
         return
 
-    previous = sender.objects.filter(pk=instance.pk).values_list(
-        "release_date", flat=True
-    ).first()
+    previous = (
+        sender.objects.filter(pk=instance.pk)
+        .values_list("release_date", flat=True)
+        .first()
+    )
     instance._previous_release_date = previous
 
 
@@ -58,7 +60,9 @@ def capture_short_release_date(sender, instance: Short, **kwargs):
         instance._previous_release_date = None
         return
 
-    previous = sender.objects.filter(pk=instance.pk).values_list(
-        "release_date", flat=True
-    ).first()
+    previous = (
+        sender.objects.filter(pk=instance.pk)
+        .values_list("release_date", flat=True)
+        .first()
+    )
     instance._previous_release_date = previous

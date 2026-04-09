@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('users', '0011_subaccount'),
+        ("users", "0011_subaccount"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='subaccount',
-            name='created_at',
+            model_name="subaccount",
+            name="created_at",
             field=models.DateTimeField(blank=True, null=True),
         ),
     ]

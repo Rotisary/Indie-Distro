@@ -6,13 +6,22 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('wallet', '0003_wallet_virtual_bank_code'),
+        ("wallet", "0003_wallet_virtual_bank_code"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='wallet',
-            name='creation_status',
-            field=models.CharField(choices=[('pending', 'PENDING'), ('failed', 'FAILED'), ('completed', 'COMPLETED')], default='pending', max_length=20, verbose_name='Wallet Creation Status'),
+            model_name="wallet",
+            name="creation_status",
+            field=models.CharField(
+                choices=[
+                    ("pending", "PENDING"),
+                    ("failed", "FAILED"),
+                    ("completed", "COMPLETED"),
+                ],
+                default="pending",
+                max_length=20,
+                verbose_name="Wallet Creation Status",
+            ),
         ),
     ]

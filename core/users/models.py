@@ -17,7 +17,13 @@ class UserManager(BaseUserManager):
     use_in_migrations = True
 
     def _create_user(
-        self, email: str, first_name: str, last_name: str, username: str, password: str, **extra_fields
+        self,
+        email: str,
+        first_name: str,
+        last_name: str,
+        username: str,
+        password: str,
+        **extra_fields,
     ):
         if not email:
             raise ValueError("The email field is required")
@@ -27,30 +33,38 @@ class UserManager(BaseUserManager):
             raise ValueError("The last name field is required")
         if not username:
             raise ValueError("The username field is required")
-        
+
         email = self.normalize_email(email)
         user = self.model(
-            email=email, 
-            first_name=first_name, 
-            last_name=last_name, 
+            email=email,
+            first_name=first_name,
+            last_name=last_name,
             username=username,
-            **extra_fields
+            **extra_fields,
         )
         user.password = make_password(password)
         user.save(using=self._db)
         return user
 
     def create_user(
-            self, email: str, first_name: str, last_name: str, username: str, password: str = None, **extra_fields
-        ):
+        self,
+        email: str,
+        first_name: str,
+        last_name: str,
+        username: str,
+        password: str = None,
+        **extra_fields,
+    ):
         extra_fields.setdefault("is_superuser", False)
-        return self._create_user(email, first_name, last_name, username, password, **extra_fields)
+        return self._create_user(
+            email, first_name, last_name, username, password, **extra_fields
+        )
 
     def create_superuser(
         self,
         email: str,
-        first_name: str, 
-        last_name: str, 
+        first_name: str,
+        last_name: str,
         username: str,
         password: str,
         account_type: str = enums.UserAccountType.SUPER_ADMINISTRATOR.value,
@@ -66,7 +80,9 @@ class UserManager(BaseUserManager):
         extra_fields.setdefault("account_type", account_type)
         if extra_fields.get("is_superuser") is not True:
             raise ValueError("Superuser must have is_superuser=True.")
-        return self._create_user(email, first_name, last_name, username, password, **extra_fields)
+        return self._create_user(
+            email, first_name, last_name, username, password, **extra_fields
+        )
 
 
 class User(AbstractBaseUser, PermissionsMixin, mixins.BaseModelMixin):
@@ -134,10 +150,14 @@ class User(AbstractBaseUser, PermissionsMixin, mixins.BaseModelMixin):
         null=False,
         blank=True,
     )
-    has_pending_issues = models.BooleanField(
-        _("Has Pending Issue?"), default=False, blank=True, null=False
-    ),
-    is_creator = models.BooleanField(_("Is user a film creator?"), blank=True, default=False)
+    has_pending_issues = (
+        models.BooleanField(
+            _("Has Pending Issue?"), default=False, blank=True, null=False
+        ),
+    )
+    is_creator = models.BooleanField(
+        _("Is user a film creator?"), blank=True, default=False
+    )
     is_staff = models.BooleanField(
         _("staff status"),
         default=False,
@@ -162,7 +182,6 @@ class User(AbstractBaseUser, PermissionsMixin, mixins.BaseModelMixin):
         verbose_name = _("User")
         verbose_name_plural = _("Users")
 
-
     def retrieve_auth_token(self):
         data = {}
         refresh = RefreshToken.for_user(self)
@@ -180,10 +199,7 @@ class User(AbstractBaseUser, PermissionsMixin, mixins.BaseModelMixin):
 
 class UserSession(mixins.BaseModelMixin):
     user = models.ForeignKey(
-        User, 
-        on_delete=models.CASCADE,
-        related_name="sessions",
-        null=False
+        User, on_delete=models.CASCADE, related_name="sessions", null=False
     )
     refresh = models.CharField(max_length=255, unique=True, null=True, blank=True)
     access = models.CharField(max_length=255, unique=True, null=True, blank=True)
@@ -198,4 +214,3 @@ class UserSession(mixins.BaseModelMixin):
 
     def __str__(self):
         return f"{self.user.email} - {self.ip_address}"
-

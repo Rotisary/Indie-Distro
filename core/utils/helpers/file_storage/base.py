@@ -40,18 +40,15 @@ class StorageClient:
             aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
             aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
             region_name=settings.AWS_S3_REGION_NAME,
-            endpoint_url=settings.AWS_S3_ENDPOINT_URL
+            endpoint_url=settings.AWS_S3_ENDPOINT_URL,
         )
-
 
     @staticmethod
     def get_mime_type(file_name):
-
         """Determine the MIME type of a file based on its name."""
 
         mime_type, *_ = mimetypes.guess_type(file_name)
         return mime_type if mime_type else "application/octet-stream"
-    
 
     def generate_presigned_get_url(self, file_key, expires_in=3600):
         """
@@ -60,10 +57,10 @@ class StorageClient:
         expires_in: link validity in seconds
         """
 
-        assert(
+        assert (
             settings.USING_MANAGED_STORAGE
         ), "Cannot invoke this function when not using managed storage"
-        try:          
+        try:
             presigned_url = self.s3_client.generate_presigned_url(
                 "get_object",
                 Params={
@@ -76,19 +73,14 @@ class StorageClient:
             logger.error(f"presigned url generation failed: {e}")
             raise exceptions.CustomException(
                 message="presigned url generation failed",
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
         return presigned_url
 
-
     def upload_file_to_s3(
-            self, 
-            local_path: str, 
-            key: str, 
-            content_type: Optional[str] = None,
-            **kwargs
-        ) -> None:
+        self, local_path: str, key: str, content_type: Optional[str] = None, **kwargs
+    ) -> None:
         assert settings.USING_MANAGED_STORAGE, "Managed storage must be enabled"
         bucket = settings.AWS_STORAGE_BUCKET_NAME
         extra = {}
@@ -97,9 +89,7 @@ class StorageClient:
 
         def _upload():
             logger.info(f"Uploading {local_path} -> s3://{bucket}/{key}")
-            self.s3_client.upload_file(
-                local_path, bucket, key, ExtraArgs=extra or None
-            )
+            self.s3_client.upload_file(local_path, bucket, key, ExtraArgs=extra or None)
 
         def _on_retry(exc, attempt, delay):
             logger.warning(
@@ -129,7 +119,6 @@ class StorageClient:
                 status_code=status.HTTP_502_BAD_GATEWAY,
             )
 
-
     def download_file_from_s3(self, key: str, local_path: str, **kwargs) -> str:
         """
         Download an object from S3/Spaces to a local file path (creates parent dirs).
@@ -138,6 +127,7 @@ class StorageClient:
         assert settings.USING_MANAGED_STORAGE, "Managed storage must be enabled"
         bucket = settings.AWS_STORAGE_BUCKET_NAME
         os.makedirs(os.path.dirname(local_path), exist_ok=True)
+
         def _download():
             logger.info(f"Downloading s3://{bucket}/{key} -> {local_path}")
             self.s3_client.download_file(bucket, key, local_path)
@@ -170,7 +160,7 @@ class StorageClient:
                 message=message,
                 status_code=status.HTTP_502_BAD_GATEWAY,
             )
-    
+
 
 class StorageUtils:
     "Utility helpers for managed storage processes"
@@ -220,13 +210,10 @@ class StorageUtils:
                 message=message,
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
-        
+
     @staticmethod
     def run_cmd(
-        cmd: Iterable[str], 
-        timeout: int = 3600, 
-        cwd: Optional[str] = None, 
-        **kwargs
+        cmd: Iterable[str], timeout: int = 3600, cwd: Optional[str] = None, **kwargs
     ) -> str:
         """
         Run a command safely; return (stdout, stderr). Raise on failure.
@@ -235,6 +222,7 @@ class StorageUtils:
         logger.info(f"Running command: {cmd}")
         if cwd:
             logger.info(f"Working directory: {cwd}")
+
         def _run():
             return subprocess.run(
                 list(cmd),
@@ -246,9 +234,7 @@ class StorageUtils:
             )
 
         def _on_retry(exc, attempt, delay):
-            logger.warning(
-                f"Command retry {attempt} in {delay}s: {cmd} ({exc})"
-            )
+            logger.warning(f"Command retry {attempt} in {delay}s: {cmd} ({exc})")
 
         try:
             response = StorageUtils._retry_operation(
@@ -288,12 +274,11 @@ class StorageUtils:
                 message="unexpected error running command",
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
-        
-    
+
     @staticmethod
     def make_tempdir(prefix: str = "proc-") -> str:
         return tempfile.mkdtemp(prefix=prefix)
- 
+
     @staticmethod
     def get_job_workdir(job_id: int) -> str:
         """
@@ -308,7 +293,7 @@ class StorageUtils:
     def ensure_dir(path: str) -> str:
         os.makedirs(path, exist_ok=True)
         return path
-    
+
     @staticmethod
     def cleanup_job_workdir(job_id: int) -> None:
         job_dir = os.path.join(settings.BASE_DIR, "jobs", str(job_id))

@@ -5,7 +5,7 @@ from .views import (
     BecomeCreator,
     Login,
     Logout,
-    TokenRefresh
+    TokenRefresh,
 )
 
 urlpatterns = [

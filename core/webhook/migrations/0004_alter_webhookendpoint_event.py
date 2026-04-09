@@ -6,13 +6,23 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('webhook', '0003_alter_webhookendpoint_event'),
+        ("webhook", "0003_alter_webhookendpoint_event"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='webhookendpoint',
-            name='event',
-            field=models.CharField(choices=[('processing_complete', 'PROCESSING_COMPLETED'), ('processing_failed', 'PROCESSING_FAILED'), ('wallet_creation_completed', 'WALLET_CREATION_COMPLETED'), ('wallet_creation_failed', 'WALLET_CREATION_FAILED')], help_text='The event that triggers this webhook', max_length=64, verbose_name='Webhook Event'),
+            model_name="webhookendpoint",
+            name="event",
+            field=models.CharField(
+                choices=[
+                    ("processing_complete", "PROCESSING_COMPLETED"),
+                    ("processing_failed", "PROCESSING_FAILED"),
+                    ("wallet_creation_completed", "WALLET_CREATION_COMPLETED"),
+                    ("wallet_creation_failed", "WALLET_CREATION_FAILED"),
+                ],
+                help_text="The event that triggers this webhook",
+                max_length=64,
+                verbose_name="Webhook Event",
+            ),
         ),
     ]

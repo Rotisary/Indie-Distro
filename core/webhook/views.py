@@ -5,9 +5,8 @@ from rest_framework import views, status, response
 from rest_framework.parsers import JSONParser
 
 from loguru import logger
- 
-from core.utils.helpers.payment.handlers import PaymentHandlers
 
+from core.utils.helpers.payment.handlers import PaymentHandlers
 
 
 class FlutterwaveWebhook(views.APIView):

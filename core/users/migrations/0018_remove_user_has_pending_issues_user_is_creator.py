@@ -6,17 +6,19 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('users', '0017_alter_user_options'),
+        ("users", "0017_alter_user_options"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='user',
-            name='has_pending_issues',
+            model_name="user",
+            name="has_pending_issues",
         ),
         migrations.AddField(
-            model_name='user',
-            name='is_creator',
-            field=models.BooleanField(default=False, verbose_name='Is user a film creator?'),
+            model_name="user",
+            name="is_creator",
+            field=models.BooleanField(
+                default=False, verbose_name="Is user a film creator?"
+            ),
         ),
     ]

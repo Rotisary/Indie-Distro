@@ -15,15 +15,7 @@ class BaseFilmSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Feed
-        fields = [
-            "id",
-            "title",
-            "plot",
-            "release_date",
-            "duration",
-            "genre",
-            "type"
-        ]
+        fields = ["id", "title", "plot", "release_date", "duration", "genre", "type"]
 
 
 class FeedSerializer:
@@ -36,36 +28,37 @@ class FeedSerializer:
                 "saved",
                 "is_released",
                 "date_added",
-                "date_last_modified"
+                "date_last_modified",
             ]
-        
 
         def validate_cast(self, value):
             if len(value) > 5:
-                raise serializers.ValidationError("Cannot have more than 5 major actors.")
+                raise serializers.ValidationError(
+                    "Cannot have more than 5 major actors."
+                )
             return value
-        
 
         def validate_crew(self, value):
             if len(value) > 5:
-                raise serializers.ValidationError("Cannot have more than 5 crew members.")
+                raise serializers.ValidationError(
+                    "Cannot have more than 5 crew members."
+                )
             return value
-        
+
         def validate_release_date(self, value):
             if value and value <= datetime.date.today():
                 raise serializers.ValidationError(
                     "Release date cannot be today. Please set a date later than today."
                 )
             return value
-        
-    
+
     class FeedOwnerRetrieve(serializers.ModelSerializer):
         owner = BaseUserSerializer()
 
         class Meta:
             model = Feed
             exclude = ["saved", "date_last_modified"]
-    
+
     class FeedRetrieve(serializers.ModelSerializer):
         owner = BaseUserSerializer()
 
@@ -73,15 +66,16 @@ class FeedSerializer:
             model = Feed
             exclude = ["bought", "saved", "date_last_modified"]
 
-    
+
 class ShortSerializer:
     class ShortCreate(serializers.ModelSerializer):
         film = serializers.PrimaryKeyRelatedField(
             queryset=Feed.objects.all(),
             required=True,
             allow_null=False,
-            help_text=_("The film this short is associated with, if any.")
+            help_text=_("The film this short is associated with, if any."),
         )
+
         class Meta:
             model = Short
             exclude = [
@@ -126,7 +120,9 @@ class ShortSerializer:
 
 class FilmPurchaseSerializer:
     class CreatePurchase(serializers.ModelSerializer):
-        method = serializers.ChoiceField(choices=enums.PaymentType.choices(), required=True)
+        method = serializers.ChoiceField(
+            choices=enums.PaymentType.choices(), required=True
+        )
         wallet_pin = serializers.CharField(
             required=True,
             write_only=True,
@@ -138,16 +134,15 @@ class FilmPurchaseSerializer:
             model = Purchase
             fields = ["method", "wallet_pin"]
 
-
         def validate(self, attrs):
             user = self.context["request"].user
             film = self.context.get("film")
 
             if Purchase.objects.filter(
                 owner=user,
-                film=film, 
+                film=film,
                 payment_status=enums.PurchasePaymentStatus.COMPLETED.value,
-                status=enums.PurchaseStatusType.ACTIVE.value
+                status=enums.PurchaseStatusType.ACTIVE.value,
             ).exists():
                 raise exceptions.CustomException(
                     message="User has already purchased this film."
@@ -166,17 +161,18 @@ class FilmPurchaseSerializer:
             )
 
             return purchase
-    
+
     class FilmPurchaseResponse(serializers.Serializer):
         status = serializers.CharField(
             read_only=True, help_text=_("The status of the transfer")
         )
         data = serializers.DictField(
-            read_only=True, help_text=_("The provider status and approval status of the transfer")
+            read_only=True,
+            help_text=_("The provider status and approval status of the transfer"),
         )
         error = serializers.CharField(read_only=True)
         message = serializers.CharField(read_only=True)
-    
+
     class RetrievePurchase(serializers.ModelSerializer):
         film = BaseFilmSerializer()
         owner = BaseUserSerializer()

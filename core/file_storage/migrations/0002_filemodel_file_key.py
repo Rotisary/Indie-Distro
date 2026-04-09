@@ -6,13 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('file_storage', '0001_initial'),
+        ("file_storage", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='filemodel',
-            name='file_key',
-            field=models.CharField(help_text='The file key in the storage provider', max_length=255, null=True, verbose_name='File Key'),
+            model_name="filemodel",
+            name="file_key",
+            field=models.CharField(
+                help_text="The file key in the storage provider",
+                max_length=255,
+                null=True,
+                verbose_name="File Key",
+            ),
         ),
     ]

@@ -6,18 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('users', '0004_wallet'),
+        ("users", "0004_wallet"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='wallet',
-            name='account_number',
+            model_name="wallet",
+            name="account_number",
             field=models.BigIntegerField(unique=True),
         ),
         migrations.AlterField(
-            model_name='wallet',
-            name='wallet_pin',
+            model_name="wallet",
+            name="wallet_pin",
             field=models.IntegerField(),
         ),
     ]

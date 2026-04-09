@@ -6,7 +6,7 @@ from django.db.models import JSONField
 from django.utils.text import slugify
 
 
-from  core.utils.mixins import BaseModelMixin
+from core.utils.mixins import BaseModelMixin
 from core.utils import enums
 from core.users.models import User
 from core.file_storage.models import FileModel
@@ -47,33 +47,30 @@ class Feed(BaseModelMixin):
         max_length=100,
         blank=False,
         null=False,
-        help_text=_("The type of film e.g Series, Standalone")
+        help_text=_("The type of film e.g Series, Standalone"),
     )
     duration = models.DurationField(_("Film duration(Runtime)"), null=True, blank=True)
     release_date = models.DateField(
         _("Release Date "),
         null=True,
         blank=True,
-        help_text=_("The date the film was/is to be released")
+        help_text=_("The date the film was/is to be released"),
     )
     release_task_id = models.CharField(
         _("Release Task Id"),
         max_length=255,
         null=True,
         blank=True,
-        help_text=_("Celery task id scheduled to release this film")
+        help_text=_("Celery task id scheduled to release this film"),
     )
     scheduled_release_at = models.DateTimeField(
         _("Scheduled Release At"),
         null=True,
         blank=True,
-        help_text=_("Datetime this film is scheduled to be released")
+        help_text=_("Datetime this film is scheduled to be released"),
     )
     is_released = models.BooleanField(
-        _("Has the movie been released?"),
-        blank=True,
-        null=True,
-        default=False
+        _("Has the movie been released?"), blank=True, null=True, default=False
     )
     cast = ArrayField(
         models.CharField(max_length=100),
@@ -97,18 +94,14 @@ class Feed(BaseModelMixin):
         help_text="Language of the movie, e.g., 'en' for English",
     )
     sale_type = models.CharField(
-        choices=enums.FilmSaleType.choices(), 
+        choices=enums.FilmSaleType.choices(),
         default=enums.FilmSaleType.ONE_TIME_SALE.value,
         verbose_name=_("Sale Type"),
         blank=True,
-        help_text=_("The sale type of the film,(one time sale, rental)"),     
+        help_text=_("The sale type of the film,(one time sale, rental)"),
     )
     price = models.DecimalField(
-        _("Film price"),
-        decimal_places=2, 
-        max_digits=17,
-        null=True, 
-        blank=True
+        _("Film price"), decimal_places=2, max_digits=17, null=True, blank=True
     )
     rental_duration = models.IntegerField(
         verbose_name=_("Rental Duration(in hours)"), blank=True, null=True
@@ -118,7 +111,7 @@ class Feed(BaseModelMixin):
         through="Purchase",
         verbose_name=_("Users Who Have Paid for the film"),
         related_name="bought_films",
-        blank=True
+        blank=True,
     )
     saved = models.ManyToManyField(
         to="users.User",
@@ -127,29 +120,22 @@ class Feed(BaseModelMixin):
         blank=True,
     )
 
-
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(self.title)
         super().save(*args, **kwargs)
 
-
     class Meta:
         verbose_name = _("Film")
         verbose_name_plural = _("Films")
 
-
     def __str__(self):
         return f"{self.slug}"
-    
+
 
 class Purchase(BaseModelMixin):
     id = models.CharField(
-        primary_key=True, 
-        blank=True, 
-        null=False, 
-        unique=True, 
-        max_length=100
+        primary_key=True, blank=True, null=False, unique=True, max_length=100
     )
     owner = models.ForeignKey(
         to="users.User",
@@ -165,7 +151,7 @@ class Purchase(BaseModelMixin):
         verbose_name="Film of Purchase",
         on_delete=models.CASCADE,
         related_name="purchases",
-        help_text=_("the film that the purchase was made for")
+        help_text=_("the film that the purchase was made for"),
     )
     transaction = models.ForeignKey(
         to=Transaction,
@@ -173,23 +159,23 @@ class Purchase(BaseModelMixin):
         null=True,
         blank=False,
         related_name="purchases",
-        help_text=_("The transaction associated with this purchase")
+        help_text=_("The transaction associated with this purchase"),
     )
     payment_status = models.CharField(
         choices=enums.PurchasePaymentStatus.choices(),
         default=enums.PurchasePaymentStatus.PENDING.value,
-        verbose_name=_("Purchase Payment Status")
+        verbose_name=_("Purchase Payment Status"),
     )
     status = models.CharField(
-        choices=enums.PurchaseStatusType.choices(), 
-        default=enums.PurchaseStatusType.REVOKED.value, 
-        verbose_name=_("Purchase Status")
+        choices=enums.PurchaseStatusType.choices(),
+        default=enums.PurchaseStatusType.REVOKED.value,
+        verbose_name=_("Purchase Status"),
     )
     method = models.CharField(
         choices=enums.PaymentType.choices(),
         blank=True,
         null=True,
-        verbose_name=_("Purchase Method")
+        verbose_name=_("Purchase Method"),
     )
     expiry_time = models.DateTimeField(
         _("Expiry Time"),
@@ -199,16 +185,14 @@ class Purchase(BaseModelMixin):
     )
 
     class Meta:
-        verbose_name = _('Film Purchase')
+        verbose_name = _("Film Purchase")
         verbose_name_plural = _("Film Purchases")
-
 
     def save(self, *args, **kwargs):
         if not self.id:
             self.id = uuid.uuid4()
         super().save(*args, **kwargs)
 
-    
     def __str__(self):
         return f"film({self.film.id})-{self.owner.first_name}-purchase({self.id})"
 
@@ -255,7 +239,9 @@ class Short(BaseModelMixin):
         blank=True,
         help_text=_("A short caption for the short"),
     )
-    duration = models.DurationField(_("Short Duration (Runtime)"), null=True, blank=True)
+    duration = models.DurationField(
+        _("Short Duration (Runtime)"), null=True, blank=True
+    )
     language = models.CharField(
         _("Language"),
         max_length=2,
@@ -279,13 +265,13 @@ class Short(BaseModelMixin):
         max_length=255,
         null=True,
         blank=True,
-        help_text=_("Celery task id scheduled to release this short")
+        help_text=_("Celery task id scheduled to release this short"),
     )
     scheduled_release_at = models.DateTimeField(
         _("Scheduled Release At"),
         null=True,
         blank=True,
-        help_text=_("Datetime this short is scheduled to be released")
+        help_text=_("Datetime this short is scheduled to be released"),
     )
     is_released = models.BooleanField(
         _("Has the short been released?"),

@@ -6,13 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('payment', '0007_alter_transaction_recipient_bank'),
+        ("payment", "0007_alter_transaction_recipient_bank"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='transaction',
-            name='transaction_type',
-            field=models.CharField(blank=True, choices=[('internal', 'internal'), ('external', 'external')], max_length=50, null=True),
+            model_name="transaction",
+            name="transaction_type",
+            field=models.CharField(
+                blank=True,
+                choices=[("internal", "internal"), ("external", "external")],
+                max_length=50,
+                null=True,
+            ),
         ),
     ]

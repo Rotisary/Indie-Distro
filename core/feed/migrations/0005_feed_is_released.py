@@ -6,13 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('feed', '0004_feed_release_date_alter_feed_crew'),
+        ("feed", "0004_feed_release_date_alter_feed_crew"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='feed',
-            name='is_released',
-            field=models.BooleanField(blank=True, default=False, null=True, verbose_name='Has the movie been released?'),
+            model_name="feed",
+            name="is_released",
+            field=models.BooleanField(
+                blank=True,
+                default=False,
+                null=True,
+                verbose_name="Has the movie been released?",
+            ),
         ),
     ]

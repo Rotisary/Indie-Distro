@@ -6,11 +6,11 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('webhook', '0005_alter_webhookendpoint_event'),
+        ("webhook", "0005_alter_webhookendpoint_event"),
     ]
 
     operations = [
         migrations.DeleteModel(
-            name='WebhookEndpoint',
+            name="WebhookEndpoint",
         ),
     ]

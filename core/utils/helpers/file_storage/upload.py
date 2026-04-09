@@ -15,19 +15,17 @@ class FileUploadUtils:
     """Utility class for handling file uploads to S3."""
 
     @staticmethod
-    def save_file_metadata_in_memory(owner, file_id, file_key: str, expires_in=settings.PRESIGNED_UPLOAD_TTL) -> str:
+    def save_file_metadata_in_memory(
+        owner, file_id, file_key: str, expires_in=settings.PRESIGNED_UPLOAD_TTL
+    ) -> str:
         """
         Store file metadata in cache for a limited time. This is useful for tracking file uploads.
         """
 
         cache_key = f"pending_upload-{file_id}"
-        cache_value = {
-            "file_key": file_key,
-            "owner": owner.id
-        }
+        cache_value = {"file_key": file_key, "owner": owner.id}
         cache.set(cache_key, cache_value, timeout=expires_in)
         return cache_key
-    
 
     @staticmethod
     def get_file_key(owner, file_name: str, purpose: str) -> dict:
@@ -48,28 +46,25 @@ class FileUploadUtils:
         file_key = f"uploads/{owner_email}/{purpose}/{file_id}{extension}"
         FileUploadUtils.save_file_metadata_in_memory(owner, file_id, file_key)
         logger.info(f"file key generated for filr {file_name}: {file_key}")
-        data = {
-            "file_id": file_id,
-            "file_key": file_key
-        }
+        data = {"file_id": file_id, "file_key": file_key}
         return data
-    
-    
 
     @staticmethod
-    def generate_presigned_upload_url(file_key: str, file_name: str, expires_in=settings.PRESIGNED_UPLOAD_TTL):
+    def generate_presigned_upload_url(
+        file_key: str, file_name: str, expires_in=settings.PRESIGNED_UPLOAD_TTL
+    ):
         """
         Generate a pre-signed URL for uploading to S3.
         file_key: the S3 key (path inside bucket)
         expires_in: link validity in seconds
         """
 
-        assert(
+        assert (
             settings.USING_MANAGED_STORAGE
         ), "Cannot invoke this function when not using managed storage"
         try:
             storage_helper = StorageClient()
-            
+
             presigned_url = storage_helper.s3_client.generate_presigned_url(
                 "put_object",
                 Params={
@@ -83,7 +78,7 @@ class FileUploadUtils:
             logger.error(f"presigned url generation failed: {e}")
             raise exceptions.CustomException(
                 message="presigned url generation failed",
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
         logger.info(f"presigned url generated successfully for {file_key}")

@@ -6,23 +6,23 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('payment', '0005_remove_transaction_recipient_and_more'),
+        ("payment", "0005_remove_transaction_recipient_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='transaction',
-            name='recipient_account_number',
+            model_name="transaction",
+            name="recipient_account_number",
             field=models.CharField(max_length=10),
         ),
         migrations.AlterField(
-            model_name='transaction',
-            name='recipient_bank',
+            model_name="transaction",
+            name="recipient_bank",
             field=models.CharField(max_length=225),
         ),
         migrations.AlterField(
-            model_name='transaction',
-            name='recipient_name',
+            model_name="transaction",
+            name="recipient_name",
             field=models.CharField(max_length=225),
         ),
     ]

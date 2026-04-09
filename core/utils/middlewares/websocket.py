@@ -22,7 +22,7 @@ class JWTAuthMiddleware(BaseMiddleware):
             logger.info(f"WebSocket authenticated: user_id={user.id}")
         else:
             logger.warning("WebSocket connection with invalid/missing token")
-            
+
         return await super().__call__(scope, receive, send)
 
     @database_sync_to_async

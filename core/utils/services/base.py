@@ -14,13 +14,13 @@ class BaseService:
     """
 
     def __init__(
-            self, 
-            base_url: str, 
-            api_key: str=None,
-            *,
-            retries: int=3, 
-            backoff_factor: float=0.5
-        ):
+        self,
+        base_url: str,
+        api_key: str = None,
+        *,
+        retries: int = 3,
+        backoff_factor: float = 0.5,
+    ):
         self.base_url = base_url
         self.api_key = api_key
 
@@ -35,25 +35,19 @@ class BaseService:
         )
         adapter = HTTPAdapter(max_retries=retry)
         self.session.mount("https://", adapter)
-        self.session.mount("http://", adapter)      
-
+        self.session.mount("http://", adapter)
 
     @staticmethod
     def _clean_payload(payload: dict) -> dict:
         return {key: value for key, value in payload.items() if value is not None}
-    
 
     def get_headers(self) -> dict:
-        headers = {
-            "accept": "application/json",
-            "Content-Type": "application/json"
-        }
+        headers = {"accept": "application/json", "Content-Type": "application/json"}
         if self.api_key:
             headers["Authorization"] = f"Bearer {self.api_key}"
         return headers
 
-
-    def post(self, endpoint: str, data: dict, timeout: int=15):
+    def post(self, endpoint: str, data: dict, timeout: int = 15):
         url = f"{self.base_url}/{endpoint}"
         headers = self.get_headers()
         clean_data = self._clean_payload(data)
@@ -63,27 +57,27 @@ class BaseService:
             )
         except requests.RequestException as e:
             logger.error(f"Request failed: {e}")
-            raise       
+            raise
         return response
 
-
-    def get(self, endpoint: str, params: dict=None, timeout: int=15):
+    def get(self, endpoint: str, params: dict = None, timeout: int = 15):
         url = f"{self.base_url}/{endpoint}"
         headers = self.get_headers()
         try:
-            response = self.session.get(url, headers=headers, params=params, timeout=timeout)
+            response = self.session.get(
+                url, headers=headers, params=params, timeout=timeout
+            )
         except requests.RequestException as e:
             logger.error(f"Request failed: {e}")
-            raise      
+            raise
         return response
 
-
-    def delete(self, endpoint: str, timeout: int=15):
+    def delete(self, endpoint: str, timeout: int = 15):
         url = f"{self.base_url}/{endpoint}"
         headers = self.get_headers()
         try:
             response = self.session.delete(url, headers=headers, timeout=timeout)
         except requests.RequestException as e:
             logger.error(f"Request failed: {e}")
-            raise      
+            raise
         return response

@@ -22,8 +22,7 @@ class PaymentHandlers:
 
         if tx.purpose == enums.TransactionPurpose.PAYOUT.value:
             debit_entry = (
-                JournalEntry.objects
-                .filter(
+                JournalEntry.objects.filter(
                     journal__transaction=tx,
                     type=enums.EntryType.DEBIT.value,
                     account__type=enums.LedgerAccountType.USER_WALLET.value,
@@ -35,8 +34,7 @@ class PaymentHandlers:
 
         if tx.purpose == enums.TransactionPurpose.FUNDING.value:
             credit_entry = (
-                JournalEntry.objects
-                .filter(
+                JournalEntry.objects.filter(
                     journal__transaction=tx,
                     type=enums.EntryType.CREDIT.value,
                     account__type=enums.LedgerAccountType.USER_WALLET.value,
@@ -48,7 +46,6 @@ class PaymentHandlers:
                 return credit_entry.account.owner
 
         return None
-
 
     @staticmethod
     def _emit_payment_event(tx: Transaction, success: bool, amount=None) -> None:
@@ -74,9 +71,12 @@ class PaymentHandlers:
         purchase_id = None
         if tx.purpose == enums.TransactionPurpose.PURCHASE.value:
             purchase = (
-                Purchase.objects
-                .select_related("owner")
-                .filter(transaction=tx if not tx.parent_transaction else tx.parent_transaction)
+                Purchase.objects.select_related("owner")
+                .filter(
+                    transaction=(
+                        tx if not tx.parent_transaction else tx.parent_transaction
+                    )
+                )
                 .first()
             )
             purchase_id = str(purchase.id) if purchase else None
@@ -101,7 +101,6 @@ class PaymentHandlers:
 
         event_type = mapped[0] if success else mapped[1]
         emit_user_event(user, event_type, payload, entity="payment")
-        
 
     @staticmethod
     def _mark_purchase_completed(tx: Transaction):
@@ -109,12 +108,9 @@ class PaymentHandlers:
         Marks a Purchase linked to this Transaction as completed/active.
         Also sets rental expiry_time when applicable.
         """
-        
+
         purchase = (
-            Purchase.objects
-            .select_related("film")
-            .filter(transaction=tx)
-            .first()
+            Purchase.objects.select_related("film").filter(transaction=tx).first()
         )
         if not purchase:
             return
@@ -130,30 +126,27 @@ class PaymentHandlers:
             and film.sale_type == enums.FilmSaleType.RENTAL.value
             and film.rental_duration
         ):
-            updates["expiry_time"] = timezone.now() + timedelta(hours=int(film.rental_duration))
+            updates["expiry_time"] = timezone.now() + timedelta(
+                hours=int(film.rental_duration)
+            )
 
         for k, v in updates.items():
             setattr(purchase, k, v)
         purchase.save(update_fields=[*updates.keys(), "date_last_modified"])
 
-
     def _mark_purchase_failed(tx: Transaction):
         """
         Marks a Purchase linked to this Transaction as failed.
         """
-        
+
         purchase = (
-            Purchase.objects
-            .select_related("film")
-            .filter(transaction=tx)
-            .first()
+            Purchase.objects.select_related("film").filter(transaction=tx).first()
         )
         if not purchase:
             return
-        
+
         purchase.payment_status = enums.PurchasePaymentStatus.FAILED.value
         purchase.save(update_fields=["payment_status", "date_last_modified"])
-
 
     @staticmethod
     def _finalise_failed_charge(tx: Transaction, data: dict, flw_status: str) -> dict:
@@ -164,20 +157,19 @@ class PaymentHandlers:
 
         return {"status": "failed"}
 
-
     @staticmethod
     def _initiate_subaccount_transfer(charge_tx: Transaction, amount) -> None:
         """
         After a successful bank charge, transfer funds from the main
         Flutterwave account into the user's payout subaccount.
         """
-    
+
         debit_entry = (
-            JournalEntry.objects
-            .filter(
+            JournalEntry.objects.filter(
                 journal__transaction=charge_tx,
                 type=enums.EntryType.DEBIT.value,
-                account__type=(enums.LedgerAccountType.FUNDING.value 
+                account__type=(
+                    enums.LedgerAccountType.FUNDING.value
                     if charge_tx.purpose == enums.TransactionPurpose.FUNDING.value
                     else enums.LedgerAccountType.EXTERNAL_PAYMENT.value
                 ),
@@ -187,35 +179,32 @@ class PaymentHandlers:
         )
 
         if not debit_entry:
-            logger.error(
-                f"No debit entry for charge tx {charge_tx.reference}"
-            )
+            logger.error(f"No debit entry for charge tx {charge_tx.reference}")
             return {"status": "error", "detail": "missing debit entry"}
 
         user = None
         purchase = (
-            Purchase.objects
-            .select_related("film")
+            Purchase.objects.select_related("film")
             .filter(transaction=charge_tx)
             .first()
         )
         if not purchase:
             user = debit_entry.account.owner
-        
-        user = purchase.film.owner 
+
+        user = purchase.film.owner
         entry_lines = [
             {
                 "user": None,
                 "account_type": enums.LedgerAccountType.PROVIDER_WALLET.value,
                 "entry_type": enums.EntryType.DEBIT.value,
-                "amount": amount
+                "amount": amount,
             },
             {
                 "user": user,
                 "account_type": enums.LedgerAccountType.USER_WALLET.value,
                 "entry_type": enums.EntryType.CREDIT.value,
-                "amount": amount
-            }
+                "amount": amount,
+            },
         ]
 
         with db_transaction.atomic():
@@ -227,10 +216,10 @@ class PaymentHandlers:
             )
 
             payment_helper = PaymentHelper(
-                user=user, 
+                user=user,
                 transaction=transaction,
                 amount=amount,
-                payment_type=enums.PaymentType.TRANSFER.value, 
+                payment_type=enums.PaymentType.TRANSFER.value,
             )
             beneficiary = {
                 "account_number": user.wallet.barter_id,
@@ -241,7 +230,6 @@ class PaymentHandlers:
                 description="bank charge completion via subaccount transfer",
             )
 
-
     @staticmethod
     def _finalise_successful_transfer(tx: Transaction, data: dict, amount) -> dict:
         """
@@ -251,8 +239,7 @@ class PaymentHandlers:
         PostLedgerData.as_successful(tx, data, "transfer")
 
         credit_entry = (
-            JournalEntry.objects
-            .filter(
+            JournalEntry.objects.filter(
                 journal__transaction=tx,
                 type=enums.EntryType.CREDIT.value,
                 account__type=enums.LedgerAccountType.USER_WALLET.value,
@@ -273,13 +260,17 @@ class PaymentHandlers:
             wallet.pay_to_wallet(amount, is_funding=True)
         elif tx.purpose == enums.TransactionPurpose.PURCHASE.value:
             wallet.pay_to_wallet(amount)
-            PaymentHandlers._mark_purchase_failed(tx.parent_transaction if tx.parent_transaction else tx)
+            PaymentHandlers._mark_purchase_failed(
+                tx.parent_transaction if tx.parent_transaction else tx
+            )
         elif tx.purpose == enums.TransactionPurpose.PAYOUT.value:
             wallet.withdraw_funds(amount, is_earnings=True)
 
         PaymentHandlers._emit_payment_event(tx, success=True, amount=amount)
 
-        logger.success(f"transfer.completed: tx {tx.reference} finalised ({tx_purpose})")
+        logger.success(
+            f"transfer.completed: tx {tx.reference} finalised ({tx_purpose})"
+        )
         return {"status": "success"}
 
     @staticmethod
@@ -288,33 +279,32 @@ class PaymentHandlers:
         PostLedgerData.as_failed(tx, data, "transfer")
 
         debit_entry = (
-            JournalEntry.objects
-            .filter(
-                journal__transaction=tx,
-                type=enums.EntryType.DEBIT.value
+            JournalEntry.objects.filter(
+                journal__transaction=tx, type=enums.EntryType.DEBIT.value
             )
             .select_related("account__owner")
             .first()
         )
         if not debit_entry:
-            logger.error(
-                f"No debit entry for transfer tx {tx.reference} found"
-            )
+            logger.error(f"No debit entry for transfer tx {tx.reference} found")
             return {"status": "error", "detail": "missing debit entry"}
-        
-        wallet = debit_entry.account.owner.wallet           
+
+        wallet = debit_entry.account.owner.wallet
         if tx.purpose == enums.TransactionPurpose.PAYOUT.value:
             wallet.pay_to_wallet(debit_entry.amount)
         elif tx.purpose == enums.TransactionPurpose.PURCHASE.value:
             wallet.pay_to_wallet(debit_entry.amount, is_funding=True)
-            PaymentHandlers._mark_purchase_failed(tx.parent_transaction if tx.parent_transaction else tx)
+            PaymentHandlers._mark_purchase_failed(
+                tx.parent_transaction if tx.parent_transaction else tx
+            )
         elif tx.purpose == enums.TransactionPurpose.FUNDING.value:
             wallet.pay_to_wallet(debit_entry.amount, is_funding=True)
 
-        PaymentHandlers._emit_payment_event(tx, success=False, amount=debit_entry.amount)
+        PaymentHandlers._emit_payment_event(
+            tx, success=False, amount=debit_entry.amount
+        )
         logger.warning(f"transfer.completed: tx {tx.reference} failed ({flw_status})")
         return {"status": "failed"}
-
 
     @staticmethod
     def handle_bank_charge(data: dict) -> dict:
@@ -342,13 +332,16 @@ class PaymentHandlers:
                 enums.TransactionStatus.FAILED.value,
             ):
                 logger.info(f"charge.completed: tx {tx_ref} already {tx.status}")
-                return {"status": "already_processed", "detail": "charge already processed"}
+                return {
+                    "status": "already_processed",
+                    "detail": "charge already processed",
+                }
 
             if flw_status != "successful":
                 return PaymentHandlers._finalise_failed_charge(tx, data, flw_status)
 
         from core.payment.tasks import (
-            verify_charge_and_initiate_subaccount_transfer_task
+            verify_charge_and_initiate_subaccount_transfer_task,
         )
 
         verify_charge_and_initiate_subaccount_transfer_task.delay(
@@ -358,7 +351,6 @@ class PaymentHandlers:
             "status": "queued",
             "detail": "charge verification and transfer queued",
         }
-    
 
     @staticmethod
     def handle_transfer(data: dict) -> dict:
@@ -391,11 +383,12 @@ class PaymentHandlers:
             if flw_status == "successful":
                 from core.payment.tasks import verify_transfer_and_finalize_task
 
-                verify_transfer_and_finalize_task.delay(tx_ref, tx_id, str(amount), data)
+                verify_transfer_and_finalize_task.delay(
+                    tx_ref, tx_id, str(amount), data
+                )
                 return {
                     "status": "queued",
                     "detail": "transfer verification and finalisation queued",
                 }
             else:
                 return PaymentHandlers._finalise_failed_transfer(tx, data, flw_status)
-    

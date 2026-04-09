@@ -7,19 +7,29 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('feed', '0012_remove_feed_film_file'),
-        ('file_storage', '0005_remove_filemodel_currently_under_processing_and_more'),
+        ("feed", "0012_remove_feed_film_file"),
+        ("file_storage", "0005_remove_filemodel_currently_under_processing_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='filemodel',
-            name='file_size',
-            field=models.BigIntegerField(blank=True, null=True, verbose_name='File Size in bytes'),
+            model_name="filemodel",
+            name="file_size",
+            field=models.BigIntegerField(
+                blank=True, null=True, verbose_name="File Size in bytes"
+            ),
         ),
         migrations.AlterField(
-            model_name='filemodel',
-            name='film',
-            field=models.OneToOneField(blank=True, help_text='The film related to the file', null=True, on_delete=django.db.models.deletion.CASCADE, related_name='file', to='feed.feed', verbose_name='File Film'),
+            model_name="filemodel",
+            name="film",
+            field=models.OneToOneField(
+                blank=True,
+                help_text="The film related to the file",
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="file",
+                to="feed.feed",
+                verbose_name="File Film",
+            ),
         ),
     ]

@@ -6,10 +6,9 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('feed', '0002_alter_feed_length'),
+        ("feed", "0002_alter_feed_length"),
     ]
 
-    
     operations = [
         migrations.RemoveField(
             model_name="feed",
@@ -18,6 +17,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="feed",
             name="crew",
-            field=models.JSONField(default=dict), 
+            field=models.JSONField(default=dict),
         ),
     ]

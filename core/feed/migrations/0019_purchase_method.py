@@ -6,13 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('feed', '0018_feed_genre_array'),
+        ("feed", "0018_feed_genre_array"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='purchase',
-            name='method',
-            field=models.CharField(blank=True, choices=[('bank_charge', 'BANK_CHARGE'), ('transfer', 'TRANSFER')], null=True, verbose_name='Purchase Method'),
+            model_name="purchase",
+            name="method",
+            field=models.CharField(
+                blank=True,
+                choices=[("bank_charge", "BANK_CHARGE"), ("transfer", "TRANSFER")],
+                null=True,
+                verbose_name="Purchase Method",
+            ),
         ),
     ]

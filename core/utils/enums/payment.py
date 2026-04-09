@@ -38,7 +38,8 @@ class EntryType(BaseEnum):
 
 class PaymentType(BaseEnum):
     BANK_CHARGE = "bank_charge"
-    TRANSFER = "transfer"  
+    TRANSFER = "transfer"
+
 
 class TransactionPurpose(BaseEnum):
     PAYOUT = "payment"

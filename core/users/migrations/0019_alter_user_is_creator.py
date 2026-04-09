@@ -6,13 +6,15 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('users', '0018_remove_user_has_pending_issues_user_is_creator'),
+        ("users", "0018_remove_user_has_pending_issues_user_is_creator"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='user',
-            name='is_creator',
-            field=models.BooleanField(blank=True, default=False, verbose_name='Is user a film creator?'),
+            model_name="user",
+            name="is_creator",
+            field=models.BooleanField(
+                blank=True, default=False, verbose_name="Is user a film creator?"
+            ),
         ),
     ]

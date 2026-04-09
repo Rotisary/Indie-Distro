@@ -6,25 +6,32 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('payment', '0002_transaction_delete_payment'),
+        ("payment", "0002_transaction_delete_payment"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='transaction',
-            name='failed',
+            model_name="transaction",
+            name="failed",
         ),
         migrations.RemoveField(
-            model_name='transaction',
-            name='pending',
+            model_name="transaction",
+            name="pending",
         ),
         migrations.RemoveField(
-            model_name='transaction',
-            name='successful',
+            model_name="transaction",
+            name="successful",
         ),
         migrations.AddField(
-            model_name='transaction',
-            name='status',
-            field=models.CharField(choices=[('pending', 'pending'), ('successful', 'successful'), ('failed', 'failed')], default='pending'),
+            model_name="transaction",
+            name="status",
+            field=models.CharField(
+                choices=[
+                    ("pending", "pending"),
+                    ("successful", "successful"),
+                    ("failed", "failed"),
+                ],
+                default="pending",
+            ),
         ),
     ]
