@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: Indie-Distro
+        working-directory: .
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -65,7 +65,7 @@ jobs:
           --health-retries 5
     defaults:
       run:
-        working-directory: Indie-Distro
+        working-directory: .
     env:
       DJANGO_SETTINGS_MODULE: config.settings.dev
       DEBUG: "false"
