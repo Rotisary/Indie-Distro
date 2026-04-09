@@ -1,4 +1,3 @@
-
 # from core.payment.api.views import validate_account,send_money, transaction_detail, event_webhooks
 
 urlpatterns = [

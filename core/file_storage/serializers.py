@@ -1,4 +1,3 @@
-
 from rest_framework import serializers
 
 from core.feed.serializers import FeedSerializer
