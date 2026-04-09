@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .views import GetSignedUploadURL, CreateFileObject, RetrieveFile, DeleteFile
+from .views import CreateFileObject, DeleteFile, GetSignedUploadURL, RetrieveFile
 
 urlpatterns = [
     path("get_signed_url/", GetSignedUploadURL.as_view(), name="get-signed-url"),

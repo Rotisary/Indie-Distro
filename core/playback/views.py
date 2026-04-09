@@ -1,17 +1,19 @@
-from rest_framework import status, response, views
+from django.conf import settings
+
+from drf_spectacular.utils import extend_schema
+from rest_framework import response, status, views
 from rest_framework.parsers import JSONParser
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from django.conf import settings
-from drf_spectacular.utils import extend_schema
 
-from .serializers import FilmIDSerializer, ShortIDSerializer, PlaybackSerializer
-from core.utils.helpers.playback import AccessUtils
 from core.utils.helpers.decorators import IdempotencyDecorator
+from core.utils.helpers.playback import AccessUtils
+
+from .serializers import FilmIDSerializer, PlaybackSerializer, ShortIDSerializer
 from .throttles import (
-    RetrievePlaybackThrottle,
     RefreshPlaybackThrottle,
-    RetrieveShortPlaybackThrottle,
     RefreshShortPlaybackThrottle,
+    RetrievePlaybackThrottle,
+    RetrieveShortPlaybackThrottle,
 )
 
 

@@ -1,19 +1,18 @@
 import os
-
-from celery import shared_task, chain, group
-from loguru import logger
-
 from datetime import timedelta
+
+from celery import chain, group, shared_task
+from loguru import logger
 from rest_framework import status
 
+from core.file_storage.models import FileProcessingJob
+from core.utils.enums import DEFAULT_RENDITIONS, Stage
+from core.utils.exceptions import exceptions
 from core.utils.helpers.file_storage import (
+    FileProcessingUtils,
     StorageClient,
     StorageUtils,
-    FileProcessingUtils,
 )
-from core.file_storage.models import FileProcessingJob
-from core.utils.enums import Stage, DEFAULT_RENDITIONS
-from core.utils.exceptions import exceptions
 
 
 def resolve_renditions(user_renditions: list[dict] | None) -> list[dict]:

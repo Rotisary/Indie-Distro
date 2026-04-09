@@ -1,11 +1,12 @@
-from celery import shared_task
-from loguru import logger
 from decimal import Decimal
 
+from celery import shared_task
+from loguru import logger
+
 from core.payment.models import Transaction
+from core.utils.exceptions import exceptions
 from core.utils.helpers.payment import PostLedgerData
 from core.utils.services import FlutterwaveService
-from core.utils.exceptions import exceptions
 
 
 @shared_task(bind=True)

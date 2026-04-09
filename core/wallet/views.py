@@ -1,21 +1,21 @@
-from rest_framework import views, status, response
-from rest_framework.permissions import IsAuthenticated
 from django.db import transaction
 
-from loguru import logger
 from drf_spectacular.utils import extend_schema
+from loguru import logger
+from rest_framework import response, status, views
+from rest_framework.permissions import IsAuthenticated
 
-from .models import Wallet
-from .tasks import fetch_virtual_account_for_wallet
-from core.utils import exceptions
-from core.utils.permissions import IsObjOwner, IsAccountType
-from .serializers import FundWalletSerializer, PayoutSerializer, WalletPinSerializer
+from core.utils import enums, exceptions
 from core.utils.helpers import payment
 from core.utils.helpers.decorators import (
-    RequestDataManipulationsDecorators,
     IdempotencyDecorator,
+    RequestDataManipulationsDecorators,
 )
-from core.utils import enums
+from core.utils.permissions import IsAccountType, IsObjOwner
+
+from .models import Wallet
+from .serializers import FundWalletSerializer, PayoutSerializer, WalletPinSerializer
+from .tasks import fetch_virtual_account_for_wallet
 
 
 @extend_schema(tags=["wallets"])

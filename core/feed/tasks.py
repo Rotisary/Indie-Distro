@@ -1,10 +1,12 @@
 from django.utils import timezone
+
 from celery import shared_task
 from loguru import logger
 
+from core.utils.enums import PurchaseStatusType
+
 from .models import Feed, Short
 from .views import _get_model_by_name
-from core.utils.enums import PurchaseStatusType
 
 
 @shared_task(bind=True, max_retries=3, default_retry_delay=60, queue="beats")

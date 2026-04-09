@@ -1,16 +1,17 @@
-from celery import shared_task
-from loguru import logger
-from requests import RequestException, Timeout, ConnectionError
-
 from django.db import transaction
 from django.utils import timezone
 
-from .models import Wallet
+from celery import shared_task
+from loguru import logger
+from requests import ConnectionError, RequestException, Timeout
+
 from core.users.models import User
-from core.utils.services import FlutterwaveService
-from core.utils.exceptions import exceptions
 from core.utils import enums
+from core.utils.exceptions import exceptions
+from core.utils.services import FlutterwaveService
 from core.websocket.utils import emit_user_event
+
+from .models import Wallet
 
 
 @shared_task(bind=True, max_retries=3, queue="service")

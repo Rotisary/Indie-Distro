@@ -1,4 +1,3 @@
-import boto3
 import mimetypes
 import os
 import shutil
@@ -7,19 +6,20 @@ import tempfile
 import time
 from typing import Iterable, Optional
 
-from loguru import logger
+from django.conf import settings
+
+import boto3
 from botocore.exceptions import (
+    ConnectionClosedError,
     ConnectTimeoutError,
     EndpointConnectionError,
     ReadTimeoutError,
-    ConnectionClosedError,
 )
-
+from loguru import logger
 from rest_framework import status
-from django.conf import settings
 
-from core.utils import exceptions
 from core.file_storage.models import FileProcessingJob
+from core.utils import exceptions
 
 # Register common streaming types; for use in file processing
 mimetypes.init()

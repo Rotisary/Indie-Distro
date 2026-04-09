@@ -1,10 +1,11 @@
 from loguru import logger
 
-from .base import BaseService
-from core.utils.exceptions import exceptions
-from core.utils.exceptions.handlers import Handlers
 from config import env
 from core.users.models import User
+from core.utils.exceptions import exceptions
+from core.utils.exceptions.handlers import Handlers
+
+from .base import BaseService
 
 
 class FlutterwaveService(BaseService):

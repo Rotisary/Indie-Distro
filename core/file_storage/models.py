@@ -1,12 +1,12 @@
 from django.db import models
-from django.utils.translation import gettext_lazy as _
-from django.utils import timezone
 from django.db.models import JSONField
+from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 
-from core.utils.mixins import BaseModelMixin
-from core.utils import enums
-from core.websocket.utils import emit_websocket_event
 from core.users.models import User
+from core.utils import enums
+from core.utils.mixins import BaseModelMixin
+from core.websocket.utils import emit_websocket_event
 
 
 class FileModel(BaseModelMixin):

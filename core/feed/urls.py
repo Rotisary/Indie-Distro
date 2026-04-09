@@ -1,15 +1,15 @@
 from django.urls import path
 
 from .views import (
+    Bookmark,
     ListCreateFeed,
     ListCreateShort,
-    RetrieveUpdateDeleteFeed,
     PublicFeedList,
-    Bookmark,
-    RemoveBookmark,
-    RetrieveUpdateDeleteShort,
     PublicShortsList,
     PurchaseFilm,
+    RemoveBookmark,
+    RetrieveUpdateDeleteFeed,
+    RetrieveUpdateDeleteShort,
     UserFeedsList,
     UserShortsList,
 )

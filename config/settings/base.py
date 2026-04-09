@@ -3,11 +3,14 @@ Django base settings for paylink project.
 """
 
 from pathlib import Path
-from django.utils.timezone import timedelta
+
 from django.urls import reverse_lazy
+from django.utils.timezone import timedelta
 from django.utils.translation import gettext_lazy as _
-from config.celery.queue import CeleryQueue
+
 from celery.schedules import crontab
+
+from config.celery.queue import CeleryQueue
 from core.utils import enums
 
 from .. import env

@@ -1,16 +1,17 @@
 import random
 
-from django.db import models
 from django.conf import settings
+from django.contrib.auth import get_user_model
+from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-from django.contrib.auth import get_user_model
 
 from faker import Faker
 
-from .mixins import BaseModelMixin
-from .enums import KeyProcessStatus
 from core.utils.enums import UserAccountType
+
+from .enums import KeyProcessStatus
+from .mixins import BaseModelMixin
 
 UserModel = get_user_model()
 

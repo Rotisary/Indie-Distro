@@ -1,9 +1,10 @@
 from django.urls import path
+
 from .views import (
-    RetrieveFilmPlaybackURL,
     RefreshFilmPlaybackCookie,
-    RetrieveShortPlaybackURL,
     RefreshShortPlaybackCookie,
+    RetrieveFilmPlaybackURL,
+    RetrieveShortPlaybackURL,
 )
 
 urlpatterns = [

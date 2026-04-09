@@ -1,10 +1,11 @@
 from django.urls import path
+
 from .views import (
-    CreateUser,
-    RetrieveUpdateUser,
     BecomeCreator,
+    CreateUser,
     Login,
     Logout,
+    RetrieveUpdateUser,
     TokenRefresh,
 )
 

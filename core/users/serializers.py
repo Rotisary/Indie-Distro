@@ -1,9 +1,11 @@
-from rest_framework import serializers
-from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.hashers import make_password
-from core.users.models import User
-from phonenumbers import parse, is_valid_number
+from django.utils.translation import gettext_lazy as _
+
+from phonenumbers import is_valid_number, parse
 from phonenumbers.phonenumberutil import NumberParseException
+from rest_framework import serializers
+
+from core.users.models import User
 
 
 class BaseUserSerializer(serializers.ModelSerializer):

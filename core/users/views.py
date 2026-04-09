@@ -1,16 +1,16 @@
-from loguru import logger
 from django.contrib.auth import authenticate
 
-from rest_framework import status, response, views
 from drf_spectacular.utils import extend_schema
-from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework_simplejwt.exceptions import TokenError
+from loguru import logger
+from rest_framework import response, status, views
 from rest_framework.parsers import JSONParser
-from rest_framework.renderers import JSONRenderer
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.renderers import JSONRenderer
+from rest_framework_simplejwt.exceptions import TokenError
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from core.users.models import UserSession
-from core.users.serializers import UserSerializer, TokenSerializer, AuthSerializer
+from core.users.serializers import AuthSerializer, TokenSerializer, UserSerializer
 from core.utils import exceptions
 from core.utils.helpers.authenticators import ServerAuthentication
 

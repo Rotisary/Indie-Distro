@@ -1,8 +1,10 @@
 from django.contrib import admin
-from unfold.admin import ModelAdmin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import Group
+from django.utils.translation import gettext_lazy as _
+
+from unfold.admin import ModelAdmin
+
 from .models import User, UserSession
 
 admin.site.unregister(Group)

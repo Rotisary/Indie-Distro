@@ -1,9 +1,10 @@
-from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
 from loguru import logger
 
-from .models import EventLog
 from core.utils import exceptions
+
+from .models import EventLog
 
 
 def emit_websocket_event(instance, event_type: str, save: bool = True) -> None:

@@ -1,11 +1,11 @@
 from django.urls import path
 
 from .views import (
+    ChangeWalletPin,
     FetchVirtualAccount,
     InitiateFundingWithBankCharge,
     InitiatePayout,
     SetWalletPin,
-    ChangeWalletPin,
 )
 
 urlpatterns = [

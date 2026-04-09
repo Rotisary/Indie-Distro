@@ -1,6 +1,7 @@
-from rest_framework import serializers
 from django.core.validators import RegexValidator
 from django.utils.translation import gettext_lazy as _
+
+from rest_framework import serializers
 
 from core.users.models import User
 

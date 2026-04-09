@@ -1,6 +1,6 @@
-from rest_framework import views, status, response
-from rest_framework.permissions import IsAuthenticated
 from drf_spectacular.utils import extend_schema
+from rest_framework import response, status, views
+from rest_framework.permissions import IsAuthenticated
 
 from .models import EventLog
 

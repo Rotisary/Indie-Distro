@@ -1,9 +1,10 @@
 
 from rest_framework import serializers
 
-from core.users.serializers import BaseUserSerializer
 from core.feed.serializers import FeedSerializer
+from core.users.serializers import BaseUserSerializer
 from core.utils.enums import FilePurposeType
+
 from .models import FileModel
 
 

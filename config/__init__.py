@@ -1,6 +1,7 @@
 import os
 import sys
 from pathlib import Path
+
 import environ
 
 from .celery import app as celery_app

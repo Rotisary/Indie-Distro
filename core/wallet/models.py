@@ -1,15 +1,14 @@
-from django.db import models, transaction
-from django.db.models import F
-from django.utils.translation import gettext_lazy as _
-from django.utils import timezone
-from django.contrib.auth.hashers import make_password, check_password
-
 from decimal import Decimal
 
-from core.utils import mixins
-from core.utils import enums
-from core.websocket.utils import emit_websocket_event
+from django.contrib.auth.hashers import check_password, make_password
+from django.db import models, transaction
+from django.db.models import F
+from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
+
+from core.utils import enums, mixins
 from core.utils.exceptions import exceptions
+from core.websocket.utils import emit_websocket_event
 
 
 class Wallet(mixins.BaseModelMixin):

@@ -1,32 +1,31 @@
-from rest_framework import status, response, views, filters, generics
-from rest_framework.parsers import JSONParser
-from rest_framework.permissions import IsAuthenticated, AllowAny
-from django.db import transaction as db_transaction
 from django.apps import apps
+from django.db import transaction as db_transaction
 
-from loguru import logger
-from drf_spectacular.utils import extend_schema
 from django_filters.rest_framework import DjangoFilterBackend
+from drf_spectacular.utils import extend_schema
+from loguru import logger
+from rest_framework import filters, generics, response, status, views
+from rest_framework.parsers import JSONParser
+from rest_framework.permissions import AllowAny, IsAuthenticated
 
-
-from .models import Feed, Short
-from .filters import FilmFilter, ShortFilter
-from .serializers import FeedSerializer, ShortSerializer, FilmPurchaseSerializer
-from core.utils import exceptions
-from core.utils.helpers.decorators import (
-    RequestDataManipulationsDecorators,
-    IdempotencyDecorator,
-)
-from core.utils.helpers import payment
+from core.utils import enums, exceptions
 from core.utils.commons.utils import serializers
+from core.utils.helpers import payment
+from core.utils.helpers.decorators import (
+    IdempotencyDecorator,
+    RequestDataManipulationsDecorators,
+)
 from core.utils.permissions import (
+    FilmNotReleased,
     IsAccountType,
     IsFilmOwner,
     IsShortOwner,
-    FilmNotReleased,
     ShortNotReleased,
 )
-from core.utils import enums
+
+from .filters import FilmFilter, ShortFilter
+from .models import Feed, Short
+from .serializers import FeedSerializer, FilmPurchaseSerializer, ShortSerializer
 
 
 @extend_schema(tags=["feed"])

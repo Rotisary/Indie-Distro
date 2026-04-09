@@ -1,8 +1,9 @@
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 
-from .models import Feed, Short
 from core.utils.helpers.feed import schedule_release_for_instance
+
+from .models import Feed, Short
 
 
 @receiver(post_save, sender=Feed)

@@ -1,8 +1,11 @@
 from __future__ import annotations
+
 import base64
 from typing import Optional
-from cryptography.fernet import Fernet, InvalidToken
+
 from django.conf import settings
+
+from cryptography.fernet import Fernet, InvalidToken
 
 _fernet: Optional[Fernet] = None
 

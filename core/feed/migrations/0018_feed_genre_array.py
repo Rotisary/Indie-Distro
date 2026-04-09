@@ -1,5 +1,5 @@
-from django.db import migrations, models
 import django.contrib.postgres.fields
+from django.db import migrations, models
 
 
 def wrap_genre_in_array(apps, schema_editor):

@@ -1,7 +1,9 @@
 from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
+
 from unfold.admin import ModelAdmin
-from .models import LedgerAccount, Transaction, LedgerJournal, JournalEntry
+
+from .models import JournalEntry, LedgerAccount, LedgerJournal, Transaction
 
 
 @admin.register(LedgerAccount)
