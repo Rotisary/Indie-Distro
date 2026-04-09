@@ -9,7 +9,6 @@ from decimal import Decimal
 from core.utils import mixins
 from core.utils import enums
 from core.websocket.utils import emit_websocket_event
-from core.utils.commons.utils.parsers import Parsers
 from core.utils.exceptions import exceptions
 
 

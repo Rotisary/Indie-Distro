@@ -1,5 +1,4 @@
 from rest_framework.permissions import BasePermission
-from core.utils import enums
 
 
 class IsFilmOwner(BasePermission):

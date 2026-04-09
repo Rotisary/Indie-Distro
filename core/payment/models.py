@@ -1,11 +1,7 @@
-import os
-import uuid
 from decimal import Decimal
 
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from django.utils import timezone
-from django.conf import settings
 from django.db.models import JSONField
 from django.core.validators import MinValueValidator
 

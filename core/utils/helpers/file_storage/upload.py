@@ -1,5 +1,3 @@
-import mimetypes
-import boto3
 from loguru import logger
 
 from django.conf import settings
@@ -8,7 +6,7 @@ from rest_framework import status
 
 from core.utils import exceptions
 from core.utils.commons.utils import identifiers
-from .base import StorageClient, StorageUtils
+from .base import StorageClient
 
 
 class FileUploadUtils:

@@ -1,6 +1,5 @@
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
-from django.utils import timezone
 from loguru import logger
 
 from .models import EventLog

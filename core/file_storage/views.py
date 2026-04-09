@@ -1,4 +1,4 @@
-from rest_framework import status, decorators, response, views
+from rest_framework import status, response, views
 from rest_framework.parsers import JSONParser
 from rest_framework.renderers import JSONRenderer
 from rest_framework.permissions import IsAuthenticated
@@ -12,7 +12,7 @@ from drf_spectacular.utils import extend_schema
 from .models import FileModel, FileProcessingJob
 from .serializers import FileSerializer, SignedURLSerializer
 from .tasks import start_pipeline
-from core.utils import mixins as global_mixins, exceptions
+from core.utils import exceptions
 from core.utils.helpers.decorators import (
     RequestDataManipulationsDecorators,
     IdempotencyDecorator,

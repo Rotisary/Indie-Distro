@@ -7,4 +7,4 @@ class FeedConfig(AppConfig):
 
     def ready(self):
         # noqa: F401
-        from . import signals
+        pass

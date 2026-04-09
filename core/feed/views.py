@@ -9,10 +9,10 @@ from drf_spectacular.utils import extend_schema
 from django_filters.rest_framework import DjangoFilterBackend
 
 
-from .models import Feed, Short, Purchase
+from .models import Feed, Short
 from .filters import FilmFilter, ShortFilter
 from .serializers import FeedSerializer, ShortSerializer, FilmPurchaseSerializer
-from core.utils import mixins as global_mixins, exceptions
+from core.utils import exceptions
 from core.utils.helpers.decorators import (
     RequestDataManipulationsDecorators,
     IdempotencyDecorator,

@@ -13,7 +13,6 @@ from .throttles import (
     RetrieveShortPlaybackThrottle,
     RefreshShortPlaybackThrottle,
 )
-from core.utils.permissions import ShortNotReleased
 
 
 @extend_schema(tags=["Playback"])

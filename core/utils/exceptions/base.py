@@ -1,7 +1,5 @@
 from typing import Any, Union
-from django.core.exceptions import ValidationError as DjangoCoreValidationError
 from rest_framework import status
-from rest_framework.exceptions import AuthenticationFailed
 
 
 class CustomException(Exception):

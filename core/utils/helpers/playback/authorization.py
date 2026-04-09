@@ -3,7 +3,6 @@ import datetime
 import hashlib
 import hmac
 import json
-import jwt
 
 from urllib.parse import urlparse
 
@@ -11,7 +10,7 @@ from rest_framework import status
 from django.utils import timezone
 from django.conf import settings
 
-from core.users.models import User, UserSession
+from core.users.models import UserSession
 from core.feed.models import Purchase, Short
 from core.utils.enums import PurchaseStatusType
 from core.utils.exceptions import CustomException

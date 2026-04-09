@@ -1,6 +1,4 @@
-import secrets
 from django.db import models
-from django.utils import timezone
 
 from core.utils.commons.utils import identifiers
 

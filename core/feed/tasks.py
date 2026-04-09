@@ -1,4 +1,3 @@
-from datetime import datetime, time as dt_time
 from django.utils import timezone
 from celery import shared_task
 from loguru import logger

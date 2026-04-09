@@ -2,7 +2,6 @@
 Django base settings for paylink project.
 """
 
-import os
 from pathlib import Path
 from django.utils.timezone import timedelta
 from django.urls import reverse_lazy
