@@ -4290,3 +4290,17 @@ C:\Users\olado\Documents\django-projects\Indie-Distro\config\settings\base.py ch
 Watching for file changes with StatReloader
 C:\Users\olado\Documents\django-projects\Indie-Distro\config\settings\base.py changed, reloading.
 Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+C:\Users\olado\Documents\django-projects\Indie-Distro\core\utils\exceptions\exceptions.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\olado\Documents\django-projects\Indie-Distro\core\utils\exceptions\exceptions.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\olado\Documents\django-projects\Indie-Distro\core\utils\exceptions\exceptions.py changed, reloading.
+Watching for file changes with StatReloader
+HTTP/2 support not enabled (install the http2 and tls Twisted extras)
+Configuring endpoint tcp:port=8000:interface=127.0.0.1
+Listening on TCP address 127.0.0.1:8000
+Watching for file changes with StatReloader
+HTTP/2 support not enabled (install the http2 and tls Twisted extras)
+Configuring endpoint tcp:port=8000:interface=127.0.0.1
+Listening on TCP address 127.0.0.1:8000

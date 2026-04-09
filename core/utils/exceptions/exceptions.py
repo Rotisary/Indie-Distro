@@ -1,11 +1,12 @@
+from django.core.exceptions import ValidationError as DjangoCoreValidationError
+
 from rest_framework import status
+from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.response import Response
 from rest_framework.views import exception_handler
 
 from .base import (
-    AuthenticationFailed,
     CustomException,
-    DjangoCoreValidationError,
     QuerySetException,
     ServiceRequestException,
     WalletException,
