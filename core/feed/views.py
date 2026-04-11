@@ -106,7 +106,7 @@ class RetrieveUpdateDeleteFeed(views.APIView):
         except Feed.DoesNotExist:
             logger.error(f"Failed to retrive film with ID: {pk}. Not Found")
             raise exceptions.CustomException(
-                "Film not found", status_code=status.HTTP_404_NOT_FOUND
+                message="Film not found", status_code=status.HTTP_404_NOT_FOUND
             )
 
     @extend_schema(
@@ -117,7 +117,7 @@ class RetrieveUpdateDeleteFeed(views.APIView):
     @RequestDataManipulationsDecorators.update_request_data_with_owner_data("owner")
     def patch(self, request, pk):
         try:
-            feed = Feed.objects.get(id=pk, owner=request.user)
+            feed = Feed.objects.get(id=pk)
             self.check_object_permissions(request, feed)
             serializer = FeedSerializer.FeedCreate(
                 instance=feed, data=request.data, partial=True
@@ -130,7 +130,7 @@ class RetrieveUpdateDeleteFeed(views.APIView):
         except Feed.DoesNotExist:
             logger.error(f"Failed to update film with ID: {pk}. Not Found")
             raise exceptions.CustomException(
-                "Film not found", status_code=status.HTTP_404_NOT_FOUND
+                message="Film not found", status_code=status.HTTP_404_NOT_FOUND
             )
 
     @extend_schema(
@@ -140,7 +140,7 @@ class RetrieveUpdateDeleteFeed(views.APIView):
     )
     def delete(self, request, pk):
         try:
-            feed = Feed.objects.get(id=pk, owner=request.user)
+            feed = Feed.objects.get(id=pk)
             self.check_object_permissions(request, feed)
             feed.delete()
             logger.success(f"Film with ID: {pk} deleted.")
@@ -148,7 +148,7 @@ class RetrieveUpdateDeleteFeed(views.APIView):
         except Feed.DoesNotExist:
             logger.error(f"Failed to delete film with ID: {pk}. Not Found")
             raise exceptions.CustomException(
-                "Film not found", status_code=status.HTTP_404_NOT_FOUND
+                message="Film not found", status_code=status.HTTP_404_NOT_FOUND
             )
 
 
@@ -195,7 +195,7 @@ class ListCreateShort(views.APIView):
         )
         serializer.is_valid(raise_exception=True)
         instance = serializer.save()
-        logger.success(f"Short created with title: {instance.title}")
+        logger.success(f"Short created with title: {instance.slug}")
         serializer = ShortSerializer.ShortRetrieve(instance=instance)
         return response.Response(data=serializer.data, status=status.HTTP_201_CREATED)
 
@@ -245,7 +245,7 @@ class RetrieveUpdateDeleteShort(views.APIView):
             return response.Response(data=serializer.data, status=status.HTTP_200_OK)
         except Short.DoesNotExist:
             raise exceptions.CustomException(
-                "Short not found", status_code=status.HTTP_404_NOT_FOUND
+                message="Short not found", status_code=status.HTTP_404_NOT_FOUND
             )
 
     @extend_schema(
@@ -256,7 +256,7 @@ class RetrieveUpdateDeleteShort(views.APIView):
     @RequestDataManipulationsDecorators.update_request_data_with_owner_data("owner")
     def patch(self, request, pk):
         try:
-            short = Short.objects.get(id=pk, owner=request.user)
+            short = Short.objects.get(id=pk)
             self.check_object_permissions(request, short)
             serializer = ShortSerializer.ShortCreate(
                 instance=short,
@@ -271,7 +271,7 @@ class RetrieveUpdateDeleteShort(views.APIView):
             return response.Response(data=serializer.data, status=status.HTTP_200_OK)
         except Short.DoesNotExist:
             raise exceptions.CustomException(
-                "Short not found", status_code=status.HTTP_404_NOT_FOUND
+                message="Short not found", status_code=status.HTTP_404_NOT_FOUND
             )
 
     @extend_schema(
@@ -281,14 +281,14 @@ class RetrieveUpdateDeleteShort(views.APIView):
     )
     def delete(self, request, pk):
         try:
-            short = Short.objects.get(id=pk, owner=request.user)
+            short = Short.objects.get(id=pk)
             self.check_object_permissions(request, short)
             short.delete()
             logger.success(f"Short with ID: {pk} deleted.")
             return response.Response(status=status.HTTP_204_NO_CONTENT)
         except Short.DoesNotExist:
             raise exceptions.CustomException(
-                "Short not found", status_code=status.HTTP_404_NOT_FOUND
+                message="Short not found", status_code=status.HTTP_404_NOT_FOUND
             )
 
 
@@ -354,7 +354,7 @@ class PurchaseFilm(views.APIView):
         return payment_response
 
     @staticmethod
-    def _purchase_film_with_transfer(request, entry_lines: list, film, method: str):
+    def _purchase_film_with_transfer(request, entry_lines: list, film):
         with db_transaction.atomic():
             request.user.wallet.withdraw_funds(film.price)
             transaction = payment.PostLedgerData.as_pending(
@@ -399,17 +399,17 @@ class PurchaseFilm(views.APIView):
         wallet_pin = request.data.get("wallet_pin", None)
         if not method:
             raise exceptions.CustomException(
-                "missing field. a payment method must be added",
+                message="missing field. a payment method must be added",
                 status_code=status.HTTP_404_NOT_FOUND,
             )
         if not wallet_pin:
             raise exceptions.CustomException(
-                "missing field. wallet pin is required",
+                message="missing field. wallet pin is required",
                 status_code=status.HTTP_404_NOT_FOUND,
             )
         if len(wallet_pin) < 4:
             raise exceptions.CustomException(
-                "only 4 digit pin is required", status_code=status.HTTP_404_NOT_FOUND
+                message="only 4 digit pin is required", status_code=status.HTTP_404_NOT_FOUND
             )
 
         if not request.user.is_creator and method == enums.PaymentType.TRANSFER.value:
@@ -422,7 +422,7 @@ class PurchaseFilm(views.APIView):
             film = Feed.objects.get(id=pk)
         except Feed.DoesNotExist:
             raise exceptions.CustomException(
-                "Film not found", status_code=status.HTTP_404_NOT_FOUND
+                message="Film not found", status_code=status.HTTP_404_NOT_FOUND
             )
 
         self.check_object_permissions(request, film)
@@ -455,18 +455,18 @@ class PurchaseFilm(views.APIView):
                 "account_type"
             ] = enums.LedgerAccountType.PROVIDER_WALLET.value
             payment_response = self._purchase_film_with_bank_charge(
-                request, entry_lines, film, user, method
+                request, entry_lines, film, user
             )
         elif method == enums.PaymentType.TRANSFER.value:
             entry_lines[0]["account_type"] = enums.LedgerAccountType.USER_WALLET.value
             entry_lines[1]["account_type"] = enums.LedgerAccountType.USER_WALLET.value
             entry_lines[1]["user"] = film.owner
             payment_response = self._purchase_film_with_transfer(
-                request, entry_lines, film, method
+                request, entry_lines, film
             )
         else:
             raise exceptions.CustomException(
-                f"invalid method type. {method} not part of allowed choices",
+                message=f"invalid method type. {method} not part of allowed choices",
                 status_code=status.HTTP_404_NOT_FOUND,
             )
 
@@ -476,7 +476,7 @@ class PurchaseFilm(views.APIView):
             else status.HTTP_502_BAD_GATEWAY
         )
 
-        return response.Response(data=payment_response, status=status_code)
+        return response.Response(data=payment_response.__dict__, status=status_code)
 
 
 def _get_model_by_name(name: str):

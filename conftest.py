@@ -3,14 +3,11 @@ from decimal import Decimal
 import pytest
 from rest_framework.test import APIClient
 
-from core.feed.tests.factories.feed_factories import (
-    FeedFactory,
-    FileModelFactory,
-    ShortFactory,
-    WalletFactory,
-)
+from core.feed.tests.factories.feed_factories import FeedFactory, ShortFactory
+from core.file_storage.tests.factories.file_storage_factories import FileModelFactory
 from core.users.tests.factories.user_factories import UserFactory
 from core.utils import enums
+from core.wallet.tests.factories.wallet_factories import WalletFactory
 
 
 @pytest.fixture

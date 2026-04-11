@@ -152,7 +152,7 @@ class PaymentLedgerCreatorHelpers:
         parent_transaction: Transaction = None,
     ) -> Transaction:
         hex_id = ObjectIdentifiers.unique_hex_id()
-        tx_reference = f"tx_{hex_id[:13]}"
+        tx_reference = f"tx_{hex_id[:12]}"
         transaction = Transaction.objects.create(
             reference=tx_reference,
             status=enums.TransactionStatus.PENDING.value,
@@ -177,7 +177,7 @@ class PaymentLedgerCreatorHelpers:
         currency: str = "NGN",
     ) -> JournalEntry:
         recent = (
-            JournalEntry.objects.filter(journal=journal).order_by("-created_at").first()
+            JournalEntry.objects.filter(journal=journal).order_by("-date_added").first()
         )
         line_no = 0
         if not recent:
@@ -192,6 +192,5 @@ class PaymentLedgerCreatorHelpers:
             type=entry_type,
             status=enums.EntryStatus.PENDING.value,
             amount=amount,
-            currency=currency,
         )
         return entry
