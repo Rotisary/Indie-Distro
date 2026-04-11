@@ -4304,3 +4304,99 @@ Watching for file changes with StatReloader
 HTTP/2 support not enabled (install the http2 and tls Twisted extras)
 Configuring endpoint tcp:port=8000:interface=127.0.0.1
 Listening on TCP address 127.0.0.1:8000
+Unauthorized: /api/users/
+Forbidden: /api/users/
+Bad Request: /api/users/
+Bad Request: /api/users/
+Not Found: /api/users/unknown/
+Unauthorized: /api/auth/login/
+Forbidden: /api/auth/login/
+Bad Request: /api/auth/login/
+Bad Request: /api/auth/login/
+Not Found: /api/auth/login/unknown/
+Unauthorized: /api/auth/token/refresh/
+Forbidden: /api/auth/token/refresh/
+Bad Request: /api/auth/token/refresh/
+Bad Request: /api/auth/token/refresh/
+Not Found: /api/auth/token/refresh/unknown/
+Unauthorized: /api/users/me/
+Forbidden: /api/users/me/
+Not Found: /api/users/me/unknown/
+Bad Request: /api/users/me/
+Unauthorized: /api/users/me/
+Forbidden: /api/users/me/
+Unauthorized: /api/users/me/become-creator/
+Forbidden: /api/users/me/become-creator/
+Bad Request: /api/users/me/become-creator/
+Not Found: /api/users/me/become-creator/unknown/
+Unauthorized: /api/auth/logout/
+Forbidden: /api/auth/logout/
+Bad Request: /api/auth/logout/
+Not Found: /api/auth/logout/unknown/
+Unauthorized: /api/users/
+Unauthorized: /api/users/me/
+Not Found: /api/users/me/unknown/
+Unauthorized: /api/users/me/
+Unauthorized: /api/users/me/become-creator/
+Not Found: /api/users/me/become-creator/unknown/
+Unauthorized: /api/auth/logout/
+Not Found: /api/auth/logout/unknown/
+Unauthorized: /api/users/
+Forbidden: /api/users/
+Bad Request: /api/users/
+Bad Request: /api/users/
+Not Found: /api/users/unknown/
+Unauthorized: /api/auth/login/
+Unauthorized: /api/auth/login/
+Forbidden: /api/auth/login/
+Bad Request: /api/auth/login/
+Bad Request: /api/auth/login/
+Not Found: /api/auth/login/unknown/
+Unauthorized: /api/auth/token/refresh/
+Forbidden: /api/auth/token/refresh/
+Bad Request: /api/auth/token/refresh/
+Bad Request: /api/auth/token/refresh/
+Not Found: /api/auth/token/refresh/unknown/
+Unauthorized: /api/users/me/
+Forbidden: /api/users/me/
+Not Found: /api/users/me/unknown/
+Bad Request: /api/users/me/
+Unauthorized: /api/users/me/
+Forbidden: /api/users/me/
+Unauthorized: /api/users/me/become-creator/
+Forbidden: /api/users/me/become-creator/
+Bad Request: /api/users/me/become-creator/
+Not Found: /api/users/me/become-creator/unknown/
+Unauthorized: /api/auth/logout/
+Forbidden: /api/auth/logout/
+Bad Request: /api/auth/logout/
+Not Found: /api/auth/logout/unknown/
+Unauthorized: /api/users/
+Forbidden: /api/users/
+Bad Request: /api/users/
+Bad Request: /api/users/
+Not Found: /api/users/unknown/
+Unauthorized: /api/auth/login/
+Forbidden: /api/auth/login/
+Bad Request: /api/auth/login/
+Bad Request: /api/auth/login/
+Not Found: /api/auth/login/unknown/
+Unauthorized: /api/auth/token/refresh/
+Forbidden: /api/auth/token/refresh/
+Bad Request: /api/auth/token/refresh/
+Bad Request: /api/auth/token/refresh/
+Not Found: /api/auth/token/refresh/unknown/
+Unauthorized: /api/users/me/
+Forbidden: /api/users/me/
+Not Found: /api/users/me/unknown/
+Bad Request: /api/users/me/
+Unauthorized: /api/users/me/
+Forbidden: /api/users/me/
+Unauthorized: /api/users/me/become-creator/
+Forbidden: /api/users/me/become-creator/
+Bad Request: /api/users/me/become-creator/
+Not Found: /api/users/me/become-creator/unknown/
+Unauthorized: /api/auth/logout/
+Forbidden: /api/auth/logout/
+Bad Request: /api/auth/logout/
+Not Found: /api/auth/logout/unknown/

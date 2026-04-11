@@ -39,6 +39,7 @@ djangorestframework_simplejwt==5.5.1
 docutils==0.19
 drf-spectacular==0.28.0
 Faker==37.11.0
+factory_boy==3.3.0
 hyperlink==21.0.0
 idna==3.10
 Incremental==24.11.0
