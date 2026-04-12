@@ -5318,3 +5318,19 @@ Unauthorized: /api/feed/users/123/shorts/
 Forbidden: /api/feed/users/125/shorts/
 Bad Request: /api/feed/users/133/shorts/
 Not Found: /api/feed/users/134/shorts/unknown/
+Unauthorized: /api/files/get_signed_url/
+Forbidden: /api/files/get_signed_url/
+Bad Request: /api/files/get_signed_url/
+Bad Request: /api/files/get_signed_url/
+Not Found: /api/files/get_signed_url/unknown/
+Unauthorized: /api/files/create_file_object/
+Forbidden: /api/files/create_file_object/
+Bad Request: /api/files/create_file_object/
+Bad Request: /api/files/create_file_object/
+Not Found: /api/files/create_file_object/unknown/
+Unauthorized: /api/files/file-1/
+Forbidden: /api/files/file-2/
+Not Found: /api/files/missing-file/
+Unauthorized: /api/files/file-4/delete/
+Forbidden: /api/files/file-5/delete/
+Not Found: /api/files/missing-file/delete/
