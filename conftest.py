@@ -4,6 +4,7 @@ import pytest
 from rest_framework.test import APIClient
 
 from core.feed.tests.factories.feed_factories import FeedFactory, ShortFactory
+from core.feed.tests.factories.purchase_factories import PurchaseFactory
 from core.file_storage.tests.factories.file_storage_factories import FileModelFactory
 from core.users.tests.factories.user_factories import UserFactory
 from core.utils import enums
@@ -140,3 +141,43 @@ def released_short(creator_user, film):
 def server_auth_headers(settings):
     header_name = f"HTTP_{settings.SERVER_SECRET_KEY_FIELD_NAME}"
     return {header_name: settings.SERVER_SECRET_KEY}
+
+
+@pytest.fixture
+def stream_playback_settings(settings):
+    settings.STREAM_COOKIE_SECRET = "test-stream-secret"
+    settings.STREAM_BASE_URL = "https://stream.example.com"
+    settings.STREAM_COOKIE_NAME = "stream_auth"
+    settings.STREAM_COOKIE_TTL_SECONDS = 900
+    settings.STREAM_COOKIE_SECURE = False
+    settings.STREAM_COOKIE_SAMESITE = "Lax"
+    return settings
+
+
+@pytest.fixture
+def released_film_with_playback(released_film, creator_user):
+    FileModelFactory(
+        owner=creator_user,
+        film=released_film,
+        hls_master_key="media/films/master.m3u8",
+    )
+    return released_film
+
+
+@pytest.fixture
+def active_purchase(buyer_user, released_film_with_playback):
+    return PurchaseFactory(owner=buyer_user, film=released_film_with_playback)
+
+
+@pytest.fixture
+def released_short_with_playback(creator_user, film):
+    file_model = FileModelFactory(
+        owner=creator_user,
+        hls_master_key="media/shorts/master.m3u8",
+    )
+    return ShortFactory(
+        owner=creator_user,
+        film=film,
+        file=file_model,
+        is_released=True,
+    )

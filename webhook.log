@@ -5334,3 +5334,309 @@ Not Found: /api/files/missing-file/
 Unauthorized: /api/files/file-4/delete/
 Forbidden: /api/files/file-5/delete/
 Not Found: /api/files/missing-file/delete/
+Internal Server Error: /api/playback/films/get_url/
+Traceback (most recent call last):
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\django\views\generic\base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\core\utils\helpers\decorators\__init__.py", line 142, in function_to_execute
+    return function(self, request, *args, **kwargs)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\core\playback\views.py", line 58, in post
+    resp.set_cookie(
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\django\http\response.py", line 252, in set_cookie
+    raise ValueError("'expires' and 'max_age' can't be used together.")
+ValueError: 'expires' and 'max_age' can't be used together.
+Unauthorized: /api/playback/films/get_url/
+Forbidden: /api/playback/films/get_url/
+Bad Request: /api/playback/films/get_url/
+Not Found: /api/playback/films/get_url/
+Internal Server Error: /api/playback/films/token/refresh/
+Traceback (most recent call last):
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\django\views\generic\base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\core\utils\helpers\decorators\__init__.py", line 142, in function_to_execute
+    return function(self, request, *args, **kwargs)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\core\playback\views.py", line 108, in post
+    resp.set_cookie(
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\django\http\response.py", line 252, in set_cookie
+    raise ValueError("'expires' and 'max_age' can't be used together.")
+ValueError: 'expires' and 'max_age' can't be used together.
+Unauthorized: /api/playback/films/token/refresh/
+Forbidden: /api/playback/films/token/refresh/
+Bad Request: /api/playback/films/token/refresh/
+Not Found: /api/playback/films/token/refresh/
+Internal Server Error: /api/playback/shorts/get_url/
+Traceback (most recent call last):
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\throttling.py", line 92, in get_rate
+    return self.THROTTLE_RATES[self.scope]
+KeyError: 'short_playback_retrieve'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\django\views\generic\base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\views.py", line 497, in dispatch
+    self.initial(request, *args, **kwargs)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\views.py", line 416, in initial
+    self.check_throttles(request)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\views.py", line 358, in check_throttles
+    for throttle in self.get_throttles():
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\views.py", line 284, in get_throttles
+    return [throttle() for throttle in self.throttle_classes]
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\views.py", line 284, in <listcomp>
+    return [throttle() for throttle in self.throttle_classes]
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\throttling.py", line 70, in __init__
+    self.rate = self.get_rate()
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\throttling.py", line 95, in get_rate
+    raise ImproperlyConfigured(msg)
+django.core.exceptions.ImproperlyConfigured: No default throttle rate set for 'short_playback_retrieve' scope
+Unauthorized: /api/playback/shorts/get_url/
+Forbidden: /api/playback/shorts/get_url/
+Internal Server Error: /api/playback/shorts/get_url/
+Traceback (most recent call last):
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\throttling.py", line 92, in get_rate
+    return self.THROTTLE_RATES[self.scope]
+KeyError: 'short_playback_retrieve'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\django\views\generic\base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\views.py", line 497, in dispatch
+    self.initial(request, *args, **kwargs)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\views.py", line 416, in initial
+    self.check_throttles(request)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\views.py", line 358, in check_throttles
+    for throttle in self.get_throttles():
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\views.py", line 284, in get_throttles
+    return [throttle() for throttle in self.throttle_classes]
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\views.py", line 284, in <listcomp>
+    return [throttle() for throttle in self.throttle_classes]
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\throttling.py", line 70, in __init__
+    self.rate = self.get_rate()
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\throttling.py", line 95, in get_rate
+    raise ImproperlyConfigured(msg)
+django.core.exceptions.ImproperlyConfigured: No default throttle rate set for 'short_playback_retrieve' scope
+Internal Server Error: /api/playback/shorts/get_url/
+Traceback (most recent call last):
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\throttling.py", line 92, in get_rate
+    return self.THROTTLE_RATES[self.scope]
+KeyError: 'short_playback_retrieve'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\django\views\generic\base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\views.py", line 497, in dispatch
+    self.initial(request, *args, **kwargs)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\views.py", line 416, in initial
+    self.check_throttles(request)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\views.py", line 358, in check_throttles
+    for throttle in self.get_throttles():
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\views.py", line 284, in get_throttles
+    return [throttle() for throttle in self.throttle_classes]
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\views.py", line 284, in <listcomp>
+    return [throttle() for throttle in self.throttle_classes]
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\throttling.py", line 70, in __init__
+    self.rate = self.get_rate()
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\throttling.py", line 95, in get_rate
+    raise ImproperlyConfigured(msg)
+django.core.exceptions.ImproperlyConfigured: No default throttle rate set for 'short_playback_retrieve' scope
+Internal Server Error: /api/playback/shorts/token/refresh/
+Traceback (most recent call last):
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\throttling.py", line 92, in get_rate
+    return self.THROTTLE_RATES[self.scope]
+KeyError: 'short_playback_refresh'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\django\views\generic\base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\views.py", line 497, in dispatch
+    self.initial(request, *args, **kwargs)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\views.py", line 416, in initial
+    self.check_throttles(request)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\views.py", line 358, in check_throttles
+    for throttle in self.get_throttles():
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\views.py", line 284, in get_throttles
+    return [throttle() for throttle in self.throttle_classes]
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\views.py", line 284, in <listcomp>
+    return [throttle() for throttle in self.throttle_classes]
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\throttling.py", line 70, in __init__
+    self.rate = self.get_rate()
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\throttling.py", line 95, in get_rate
+    raise ImproperlyConfigured(msg)
+django.core.exceptions.ImproperlyConfigured: No default throttle rate set for 'short_playback_refresh' scope
+Unauthorized: /api/playback/shorts/token/refresh/
+Forbidden: /api/playback/shorts/token/refresh/
+Internal Server Error: /api/playback/shorts/token/refresh/
+Traceback (most recent call last):
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\throttling.py", line 92, in get_rate
+    return self.THROTTLE_RATES[self.scope]
+KeyError: 'short_playback_refresh'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\django\views\generic\base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\views.py", line 497, in dispatch
+    self.initial(request, *args, **kwargs)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\views.py", line 416, in initial
+    self.check_throttles(request)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\views.py", line 358, in check_throttles
+    for throttle in self.get_throttles():
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\views.py", line 284, in get_throttles
+    return [throttle() for throttle in self.throttle_classes]
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\views.py", line 284, in <listcomp>
+    return [throttle() for throttle in self.throttle_classes]
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\throttling.py", line 70, in __init__
+    self.rate = self.get_rate()
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\throttling.py", line 95, in get_rate
+    raise ImproperlyConfigured(msg)
+django.core.exceptions.ImproperlyConfigured: No default throttle rate set for 'short_playback_refresh' scope
+Internal Server Error: /api/playback/shorts/token/refresh/
+Traceback (most recent call last):
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\throttling.py", line 92, in get_rate
+    return self.THROTTLE_RATES[self.scope]
+KeyError: 'short_playback_refresh'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\django\views\generic\base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\views.py", line 497, in dispatch
+    self.initial(request, *args, **kwargs)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\views.py", line 416, in initial
+    self.check_throttles(request)
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\views.py", line 358, in check_throttles
+    for throttle in self.get_throttles():
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\views.py", line 284, in get_throttles
+    return [throttle() for throttle in self.throttle_classes]
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\views.py", line 284, in <listcomp>
+    return [throttle() for throttle in self.throttle_classes]
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\throttling.py", line 70, in __init__
+    self.rate = self.get_rate()
+  File "C:\Users\olado\Documents\django-projects\Indie-Distro\.venv\lib\site-packages\rest_framework\throttling.py", line 95, in get_rate
+    raise ImproperlyConfigured(msg)
+django.core.exceptions.ImproperlyConfigured: No default throttle rate set for 'short_playback_refresh' scope
+Unauthorized: /api/playback/films/get_url/
+Forbidden: /api/playback/films/get_url/
+Bad Request: /api/playback/films/get_url/
+Not Found: /api/playback/films/get_url/
+Unauthorized: /api/playback/films/token/refresh/
+Forbidden: /api/playback/films/token/refresh/
+Bad Request: /api/playback/films/token/refresh/
+Not Found: /api/playback/films/token/refresh/
+Unauthorized: /api/playback/shorts/get_url/
+Forbidden: /api/playback/shorts/get_url/
+Bad Request: /api/playback/shorts/get_url/
+Not Found: /api/playback/shorts/get_url/
+Unauthorized: /api/playback/shorts/token/refresh/
+Forbidden: /api/playback/shorts/token/refresh/
+Bad Request: /api/playback/shorts/token/refresh/
+Not Found: /api/playback/shorts/token/refresh/
