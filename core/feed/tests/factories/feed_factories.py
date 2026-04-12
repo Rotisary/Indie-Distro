@@ -1,8 +1,9 @@
 import datetime
 from decimal import Decimal
 
-import factory
 from django.utils import timezone
+
+import factory
 
 from core.feed.models import Feed, Short
 from core.file_storage.tests.factories.file_storage_factories import FileModelFactory
@@ -48,5 +49,3 @@ class ShortFactory(factory.django.DjangoModelFactory):
         lambda: timezone.now().date() + datetime.timedelta(days=7)
     )
     is_released = False
-
-

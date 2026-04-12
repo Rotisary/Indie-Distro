@@ -24,14 +24,12 @@ class UserFactory(factory.django.DjangoModelFactory):
     is_superuser = False
     password = factory.PostGenerationMethodCall("set_password", DEFAULT_PASSWORD)
 
-
     @factory.post_generation
     def password(self, create, extracted, **kwargs):
         raw_password = extracted or DEFAULT_PASSWORD
         self.set_password(raw_password)
         if create:
             self.save(update_fields=["password"])
-
 
 
 class UserSessionFactory(factory.django.DjangoModelFactory):

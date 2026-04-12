@@ -100,7 +100,10 @@ def test_create_user_missing_required_fields(
     anonymous_client, server_auth_headers, admin_user
 ):
     response = anonymous_client.post(
-        CREATE_USER_URL, {"password": DEFAULT_PASSWORD}, format="json", **server_auth_headers
+        CREATE_USER_URL,
+        {"password": DEFAULT_PASSWORD},
+        format="json",
+        **server_auth_headers,
     )
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -154,14 +157,21 @@ def test_login_forbidden(monkeypatch, user):
 
 def test_login_invalid_payload(anonymous_client, server_auth_headers, admin_user):
     response = anonymous_client.post(
-        LOGIN_URL, {"email": "not-an-email", "password": DEFAULT_PASSWORD}, format="json", **server_auth_headers
+        LOGIN_URL,
+        {"email": "not-an-email", "password": DEFAULT_PASSWORD},
+        format="json",
+        **server_auth_headers,
     )
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
 
 
-def test_login_missing_required_fields(anonymous_client, server_auth_headers, admin_user):
-    response = anonymous_client.post(LOGIN_URL, {}, format="json", **server_auth_headers)
+def test_login_missing_required_fields(
+    anonymous_client, server_auth_headers, admin_user
+):
+    response = anonymous_client.post(
+        LOGIN_URL, {}, format="json", **server_auth_headers
+    )
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
 
@@ -183,7 +193,10 @@ def test_token_refresh_success(anonymous_client, server_auth_headers, admin_user
     UserSessionFactory(user=user, refresh=token["refresh"], access=token["access"])
 
     response = anonymous_client.post(
-        TOKEN_REFRESH_URL, {"refresh": token["refresh"]}, format="json", **server_auth_headers
+        TOKEN_REFRESH_URL,
+        {"refresh": token["refresh"]},
+        format="json",
+        **server_auth_headers,
     )
 
     assert response.status_code == status.HTTP_200_OK
@@ -208,19 +221,22 @@ def test_token_refresh_forbidden(monkeypatch, user):
     client = APIClient()
     client.force_authenticate(user=user)
 
-    response = client.post(
-        TOKEN_REFRESH_URL, {"refresh": "invalid"}, format="json"
-    )
+    response = client.post(TOKEN_REFRESH_URL, {"refresh": "invalid"}, format="json")
 
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
-def test_token_refresh_invalid_payload(anonymous_client, server_auth_headers, admin_user):
+def test_token_refresh_invalid_payload(
+    anonymous_client, server_auth_headers, admin_user
+):
     user = UserFactory()
     token = user.retrieve_auth_token()
 
     response = anonymous_client.post(
-        TOKEN_REFRESH_URL, {"refresh": token["refresh"]}, format="json", **server_auth_headers
+        TOKEN_REFRESH_URL,
+        {"refresh": token["refresh"]},
+        format="json",
+        **server_auth_headers,
     )
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -301,9 +317,7 @@ def test_update_user_invalid_payload(authenticated_client):
 
 
 def test_update_user_unauthorized(anonymous_client):
-    response = anonymous_client.patch(
-        ME_URL, {"first_name": "Updated"}, format="json"
-    )
+    response = anonymous_client.patch(ME_URL, {"first_name": "Updated"}, format="json")
 
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
@@ -355,7 +369,9 @@ def test_become_creator_invalid_payload():
 
 
 def test_become_creator_not_found(anonymous_client):
-    response = anonymous_client.post("/api/users/me/become-creator/unknown/", format="json")
+    response = anonymous_client.post(
+        "/api/users/me/become-creator/unknown/", format="json"
+    )
 
     assert response.status_code == status.HTTP_404_NOT_FOUND
 
@@ -381,7 +397,9 @@ def test_logout_unauthorized(anonymous_client):
 def test_logout_forbidden(monkeypatch, authenticated_client):
     monkeypatch.setattr(user_views.Logout, "permission_classes", [IsAdminUser])
 
-    response = authenticated_client.post(LOGOUT_URL, {"refresh": "invalid"}, format="json")
+    response = authenticated_client.post(
+        LOGOUT_URL, {"refresh": "invalid"}, format="json"
+    )
 
     assert response.status_code == status.HTTP_403_FORBIDDEN
 

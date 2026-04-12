@@ -409,7 +409,8 @@ class PurchaseFilm(views.APIView):
             )
         if len(wallet_pin) < 4:
             raise exceptions.CustomException(
-                message="only 4 digit pin is required", status_code=status.HTTP_404_NOT_FOUND
+                message="only 4 digit pin is required",
+                status_code=status.HTTP_404_NOT_FOUND,
             )
 
         if not request.user.is_creator and method == enums.PaymentType.TRANSFER.value:

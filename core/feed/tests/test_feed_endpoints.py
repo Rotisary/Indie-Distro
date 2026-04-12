@@ -1,6 +1,7 @@
-import pytest
 from django.urls import reverse
 from django.utils import timezone
+
+import pytest
 from rest_framework import status
 from rest_framework.permissions import IsAdminUser
 from rest_framework.test import APIClient
@@ -82,6 +83,7 @@ def build_purchase_payload(
 
 # List/create films
 
+
 def test_list_create_film_get_success(creator_client, creator_user):
     FeedFactory(owner=creator_user)
     FeedFactory()
@@ -158,6 +160,7 @@ def test_list_create_film_not_found(anonymous_client):
 
 
 # Film detail
+
 
 def test_film_detail_get_success(authenticated_client, film):
     response = authenticated_client.get(film_detail_url(film.id))
@@ -253,6 +256,7 @@ def test_film_detail_delete_not_found(creator_client):
 
 # Public film list
 
+
 def test_public_film_list_success(anonymous_client):
     released = FeedFactory(is_released=True)
     FeedFactory(is_released=False)
@@ -320,6 +324,7 @@ def test_public_film_list_not_found(anonymous_client):
 
 
 # User film list
+
 
 def test_user_films_list_success(authenticated_client, creator_user):
     FeedFactory.create_batch(2, owner=creator_user, is_released=True)
@@ -406,6 +411,7 @@ def test_user_films_list_not_found(anonymous_client, creator_user):
 
 # Film purchase
 
+
 def test_purchase_film_success(
     monkeypatch, buyer_client, buyer_wallet, creator_user, creator_wallet
 ):
@@ -463,7 +469,9 @@ def test_purchase_film_invalid_payload(
     )
 
     response = buyer_client.post(
-        purchase_film_url(film.id), build_purchase_payload(wallet_pin="0000"), format="json"
+        purchase_film_url(film.id),
+        build_purchase_payload(wallet_pin="0000"),
+        format="json",
     )
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -478,6 +486,7 @@ def test_purchase_film_not_found(creator_client):
 
 
 # Bookmark
+
 
 def test_bookmark_success(authenticated_client, film, user):
     response = authenticated_client.post(
@@ -511,7 +520,9 @@ def test_bookmark_forbidden(monkeypatch, user, film):
 
 
 def test_bookmark_invalid_payload(authenticated_client):
-    response = authenticated_client.post(BOOKMARK_URL, {"model_name": "Feed"}, format="json")
+    response = authenticated_client.post(
+        BOOKMARK_URL, {"model_name": "Feed"}, format="json"
+    )
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
 
@@ -558,7 +569,9 @@ def test_remove_bookmark_forbidden(monkeypatch, user, film):
 
 
 def test_remove_bookmark_invalid_payload(authenticated_client):
-    response = authenticated_client.post(REMOVE_BOOKMARK_URL, {"model_name": "Feed"}, format="json")
+    response = authenticated_client.post(
+        REMOVE_BOOKMARK_URL, {"model_name": "Feed"}, format="json"
+    )
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
 
@@ -572,6 +585,7 @@ def test_remove_bookmark_not_found(authenticated_client):
 
 
 # List/create shorts
+
 
 def test_list_create_short_get_success(creator_client, creator_user):
     ShortFactory(owner=creator_user)
@@ -653,6 +667,7 @@ def test_list_create_short_not_found(anonymous_client):
 
 
 # Short detail
+
 
 def test_short_detail_get_success(authenticated_client, short):
     response = authenticated_client.get(short_detail_url(short.id))
@@ -767,6 +782,7 @@ def test_short_detail_delete_not_found(creator_client):
 
 # Public short list
 
+
 def test_public_short_list_success(anonymous_client):
     released = ShortFactory(is_released=True)
     ShortFactory(is_released=False)
@@ -817,7 +833,9 @@ def test_public_short_list_invalid_filter(anonymous_client):
 
 
 def test_public_short_list_forbidden(monkeypatch, user):
-    monkeypatch.setattr(feed_views.PublicShortsList, "permission_classes", [IsAdminUser])
+    monkeypatch.setattr(
+        feed_views.PublicShortsList, "permission_classes", [IsAdminUser]
+    )
 
     client = APIClient()
     client.force_authenticate(user=user)
@@ -834,6 +852,7 @@ def test_public_short_list_not_found(anonymous_client):
 
 
 # User short list
+
 
 def test_user_shorts_list_success(authenticated_client, creator_user):
     ShortFactory.create_batch(2, owner=creator_user, is_released=True)

@@ -47,9 +47,7 @@ def admin_client(admin_user):
 
 @pytest.fixture
 def creator_user():
-    return UserFactory(
-        is_creator=True, account_type=enums.UserAccountType.USER.value
-    )
+    return UserFactory(is_creator=True, account_type=enums.UserAccountType.USER.value)
 
 
 @pytest.fixture
@@ -72,9 +70,7 @@ def creator_wallet(creator_user):
 
 @pytest.fixture
 def other_creator_user():
-    return UserFactory(
-        is_creator=True, account_type=enums.UserAccountType.USER.value
-    )
+    return UserFactory(is_creator=True, account_type=enums.UserAccountType.USER.value)
 
 
 @pytest.fixture
@@ -125,7 +121,9 @@ def file_model(creator_user):
 
 @pytest.fixture
 def short(creator_user, film, file_model):
-    return ShortFactory(owner=creator_user, film=film, file=file_model, is_released=False)
+    return ShortFactory(
+        owner=creator_user, film=film, file=file_model, is_released=False
+    )
 
 
 @pytest.fixture
