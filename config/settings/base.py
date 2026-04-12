@@ -182,6 +182,12 @@ REST_FRAMEWORK = {
         "anon": "50/minute",
         "playback_retrieve": env.str("PLAYBACK_RETRIEVE_THROTTLE_RATE", "30/minute"),
         "playback_refresh": env.str("PLAYBACK_REFRESH_THROTTLE_RATE", "60/minute"),
+        "short_playback_retrieve": env.str(
+            "SHORT_PLAYBACK_RETRIEVE_THROTTLE_RATE", "60/minute"
+        ),
+        "short_playback_refresh": env.str(
+            "SHORT_PLAYBACK_REFRESH_THROTTLE_RATE", "60/minute"
+        ),
     },
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "EXCEPTION_HANDLER": "core.utils.exceptions.exceptions.custom_exception_handler",
