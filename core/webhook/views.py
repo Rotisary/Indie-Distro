@@ -46,7 +46,11 @@ class FlutterwaveWebhook(views.APIView):
             if event == "charge.completed":
                 result = PaymentHandlers.handle_bank_charge(data)
                 return response.Response(result, status=status.HTTP_200_OK)
-            elif event in ("transfer.completed", "transfer.failed"):
+            elif event in (
+                "transfer.completed",
+                "transfer.disburse",
+                "transfer.failed",
+            ):
                 result = PaymentHandlers.handle_transfer(data)
                 return response.Response(result, status=status.HTTP_200_OK)
             else:
