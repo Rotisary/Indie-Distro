@@ -2,6 +2,8 @@ from drf_spectacular.utils import extend_schema
 from rest_framework import response, status, views
 from rest_framework.permissions import IsAuthenticated
 
+from core.utils import exceptions
+
 from .models import EventLog
 
 
@@ -12,7 +14,11 @@ class EventReplayView(views.APIView):
 
     @extend_schema(description="Get the last N events for the authenticated user")
     def get(self, request):
-        limit = int(request.query_params.get("limit", 50))
+        limit_param = request.query_params.get("limit", 50)
+        try:
+            limit = int(limit_param)
+        except (TypeError, ValueError):
+            raise exceptions.CustomException(message="Invalid limit value")
         limit = max(1, min(limit, 200))
         events = EventLog.objects.filter(user=request.user)[:limit]
         payload = [

@@ -6340,3 +6340,7 @@ Bad Request: /api/webhook/flutterwave/
 Forbidden: /api/webhook/flutterwave/
 Bad Request: /api/webhook/flutterwave/
 Not Found: /api/webhook/flutterwave/unknown/
+Unauthorized: /api/websocket/events/last/
+Forbidden: /api/websocket/events/last/
+Bad Request: /api/websocket/events/last/
+Not Found: /api/websocket/events/last/missing/
