@@ -51,7 +51,7 @@ class FlutterwaveWebhook(views.APIView):
                 "transfer.disburse",
                 "transfer.failed",
             ):
-                result = PaymentHandlers.handle_transfer(data)
+                result = PaymentHandlers.handle_transfer_event(data)
                 return response.Response(result, status=status.HTTP_200_OK)
             else:
                 logger.warning(f"Unhandled Flutterwave event: {event}")

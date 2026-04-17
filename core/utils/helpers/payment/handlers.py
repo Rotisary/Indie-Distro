@@ -10,12 +10,42 @@ from core.feed.models import Purchase
 from core.payment.models import JournalEntry, Transaction
 from core.utils import enums
 from core.utils.helpers.payment import PostLedgerData
+from core.wallet.models import Wallet
 from core.websocket.utils import emit_user_event
 
 from .base import PaymentHelper
 
 
 class PaymentHandlers:
+
+    @staticmethod
+    def _extract_transfer_webhook_context(data: dict) -> dict:
+        return {
+            "tx_ref": data.get("reference") or data.get("tx_ref"),
+            "bank_code": data.get("bank_code"),
+            "account_number": data.get("account_number"),
+            "tx_id": data.get("id"),
+            "flw_status": data.get("status").lower(),
+            "amount": Decimal(str(data.get("charged_amount") or data.get("amount"))),
+        }
+
+    @staticmethod
+    def _transaction_is_finalized(tx: Transaction) -> bool:
+        return tx.status in (
+            enums.TransactionStatus.SUCCESSFUL.value,
+            enums.TransactionStatus.FAILED.value,
+        )
+
+    @staticmethod
+    def _find_transaction_by_reference(tx_ref: str):
+        if not tx_ref:
+            return None
+
+        tx = Transaction.objects.filter(reference=tx_ref).first()
+        if tx:
+            return tx
+
+        return None
 
     @staticmethod
     def _resolve_event_user(tx: Transaction, purchase: Purchase = None):
@@ -151,9 +181,57 @@ class PaymentHandlers:
         purchase.save(update_fields=["payment_status", "date_last_modified"])
 
     @staticmethod
+    def _create_virtual_funding_entry(data):
+        context = PaymentHandlers._extract_transfer_webhook_context(data)
+        tx_ref = context["tx_ref"]
+        account_number = context["account_number"]
+        amount = context["amount"]
+
+        if not account_number:
+            logger.info("transfer.completed: missing account number, using payout flow")
+            return {
+                "status": "error",
+                "detail": f"account number is missing for tx_ref: {tx_ref}",
+            }
+
+        wallet = (
+            Wallet.objects.select_related("owner")
+            .filter(virtual_account_number=account_number)
+            .first()
+        )
+        if not wallet:
+            logger.info(
+                f"transfer.completed: no wallet matched virtual account {account_number}, using payout flow"
+            )
+            return {"status": "error"}
+
+        with db_transaction.atomic():
+            entry_lines = [
+                {
+                    "user": wallet.owner,
+                    "account_type": enums.LedgerAccountType.FUNDING.value,
+                    "entry_type": enums.EntryType.DEBIT.value,
+                    "amount": amount,
+                },
+                {
+                    "user": wallet.owner,
+                    "account_type": enums.LedgerAccountType.USER_WALLET.value,
+                    "entry_type": enums.EntryType.CREDIT.value,
+                    "amount": amount,
+                },
+            ]
+            tx = PostLedgerData.as_pending(
+                ledger_data=entry_lines,
+                tx_purpose=enums.TransactionPurpose.FUNDING.value,
+                description="Wallet funding via static virtual account",
+            )
+        return tx
+
+    @staticmethod
     def _finalise_failed_charge(tx: Transaction, data: dict, flw_status: str) -> dict:
-        PostLedgerData.as_failed(tx, data, "charge")
-        PaymentHandlers._mark_purchase_failed(tx)
+        with db_transaction.atomic():
+            PostLedgerData.as_failed(tx, data, "charge")
+            PaymentHandlers._mark_purchase_failed(tx)
         PaymentHandlers._emit_payment_event(tx, success=False)
         logger.warning(f"charge.completed: tx {tx.reference} failed ({flw_status})")
 
@@ -237,117 +315,155 @@ class PaymentHandlers:
         """
         Finalises successful transfers and move money from and to  the right balances
         """
+        try:
+            with db_transaction.atomic():
+                PostLedgerData.as_successful(tx, data, "transfer")
 
-        PostLedgerData.as_successful(tx, data, "transfer")
+                credit_entry = (
+                    JournalEntry.objects.filter(
+                        journal__transaction=tx,
+                        type=enums.EntryType.CREDIT.value,
+                        account__type=enums.LedgerAccountType.USER_WALLET.value,
+                    )
+                    .select_related("account__owner")
+                    .first()
+                )
+                if not credit_entry:
+                    logger.error(
+                        f"No USER_WALLET credit entry for transfer tx {tx.reference} found"
+                    )
+                    return {"status": "error", "detail": "missing credit entry"}
 
-        credit_entry = (
-            JournalEntry.objects.filter(
-                journal__transaction=tx,
-                type=enums.EntryType.CREDIT.value,
-                account__type=enums.LedgerAccountType.USER_WALLET.value,
+                wallet = credit_entry.account.owner.wallet
+                tx_purpose = tx.purpose
+
+                if tx_purpose == enums.TransactionPurpose.FUNDING.value:
+                    wallet.pay_to_wallet(amount, is_funding=True)
+                elif tx.purpose == enums.TransactionPurpose.PURCHASE.value:
+                    wallet.pay_to_wallet(amount)
+                    PaymentHandlers._mark_purchase_failed(
+                        tx.parent_transaction if tx.parent_transaction else tx
+                    )
+                elif tx.purpose == enums.TransactionPurpose.PAYOUT.value:
+                    wallet.withdraw_funds(amount, is_earnings=True)
+
+                db_transaction.on_commit(
+                    lambda: PaymentHandlers._emit_payment_event(
+                        tx, success=True, amount=amount
+                    )
+                )
+            logger.success(
+                f"transfer.completed: tx {tx.reference} finalised ({tx_purpose})"
             )
-            .select_related("account__owner")
-            .first()
-        )
-        if not credit_entry:
-            logger.error(
-                f"No USER_WALLET credit entry for transfer tx {tx.reference} found"
+            return {"status": "success"}
+        except Exception as e:
+            # TODO issue refund
+            db_transaction.on_commit(
+                lambda: PaymentHandlers._emit_payment_event(
+                    tx, success=False, amount=amount
+                )
             )
-            return {"status": "error", "detail": "missing credit entry"}
-
-        wallet = credit_entry.account.owner.wallet
-        tx_purpose = tx.purpose
-
-        if tx_purpose == enums.TransactionPurpose.FUNDING.value:
-            wallet.pay_to_wallet(amount, is_funding=True)
-        elif tx.purpose == enums.TransactionPurpose.PURCHASE.value:
-            wallet.pay_to_wallet(amount)
-            PaymentHandlers._mark_purchase_failed(
-                tx.parent_transaction if tx.parent_transaction else tx
-            )
-        elif tx.purpose == enums.TransactionPurpose.PAYOUT.value:
-            wallet.withdraw_funds(amount, is_earnings=True)
-
-        PaymentHandlers._emit_payment_event(tx, success=True, amount=amount)
-
-        logger.success(
-            f"transfer.completed: tx {tx.reference} finalised ({tx_purpose})"
-        )
-        return {"status": "success"}
+            logger.warning(f"transfer.completed: tx {tx.reference} failed")
+            return {"status": "failed"}
 
     @staticmethod
     def _finalise_failed_transfer(tx: Transaction, data: dict, flw_status: str) -> dict:
+        with db_transaction.atomic():
+            PostLedgerData.as_failed(tx, data, "transfer")
 
-        PostLedgerData.as_failed(tx, data, "transfer")
-
-        debit_entry = (
-            JournalEntry.objects.filter(
-                journal__transaction=tx, type=enums.EntryType.DEBIT.value
+            debit_entry = (
+                JournalEntry.objects.filter(
+                    journal__transaction=tx, type=enums.EntryType.DEBIT.value
+                )
+                .select_related("account__owner")
+                .first()
             )
-            .select_related("account__owner")
-            .first()
-        )
-        if not debit_entry:
-            logger.error(f"No debit entry for transfer tx {tx.reference} found")
-            return {"status": "error", "detail": "missing debit entry"}
+            if not debit_entry:
+                logger.error(f"No debit entry for transfer tx {tx.reference} found")
+                return {"status": "error", "detail": "missing debit entry"}
 
-        wallet = debit_entry.account.owner.wallet
-        if tx.purpose == enums.TransactionPurpose.PAYOUT.value:
-            wallet.pay_to_wallet(debit_entry.amount)
-        elif tx.purpose == enums.TransactionPurpose.PURCHASE.value:
-            wallet.pay_to_wallet(debit_entry.amount, is_funding=True)
-            PaymentHandlers._mark_purchase_failed(
-                tx.parent_transaction if tx.parent_transaction else tx
+            if debit_entry.account.owner is not None:
+                wallet = debit_entry.account.owner.wallet
+                if tx.purpose == enums.TransactionPurpose.PAYOUT.value:
+                    wallet.pay_to_wallet(debit_entry.amount)
+                elif tx.purpose == enums.TransactionPurpose.PURCHASE.value:
+                    wallet.pay_to_wallet(debit_entry.amount, is_funding=True)
+                    PaymentHandlers._mark_purchase_failed(
+                        tx.parent_transaction if tx.parent_transaction else tx
+                    )
+
+            db_transaction.on_commit(
+                lambda: PaymentHandlers._emit_payment_event(
+                    tx, success=False, amount=debit_entry.amount
+                )
             )
-        elif tx.purpose == enums.TransactionPurpose.FUNDING.value:
-            wallet.pay_to_wallet(debit_entry.amount, is_funding=True)
-
-        PaymentHandlers._emit_payment_event(
-            tx, success=False, amount=debit_entry.amount
-        )
         logger.warning(f"transfer.completed: tx {tx.reference} failed ({flw_status})")
         return {"status": "failed"}
+
+    @staticmethod
+    def handle_transfer_event(data: dict) -> dict:
+        context = PaymentHandlers._extract_transfer_webhook_context(data)
+        tx_ref = context["tx_ref"]
+
+        if not tx_ref:
+            logger.error("transfer.completed webhook missing reference")
+            return {"status": "error", "detail": "missing reference"}
+
+        existing_tx = PaymentHandlers._find_transaction_by_reference(tx_ref)
+        if existing_tx:
+            if PaymentHandlers._transaction_is_finalized(existing_tx):
+                logger.info(
+                    f"transfer.completed: tx {existing_tx.reference} already {existing_tx.status}"
+                )
+                return {"status": "already_processed"}
+
+            return PaymentHandlers.handle_transfer(data, existing_tx)
+
+        return PaymentHandlers.handle_virtual_account_funding(data)
+
+    @staticmethod
+    def handle_virtual_account_funding(data: dict) -> dict:
+        from core.payment.tasks import handle_virtual_funding_task
+
+        context = PaymentHandlers._extract_transfer_webhook_context(data)
+        handle_virtual_funding_task.delay(
+            context["tx_ref"], context["tx_id"], str(context["amount"]), data
+        )
+        return {
+            "status": "queued",
+            "detail": "transfer verification and finalisation queued",
+        }
 
     @staticmethod
     def handle_bank_charge(data: dict) -> dict:
         """
         Handle Flutterwave 'charge.completed' webhook.
         """
-        tx_ref = data.get("tx_ref")
-        flw_status = data.get("status").lower()
-        tx_id = data.get("id")
-        amount = Decimal(str(data.get("charged_amount") or data.get("amount")))
+        context = PaymentHandlers._extract_transfer_webhook_context(data)
+        tx_ref = context["tx_ref"]
 
         if not tx_ref:
             logger.error("charge.completed webhook missing tx_ref")
             return {"status": "error", "detail": "missing tx_ref"}
 
-        with db_transaction.atomic():
-            try:
-                tx = Transaction.objects.select_for_update().get(reference=tx_ref)
-            except Transaction.DoesNotExist:
-                logger.error(f"charge.completed: no transaction with ref={tx_ref}")
-                return {"status": "error", "detail": "transaction not found"}
+        existing_tx = PaymentHandlers._find_transaction_by_reference(tx_ref)
+        if not existing_tx:
+            logger.error(f"charge.completed: no transaction with ref={tx_ref}")
+            return {"status": "error", "detail": "transaction not found"}
 
-            if tx.status in (
-                enums.TransactionStatus.SUCCESSFUL.value,
-                enums.TransactionStatus.FAILED.value,
-            ):
-                logger.info(f"charge.completed: tx {tx_ref} already {tx.status}")
-                return {
-                    "status": "already_processed",
-                    "detail": "charge already processed",
-                }
-
-            if flw_status != "successful":
-                return PaymentHandlers._finalise_failed_charge(tx, data, flw_status)
+        if PaymentHandlers._transaction_is_finalized(existing_tx):
+            logger.info(f"charge.completed: tx {tx_ref} already {existing_tx.status}")
+            return {
+                "status": "already_processed",
+                "detail": "charge already processed",
+            }
 
         from core.payment.tasks import (
             verify_charge_and_initiate_subaccount_transfer_task,
         )
 
         verify_charge_and_initiate_subaccount_transfer_task.delay(
-            tx_ref, tx_id, str(amount), data
+            tx_ref, context["tx_id"], str(context["amount"]), data
         )
         return {
             "status": "queued",
@@ -355,42 +471,18 @@ class PaymentHandlers:
         }
 
     @staticmethod
-    def handle_transfer(data: dict) -> dict:
+    def handle_transfer(data: dict, tx: Transaction) -> dict:
         """
         Handle Flutterwave 'transfer.completed' webhook.
         """
-        tx_ref = data.get("reference")
-        flw_status = data.get("status").lower()
-        amount = Decimal(str(data.get("charged_amount") or data.get("amount")))
-        tx_id = data.get("id")
+        context = PaymentHandlers._extract_transfer_webhook_context(data)
 
-        if not tx_ref:
-            logger.error("transfer.completed webhook missing reference")
-            return {"status": "error", "detail": "missing reference"}
+        from core.payment.tasks import verify_transfer_and_finalize_task
 
-        with db_transaction.atomic():
-            try:
-                tx = Transaction.objects.select_for_update().get(reference=tx_ref)
-            except Transaction.DoesNotExist:
-                logger.error(f"transfer.completed: no transaction with ref={tx_ref}")
-                return {"status": "error", "detail": "transaction not found"}
-
-            if tx.status in (
-                enums.TransactionStatus.SUCCESSFUL.value,
-                enums.TransactionStatus.FAILED.value,
-            ):
-                logger.info(f"transfer.completed: tx {tx_ref} already {tx.status}")
-                return {"status": "already_processed"}
-
-            if flw_status == "successful":
-                from core.payment.tasks import verify_transfer_and_finalize_task
-
-                verify_transfer_and_finalize_task.delay(
-                    tx_ref, tx_id, str(amount), data
-                )
-                return {
-                    "status": "queued",
-                    "detail": "transfer verification and finalisation queued",
-                }
-            else:
-                return PaymentHandlers._finalise_failed_transfer(tx, data, flw_status)
+        verify_transfer_and_finalize_task.delay(
+            tx.reference, context["tx_id"], str(context["amount"]), data
+        )
+        return {
+            "status": "queued",
+            "detail": "transfer verification and finalisation queued",
+        }

@@ -66,7 +66,7 @@ class InitiateFundingWithBankCharge(views.APIView):
     @IdempotencyDecorator.make_endpoint_idempotent(ttl=300)
     def post(self, request):
         serializer = FundWalletSerializer.InitiateBankChargeFundingSerializer(
-            request.data
+            data=request.data
         )
         serializer.is_valid(raise_exception=True)
         owner = serializer.validated_data["owner"]
@@ -107,7 +107,7 @@ class InitiateFundingWithBankCharge(views.APIView):
             else status.HTTP_502_BAD_GATEWAY
         )
 
-        return response.Response(data=payment_response, status=status_code)
+        return response.Response(data=payment_response.__dict__, status=status_code)
 
 
 @extend_schema(tags=["wallets"])
@@ -181,7 +181,7 @@ class InitiatePayout(views.APIView):
             if payment_response.status == "initiated"
             else status.HTTP_502_BAD_GATEWAY
         )
-        return response.Response(data=payment_response, status=status_code)
+        return response.Response(data=payment_response.__dict__, status=status_code)
 
 
 @extend_schema(tags=["wallets"])

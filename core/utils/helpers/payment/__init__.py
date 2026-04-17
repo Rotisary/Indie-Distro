@@ -39,20 +39,21 @@ class PostLedgerData:
 
     @staticmethod
     def as_successful(tx: Transaction, data: dict, type: str):
-        entries = JournalEntry.objects.filter(
-            journal__transaction=tx,
-            status=enums.EntryStatus.PENDING.value,
-        )
-        updated = entries.update(
-            status=enums.EntryStatus.COMPLETED.value, completed_at=timezone.now()
-        )
+        with db_transaction.atomic():
+            entries = JournalEntry.objects.filter(
+                journal__transaction=tx,
+                status=enums.EntryStatus.PENDING.value,
+            )
+            updated = entries.update(
+                status=enums.EntryStatus.COMPLETED.value, completed_at=timezone.now()
+            )
 
-        tx.status = enums.TransactionStatus.SUCCESSFUL.value
-        tx.successful_at = timezone.now()
-        tx.metadata[f"flw_{type}_webhook"] = data
-        tx.save(update_fields=["status", "successful_at", "metadata"])
+            tx.status = enums.TransactionStatus.SUCCESSFUL.value
+            tx.successful_at = timezone.now()
+            tx.metadata[f"flw_{type}_webhook"] = data
+            tx.save(update_fields=["status", "successful_at", "metadata"])
 
-        logger.info(f"Completed {updated} journal entries for tx {tx.reference}")
+            logger.info(f"Completed {updated} journal entries for tx {tx.reference}")
 
     @staticmethod
     def as_failed(tx: Transaction, data: dict, type: str):

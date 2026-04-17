@@ -65,13 +65,13 @@ class IsAccountType:
             ) or IsAccountType.IsCreatorAccount().has_permission(request, view)
 
 
-class IsObjOwner(BaseException):
+class IsObjOwner(BasePermission):
     """
     Allows access only to the owner of an object.
     """
 
     message: str
 
-    def has_object_permissions(self, request, view, obj):
+    def has_object_permission(self, request, view, obj):
         self.message = "You do not have permission to access this object."
         return obj.owner == request.user
