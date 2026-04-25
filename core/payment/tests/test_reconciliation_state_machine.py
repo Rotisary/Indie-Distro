@@ -1,8 +1,9 @@
 from datetime import timedelta
 from decimal import Decimal
 
-import pytest
 from django.utils import timezone
+
+import pytest
 
 from core.payment.models import JournalEntry, LedgerAccount, LedgerJournal, Transaction
 from core.payment.tasks import reconcile_flutterwave_finalization_failures
@@ -16,13 +17,15 @@ pytestmark = pytest.mark.django_db
 
 
 def build_payout_transaction(user, suffix: str, finalisation_state: str, metadata=None):
-    WalletFactory(owner=user)
+    if not hasattr(user, "wallet"):
+        WalletFactory(owner=user)
     tx = Transaction.objects.create(
         reference=f"txr{suffix}",
         status=enums.TransactionStatus.INITIATED.value,
         finalisation_state=finalisation_state,
         currency=enums.SupportedCurrency.NGN.value,
         purpose=enums.TransactionPurpose.PAYOUT.value,
+        type=enums.PaymentType.TRANSFER.value,
         metadata=metadata or {},
     )
     account, _ = LedgerAccount.objects.get_or_create(
@@ -67,7 +70,9 @@ def test_reconcile_uses_persisted_webhook_outcome_and_finalises_as_failed(
     monkeypatch, user
 ):
     monkeypatch.setattr(
-        PaymentHandlers, "_emit_payment_event", staticmethod(lambda *args, **kwargs: None)
+        PaymentHandlers,
+        "_emit_payment_event",
+        staticmethod(lambda *args, **kwargs: None),
     )
 
     tx = build_payout_transaction(
@@ -84,7 +89,10 @@ def test_reconcile_uses_persisted_webhook_outcome_and_finalises_as_failed(
 
     assert result["status"] == "failed"
     assert tx.status == enums.TransactionStatus.FAILED.value
-    assert tx.finalisation_state == enums.TransactionFinalisationState.FAILED_FINALISED.value
+    assert (
+        tx.finalisation_state
+        == enums.TransactionFinalisationState.FAILED_FINALISED.value
+    )
     assert tx.metadata["provider_outcome"]["status"] == "successful"
     assert entry.status == enums.EntryStatus.FAILED.value
 
@@ -93,7 +101,9 @@ def test_reconcile_moves_to_failed_not_finalised_when_failed_finalisation_fails(
     monkeypatch, user
 ):
     monkeypatch.setattr(
-        PaymentHandlers, "_emit_payment_event", staticmethod(lambda *args, **kwargs: None)
+        PaymentHandlers,
+        "_emit_payment_event",
+        staticmethod(lambda *args, **kwargs: None),
     )
 
     tx = build_payout_transaction(
@@ -114,7 +124,10 @@ def test_reconcile_moves_to_failed_not_finalised_when_failed_finalisation_fails(
 
     assert result["status"] == "failed"
     assert result["detail"] == "reconciliation required"
-    assert tx.finalisation_state == enums.TransactionFinalisationState.FAILED_NOT_FINALISED.value
+    assert (
+        tx.finalisation_state
+        == enums.TransactionFinalisationState.FAILED_NOT_FINALISED.value
+    )
     assert tx.metadata["provider_outcome"]["status"] == "successful"
 
 
@@ -150,7 +163,9 @@ def test_reconcile_task_filters_by_finalisation_state_and_provider_outcome(
         return {"status": "failed", "tx_ref": tx_ref}
 
     monkeypatch.setattr(
-        PaymentHandlers, "reconcile_transaction_finalization", staticmethod(fake_reconcile)
+        PaymentHandlers,
+        "reconcile_transaction_finalization",
+        staticmethod(fake_reconcile),
     )
 
     result = reconcile_flutterwave_finalization_failures.run(batch_size=10)

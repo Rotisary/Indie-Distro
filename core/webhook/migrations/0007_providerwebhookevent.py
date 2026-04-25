@@ -34,11 +34,15 @@ class Migration(migrations.Migration):
                 ("idempotency_key", models.CharField(max_length=255, unique=True)),
                 (
                     "tx_ref",
-                    models.CharField(blank=True, db_index=True, max_length=100, null=True),
+                    models.CharField(
+                        blank=True, db_index=True, max_length=100, null=True
+                    ),
                 ),
                 (
                     "provider_event_id",
-                    models.CharField(blank=True, db_index=True, max_length=100, null=True),
+                    models.CharField(
+                        blank=True, db_index=True, max_length=100, null=True
+                    ),
                 ),
                 (
                     "provider_status",

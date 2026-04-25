@@ -77,12 +77,12 @@ class PostLedgerData:
         updated = entries.update(status=enums.EntryStatus.FAILED.value)
 
         tx.status = enums.TransactionStatus.FAILED.value
-        tx.finalisation_state = enums.TransactionFinalisationState.FAILED_FINALISED.value
+        tx.finalisation_state = (
+            enums.TransactionFinalisationState.FAILED_FINALISED.value
+        )
         tx.failed_at = timezone.now()
         metadata = tx.metadata or {}
         metadata[f"flw_{type}_webhook"] = data
-        tx.save(
-            update_fields=["status", "finalisation_state", "failed_at", "metadata"]
-        )
+        tx.save(update_fields=["status", "finalisation_state", "failed_at", "metadata"])
 
         logger.info(f"Failed {updated} journal entries for tx {tx.reference}")

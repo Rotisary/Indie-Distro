@@ -1,6 +1,5 @@
 from django.db import migrations, models
 
-
 BANK_CHARGE = "bank_charge"
 TRANSFER = "transfer"
 
@@ -18,14 +17,19 @@ def backfill_transaction_type(apps, schema_editor):
             tx_type = TRANSFER
         elif tx.purpose == "payment":
             tx_type = TRANSFER
-        elif metadata.get("transfer_initiation_data") or metadata.get("flw_transfer_webhook"):
+        elif metadata.get("transfer_initiation_data") or metadata.get(
+            "flw_transfer_webhook"
+        ):
             tx_type = TRANSFER
-        elif metadata.get("charge_initiation_data") or metadata.get("flw_charge_webhook"):
+        elif metadata.get("charge_initiation_data") or metadata.get(
+            "flw_charge_webhook"
+        ):
             tx_type = BANK_CHARGE
         else:
             account_types = set(
-                JournalEntry.objects.filter(journal__transaction=tx)
-                .values_list("account__type", flat=True)
+                JournalEntry.objects.filter(journal__transaction=tx).values_list(
+                    "account__type", flat=True
+                )
             )
 
             if "external payment" in account_types:

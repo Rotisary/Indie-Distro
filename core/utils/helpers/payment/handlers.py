@@ -291,7 +291,7 @@ class PaymentHandlers:
                 description="Wallet funding via static virtual account",
             )
         return tx
-    
+
     @staticmethod
     def _post_successful_charge(tx: Transaction, data: dict, flw_status: str):
         try:
@@ -299,21 +299,23 @@ class PaymentHandlers:
             return True
         except Exception as e:
             # TODO issue refund
-            logger.warning(f"charge.completed: tx {tx.reference} success posting failed")     
+            logger.warning(
+                f"charge.completed: tx {tx.reference} success posting failed"
+            )
             PaymentHandlers._finalise_failed_charge(
-                tx, 
-                data, 
-                flw_status, 
-                state=enums.TransactionFinalisationState.SUCCESS_NOT_FINALISED.value
-            ) 
-            return False         
+                tx,
+                data,
+                flw_status,
+                state=enums.TransactionFinalisationState.SUCCESS_NOT_FINALISED.value,
+            )
+            return False
 
     @staticmethod
     def _finalise_failed_charge(
-        tx: Transaction, 
-        data: dict, 
-        flw_status: str, 
-        state: str=enums.TransactionFinalisationState.FAILED_NOT_FINALISED.value
+        tx: Transaction,
+        data: dict,
+        flw_status: str,
+        state: str = enums.TransactionFinalisationState.FAILED_NOT_FINALISED.value,
     ) -> dict:
         PaymentHandlers._set_provider_outcome(tx, flw_status, data)
         try:
@@ -407,7 +409,9 @@ class PaymentHandlers:
             )
 
     @staticmethod
-    def _finalise_successful_transfer(tx: Transaction, data: dict, amount, flw_status: str) -> dict:
+    def _finalise_successful_transfer(
+        tx: Transaction, data: dict, amount, flw_status: str
+    ) -> dict:
         """
         Finalises successful transfers and move money from and to  the right balances
         """
@@ -457,18 +461,18 @@ class PaymentHandlers:
                 f"transfer.completed: tx {tx.reference} success finalization failed: {str(e)}"
             )
             return PaymentHandlers._finalise_failed_transfer(
-                tx, 
-                data, 
-                flw_status, 
-                state=enums.TransactionFinalisationState.SUCCESS_NOT_FINALISED.value
+                tx,
+                data,
+                flw_status,
+                state=enums.TransactionFinalisationState.SUCCESS_NOT_FINALISED.value,
             )
 
     @staticmethod
     def _finalise_failed_transfer(
-        tx: Transaction, 
-        data: dict, 
-        flw_status: str, 
-        state: str=enums.TransactionFinalisationState.FAILED_NOT_FINALISED.value
+        tx: Transaction,
+        data: dict,
+        flw_status: str,
+        state: str = enums.TransactionFinalisationState.FAILED_NOT_FINALISED.value,
     ) -> dict:
         PaymentHandlers._set_provider_outcome(tx, flw_status, data)
         try:
@@ -501,7 +505,9 @@ class PaymentHandlers:
                         tx, success=False, amount=debit_entry.amount
                     )
                 )
-            logger.warning(f"transfer.completed: tx {tx.reference} failed ({flw_status})")
+            logger.warning(
+                f"transfer.completed: tx {tx.reference} failed ({flw_status})"
+            )
             return {"status": "failed"}
         except Exception as failed_post_err:
             PaymentHandlers._set_finalisation_state(tx, state)
@@ -600,7 +606,9 @@ class PaymentHandlers:
     @staticmethod
     def reconcile_transaction_finalization(tx_ref: str) -> dict:
         with db_transaction.atomic():
-            tx = Transaction.objects.select_for_update().filter(reference=tx_ref).first()
+            tx = (
+                Transaction.objects.select_for_update().filter(reference=tx_ref).first()
+            )
             if not tx:
                 return {"status": "not_found", "tx_ref": tx_ref}
 
@@ -614,7 +622,7 @@ class PaymentHandlers:
                     "tx_ref": tx_ref,
                     "detail": "provider outcome unavailable",
                 }
-            
+
             if tx.type == enums.PaymentType.BANK_CHARGE.value:
                 result = PaymentHandlers._finalise_failed_charge(
                     tx,
@@ -623,9 +631,9 @@ class PaymentHandlers:
                         "provider_outcome": provider_outcome,
                         "reconciled": True,
                     },
-                    provider_outcome
-                ) 
-            else:  
+                    provider_outcome,
+                )
+            else:
                 result = PaymentHandlers._finalise_failed_transfer(
                     tx,
                     {
@@ -633,6 +641,6 @@ class PaymentHandlers:
                         "provider_outcome": provider_outcome,
                         "reconciled": True,
                     },
-                    provider_outcome
+                    provider_outcome,
                 )
             return {"tx_ref": tx_ref, **result}

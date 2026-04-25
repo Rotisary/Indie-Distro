@@ -5,9 +5,9 @@ from django.urls import reverse
 import pytest
 from rest_framework import status
 
+from core.utils.services.flutterwave import FlutterwaveService
 from core.wallet import views as wallet_views
 from core.wallet.tests.factories.wallet_factories import WalletFactory
-from core.utils.services.flutterwave import FlutterwaveService
 
 pytestmark = pytest.mark.django_db
 

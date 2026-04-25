@@ -10,8 +10,8 @@ from rest_framework import status
 
 from core.utils import enums, mixins
 from core.utils.exceptions import exceptions
-from core.websocket.utils import emit_websocket_event
 from core.utils.services import FlutterwaveService
+from core.websocket.utils import emit_websocket_event
 
 
 class Wallet(mixins.BaseModelMixin):

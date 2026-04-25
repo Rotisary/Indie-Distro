@@ -501,7 +501,7 @@ def test_purchase_film_not_found(creator_client):
 
 
 def test_purchase_film_transfer_success(
-    monkeypatch, other_creator_client, other_creator_user, creator_user
+    monkeypatch, other_creator_client, other_creator_user, creator_user, creator_wallet
 ):
     film = FeedFactory(owner=creator_user, is_released=False, price="20.00")
     WalletFactory(
@@ -531,7 +531,7 @@ def test_purchase_film_transfer_success(
 
 
 def test_purchase_film_transfer_balance_mismatch(
-    monkeypatch, other_creator_client, other_creator_user, creator_user
+    monkeypatch, other_creator_client, other_creator_user, creator_user, creator_wallet
 ):
     film = FeedFactory(owner=creator_user, is_released=False, price="20.00")
     WalletFactory(
@@ -557,7 +557,7 @@ def test_purchase_film_transfer_balance_mismatch(
 
 
 def test_purchase_film_transfer_balance_insufficient(
-    monkeypatch, other_creator_client, other_creator_user, creator_user
+    monkeypatch, other_creator_client, other_creator_user, creator_user, creator_wallet
 ):
     film = FeedFactory(owner=creator_user, is_released=False, price="100.00")
     WalletFactory(

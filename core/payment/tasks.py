@@ -1,15 +1,15 @@
-from decimal import Decimal
 from datetime import timedelta
+from decimal import Decimal
 
-from celery import shared_task
 from django.db.models import Q
 from django.utils import timezone
+
+from celery import shared_task
 from loguru import logger
 
 from core.payment.models import Transaction
-from core.utils.exceptions import exceptions
-from core.utils.helpers.payment import PostLedgerData
 from core.utils import enums
+from core.utils.exceptions import exceptions
 from core.utils.services import FlutterwaveService
 
 
@@ -82,7 +82,7 @@ def verify_charge_and_initiate_subaccount_transfer_task(
             return {
                 "verification": verification_response,
             }
-        
+
         initiate_subaccount_transfer_task.delay(tx_ref, amount)
         logger.info(
             f"Charge verified and subaccount transfer queued for tx={tx.reference}"
@@ -239,9 +239,7 @@ def reconcile_flutterwave_finalization_failures(self, batch_size: int = 100):
         threshold = timezone.now() - timedelta(minutes=2)
         candidates = (
             Transaction.objects.filter(
-                Q(
-                    finalisation_state__in=PaymentHandlers.NOT_FINALISED_STATES
-                )
+                Q(finalisation_state__in=PaymentHandlers.NOT_FINALISED_STATES)
                 | Q(
                     status__in=[
                         enums.TransactionStatus.PENDING.value,

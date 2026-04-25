@@ -1,6 +1,6 @@
 from django.conf import settings
-from django.utils.decorators import method_decorator
 from django.utils import timezone
+from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 
 from loguru import logger
@@ -58,21 +58,21 @@ class FlutterwaveWebhook(views.APIView):
                 "provider": enums.WebhookProvider.FLUTTERWAVE.value,
                 "event": event or "",
                 "tx_ref": tx_ref,
-                "provider_event_id": str(provider_event_id) if provider_event_id else None,
+                "provider_event_id": (
+                    str(provider_event_id) if provider_event_id else None
+                ),
                 "provider_status": provider_status,
                 "payload": payload,
             },
         )
 
-        if (
-            not created
-            and webhook_event.processing_state
-            in (
-                enums.WebhookProcessingState.ACKNOWLEDGED.value,
-                enums.WebhookProcessingState.IGNORED.value,
-            )
+        if not created and webhook_event.processing_state in (
+            enums.WebhookProcessingState.ACKNOWLEDGED.value,
+            enums.WebhookProcessingState.IGNORED.value,
         ):
-            stored_response = webhook_event.handler_response or {"status": "already_processed"}
+            stored_response = webhook_event.handler_response or {
+                "status": "already_processed"
+            }
             return response.Response(stored_response, status=status.HTTP_200_OK)
 
         try:
@@ -93,7 +93,11 @@ class FlutterwaveWebhook(views.APIView):
                 webhook_event.handler_response = result
                 webhook_event.processed_at = timezone.now()
                 webhook_event.save(
-                    update_fields=["processing_state", "handler_response", "processed_at"]
+                    update_fields=[
+                        "processing_state",
+                        "handler_response",
+                        "processed_at",
+                    ]
                 )
                 return response.Response(result, status=status.HTTP_200_OK)
 

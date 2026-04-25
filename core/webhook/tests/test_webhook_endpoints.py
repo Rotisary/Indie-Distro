@@ -44,7 +44,12 @@ def test_flutterwave_webhook_charge_completed_success(
 
     response = anonymous_client.post(
         WEBHOOK_URL,
-        build_payload("charge.completed", reference="tx-123", amount=500),
+        build_payload(
+            "charge.completed",
+            reference="tx-123",
+            amount=500,
+            status="successful",
+        ),
         format="json",
         **build_headers(settings),
     )
@@ -82,7 +87,7 @@ def test_flutterwave_webhook_transfer_event_success(
 
     response = anonymous_client.post(
         WEBHOOK_URL,
-        build_payload(event, reference="tx-999"),
+        build_payload(event, reference="tx-999", status="successful"),
         format="json",
         **build_headers(settings),
     )
@@ -93,7 +98,7 @@ def test_flutterwave_webhook_transfer_event_success(
 
     persisted = ProviderWebhookEvent.objects.get(tx_ref="tx-999", event=event)
     assert persisted.processing_state == enums.WebhookProcessingState.ACKNOWLEDGED.value
-    assert persisted.provider_status is None
+    assert persisted.provider_status == "successful"
 
 
 def test_flutterwave_webhook_is_idempotent_for_duplicate_payload(
@@ -143,7 +148,7 @@ def test_flutterwave_webhook_ignored_event_success(anonymous_client, settings):
 
     response = anonymous_client.post(
         WEBHOOK_URL,
-        build_payload("unknown.event", payload="noop"),
+        build_payload("unknown.event", payload="noop", status="ignored"),
         format="json",
         **build_headers(settings),
     )
@@ -160,7 +165,7 @@ def test_flutterwave_webhook_unauthorized_invalid_hash(anonymous_client, setting
 
     response = anonymous_client.post(
         WEBHOOK_URL,
-        build_payload("charge.completed", reference="tx-unauth"),
+        build_payload("charge.completed", reference="tx-unauth", status="successful"),
         format="json",
         HTTP_VERIF_HASH="wrong-secret",
     )
@@ -173,7 +178,7 @@ def test_flutterwave_webhook_missing_verification_hash(anonymous_client, setting
 
     response = anonymous_client.post(
         WEBHOOK_URL,
-        build_payload("charge.completed", reference="tx-missing"),
+        build_payload("charge.completed", reference="tx-missing", status="successful"),
         format="json",
     )
 
@@ -191,7 +196,9 @@ def test_flutterwave_webhook_forbidden_when_admin_required(
 
     response = authenticated_client.post(
         WEBHOOK_URL,
-        build_payload("charge.completed", reference="tx-forbidden"),
+        build_payload(
+            "charge.completed", reference="tx-forbidden", status="successful"
+        ),
         format="json",
         **build_headers(settings),
     )
