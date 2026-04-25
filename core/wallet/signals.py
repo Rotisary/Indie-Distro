@@ -12,5 +12,5 @@ from .models import Wallet
 def create_wallet(sender, instance, **kwargs):
     if instance.is_creator and not Wallet.objects.filter(owner=instance).exists():
         transaction.on_commit(
-            lambda: create_wallet_for_user.delay(instance.id, trigger_webhook=True)
+            lambda: create_wallet_for_user.delay(instance.id)
         )

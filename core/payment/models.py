@@ -55,6 +55,14 @@ class Transaction(BaseModelMixin):
         blank=False,
         max_length=20,
     )
+    finalisation_state = models.CharField(
+        _("Transaction Finalisation State"),
+        choices=enums.TransactionFinalisationState.choices(),
+        default=enums.TransactionFinalisationState.PENDING.value,
+        null=False,
+        blank=False,
+        max_length=30,
+    )
     description = models.CharField(blank=True, null=True, max_length=50)
     currency = models.CharField(
         _("currency"),
@@ -68,6 +76,13 @@ class Transaction(BaseModelMixin):
         blank=False,
         null=True,
         help_text=_("The purpose of the transaction(funding, purchase, payout)"),
+    )
+    type = models.CharField(
+        choices=enums.PaymentType.choices(),
+        blank=False,
+        null=False,
+        max_length=20,
+        help_text=_("The type of transaction(bank_charge/transfer)"),
     )
     parent_transaction = models.ForeignKey(
         "self",

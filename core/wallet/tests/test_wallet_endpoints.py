@@ -7,6 +7,7 @@ from rest_framework import status
 
 from core.wallet import views as wallet_views
 from core.wallet.tests.factories.wallet_factories import WalletFactory
+from core.utils.services.flutterwave import FlutterwaveService
 
 pytestmark = pytest.mark.django_db
 
@@ -55,6 +56,17 @@ def build_change_pin_payload(old_pin="1234", new_pin="4321", **overrides):
     payload = {"old_pin": old_pin, "new_pin": new_pin}
     payload.update(overrides)
     return payload
+
+
+def build_balance_response(balance, currency="NGN"):
+    def fake_balance(self, account_reference, currency=currency):
+        return {
+            "status": "success",
+            "balance": Decimal(str(balance)),
+            "currency": currency,
+        }
+
+    return fake_balance
 
 
 @pytest.fixture
@@ -181,6 +193,11 @@ def test_initiate_payout_success(
     def fake_transfer(self, **kwargs):
         return self.PaymentResponse(status="initiated", data={"ok": True})
 
+    monkeypatch.setattr(
+        FlutterwaveService,
+        "check_payout_subaccount_balance",
+        build_balance_response("250.00"),
+    )
     monkeypatch.setattr(wallet_views.payment.PaymentHelper, "transfer", fake_transfer)
 
     response = creator_client.post(
@@ -188,6 +205,44 @@ def test_initiate_payout_success(
     )
 
     assert response.status_code == status.HTTP_202_ACCEPTED
+
+
+def test_initiate_payout_flutterwave_balance_mismatch(
+    monkeypatch, creator_client, creator_wallet_with_earnings
+):
+    monkeypatch.setattr(
+        FlutterwaveService,
+        "check_payout_subaccount_balance",
+        build_balance_response("200.00"),
+    )
+
+    response = creator_client.post(
+        INITIATE_PAYOUT_URL, build_payout_payload(), format="json"
+    )
+
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+
+
+def test_initiate_payout_flutterwave_balance_insufficient(
+    monkeypatch, creator_client, creator_wallet_with_earnings
+):
+    creator_wallet_with_earnings.earnings_balance = Decimal("50.00")
+    creator_wallet_with_earnings.total_balance = Decimal("50.00")
+    creator_wallet_with_earnings.save(
+        update_fields=["earnings_balance", "total_balance"]
+    )
+
+    monkeypatch.setattr(
+        FlutterwaveService,
+        "check_payout_subaccount_balance",
+        build_balance_response("50.00"),
+    )
+
+    response = creator_client.post(
+        INITIATE_PAYOUT_URL, build_payout_payload(), format="json"
+    )
+
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
 def test_initiate_payout_unauthorized(anonymous_client):

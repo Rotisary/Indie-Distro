@@ -147,6 +147,7 @@ class PaymentLedgerCreatorHelpers:
     @staticmethod
     def create_ledger_transaction(
         tx_purpose: str,
+        type: str,
         description: str = None,
         currency: str = "NGN",
         parent_transaction: Transaction = None,
@@ -159,6 +160,7 @@ class PaymentLedgerCreatorHelpers:
             description=description,
             currency=currency,
             purpose=tx_purpose,
+            type=type,
             parent_transaction=parent_transaction,
         )
         return transaction

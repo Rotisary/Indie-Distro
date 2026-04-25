@@ -91,6 +91,7 @@ class InitiateFundingWithBankCharge(views.APIView):
         transaction = payment.PostLedgerData.as_pending(
             ledger_data=entry_lines,
             tx_purpose=enums.TransactionPurpose.FUNDING.value,
+            type=enums.PaymentType.BANK_CHARGE.value,
             description="Wallet funding via bank charge",
         )
         payment_helper = payment.PaymentHelper(
@@ -133,6 +134,7 @@ class InitiatePayout(views.APIView):
         wallet_pin = serializer.validated_data["wallet_pin"]
 
         request.user.wallet.verify_pin(wallet_pin)
+        request.user.wallet.verify_flutterwave_balance(amount)
         with transaction.atomic():
             request.user.wallet.withdraw_funds(amount, is_earnings=True)
             beneficiary = {
@@ -160,6 +162,7 @@ class InitiatePayout(views.APIView):
             tx = payment.PostLedgerData.as_pending(
                 ledger_data=entry_lines,
                 tx_purpose=enums.TransactionPurpose.PAYOUT.value,
+                type=enums.PaymentType.TRANSFER.value,
                 description="earnings payout",
             )
 

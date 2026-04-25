@@ -10,6 +10,7 @@ class PostLedgerData:
     def as_pending(
         ledger_data: list[dict],
         tx_purpose: str,
+        type: str,
         currency: str = None,
         description: str = None,
         parent_transaction: Transaction = None,
@@ -18,6 +19,7 @@ class PostLedgerData:
             transaction = PaymentLedgerCreatorHelpers.create_ledger_transaction(
                 tx_purpose=tx_purpose,
                 description=description,
+                type=type,
                 parent_transaction=parent_transaction,
             )
             journal = PaymentLedgerCreatorHelpers.add_transaction_to_journal(
@@ -49,9 +51,20 @@ class PostLedgerData:
             )
 
             tx.status = enums.TransactionStatus.SUCCESSFUL.value
+            tx.finalisation_state = (
+                enums.TransactionFinalisationState.SUCCESS_FINALISED.value
+            )
             tx.successful_at = timezone.now()
-            tx.metadata[f"flw_{type}_webhook"] = data
-            tx.save(update_fields=["status", "successful_at", "metadata"])
+            metadata = tx.metadata or {}
+            metadata[f"flw_{type}_webhook"] = data
+            tx.save(
+                update_fields=[
+                    "status",
+                    "finalisation_state",
+                    "successful_at",
+                    "metadata",
+                ]
+            )
 
             logger.info(f"Completed {updated} journal entries for tx {tx.reference}")
 
@@ -64,8 +77,12 @@ class PostLedgerData:
         updated = entries.update(status=enums.EntryStatus.FAILED.value)
 
         tx.status = enums.TransactionStatus.FAILED.value
+        tx.finalisation_state = enums.TransactionFinalisationState.FAILED_FINALISED.value
         tx.failed_at = timezone.now()
-        tx.metadata[f"flw_{type}_webhook"] = data
-        tx.save(update_fields=["status", "failed_at", "metadata"])
+        metadata = tx.metadata or {}
+        metadata[f"flw_{type}_webhook"] = data
+        tx.save(
+            update_fields=["status", "finalisation_state", "failed_at", "metadata"]
+        )
 
         logger.info(f"Failed {updated} journal entries for tx {tx.reference}")

@@ -1,11 +1,15 @@
 from decimal import Decimal
+from datetime import timedelta
 
 from celery import shared_task
+from django.db.models import Q
+from django.utils import timezone
 from loguru import logger
 
 from core.payment.models import Transaction
 from core.utils.exceptions import exceptions
 from core.utils.helpers.payment import PostLedgerData
+from core.utils import enums
 from core.utils.services import FlutterwaveService
 
 
@@ -57,7 +61,7 @@ def verify_charge_and_initiate_subaccount_transfer_task(
                 "verif_status": verification_response,
             }
             PaymentHandlers._finalise_failed_charge(
-                tx, error_data, verification_response
+                tx, error_data, verification_response["data.status"]
             )
             logger.error(f"Verification failed for tx {tx.reference}")
             return {
@@ -68,15 +72,17 @@ def verify_charge_and_initiate_subaccount_transfer_task(
             "webhook": webhook_payload,
             "verif_status": verification_response,
         }
-
-        # post successful charge data and handle data posting failure
-        try:
-            PostLedgerData.as_successful(tx, success_data, "charge")
-        except Exception as e:
-            # TODO issue refund
-            PaymentHandlers._emit_payment_event(tx, success=False)
-            logger.warning(f"charge.completed: tx {tx.reference} failed")
-
+        successful = PaymentHandlers._post_successful_charge(
+            tx, success_data, verification_response["data.status"]
+        )
+        if not successful:
+            logger.info(
+                f"Charge success verification posting for tx={tx.reference} failed"
+            )
+            return {
+                "verification": verification_response,
+            }
+        
         initiate_subaccount_transfer_task.delay(tx_ref, amount)
         logger.info(
             f"Charge verified and subaccount transfer queued for tx={tx.reference}"
@@ -127,7 +133,7 @@ def verify_transfer_and_finalize_task(
                 "verif_status": verification_response,
             }
             PaymentHandlers._finalise_failed_transfer(
-                tx, error_data, verification_response
+                tx, error_data, verification_response["data.status"]
             )
             logger.error(f"Verification failed for tx {tx.reference}")
             return {
@@ -138,7 +144,9 @@ def verify_transfer_and_finalize_task(
             "webhook": webhook_payload,
             "verif_status": verification_response,
         }
-        PaymentHandlers._finalise_successful_transfer(tx, success_data, Decimal(amount))
+        PaymentHandlers._finalise_successful_transfer(
+            tx, success_data, Decimal(amount), verification_response["data.status"]
+        )
         logger.info(
             f"Transfer verification and finalisation completed for tx={tx.reference}"
         )
@@ -186,7 +194,7 @@ def handle_virtual_funding_task(
                 "verif_status": verification_response,
             }
             PaymentHandlers._finalise_failed_transfer(
-                tx, error_data, verification_response
+                tx, error_data, verification_response["data.status"]
             )
             logger.error(f"Verification failed for tx {tx.reference}")
             return {
@@ -197,7 +205,9 @@ def handle_virtual_funding_task(
             "webhook": webhook_payload,
             "verif_status": verification_response,
         }
-        PaymentHandlers._finalise_successful_transfer(tx, success_data, Decimal(amount))
+        PaymentHandlers._finalise_successful_transfer(
+            tx, success_data, Decimal(amount), verification_response["data.status"]
+        )
         logger.info(
             f"Transfer verification and finalisation completed for tx={tx.reference}"
         )
@@ -212,5 +222,59 @@ def handle_virtual_funding_task(
         logger.exception(
             f"Unexpected error in verify_transfer_and_finalize_task "
             f"for tx_id={tx_id}: {exc}"
+        )
+        raise
+
+
+@shared_task(bind=True, max_retries=3)
+def reconcile_flutterwave_finalization_failures(self, batch_size: int = 100):
+    """
+    Reconcile transactions that are stuck in pending/initiated states,
+    or not in finalized state.
+    """
+
+    from core.utils.helpers.payment.handlers import PaymentHandlers
+
+    try:
+        threshold = timezone.now() - timedelta(minutes=2)
+        candidates = (
+            Transaction.objects.filter(
+                Q(
+                    finalisation_state__in=PaymentHandlers.NOT_FINALISED_STATES
+                )
+                | Q(
+                    status__in=[
+                        enums.TransactionStatus.PENDING.value,
+                        enums.TransactionStatus.INITIATED.value,
+                    ],
+                    metadata__provider_outcome__isnull=False,
+                )
+            )
+            .filter(date_added__lte=threshold)
+            .exclude(finalisation_state__in=PaymentHandlers.FINALIZED_STATES)
+            .order_by("date_added")[:batch_size]
+        )
+
+        processed = 0
+        for tx in candidates:
+            try:
+                PaymentHandlers.reconcile_transaction_finalization(tx.reference)
+                processed += 1
+            except Exception as per_tx_err:
+                logger.exception(
+                    f"Reconciliation failed for tx={tx.reference}: {str(per_tx_err)}"
+                )
+
+        logger.info(
+            f"Reconciliation run completed. processed={processed} candidates={len(candidates)}"
+        )
+        return {"processed": processed, "candidates": len(candidates)}
+    except exceptions.ServiceRequestException as exc:
+        logger.error(f"Reconciliation error: {str(exc)}")
+        delay = 5 * (self.request.retries + 1)
+        raise self.retry(exc=exc, countdown=delay)
+    except Exception as exc:
+        logger.exception(
+            f"Unexpected error in reconcile_flutterwave_finalization_failures: {str(exc)}"
         )
         raise

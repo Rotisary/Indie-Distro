@@ -25,6 +25,17 @@ class TransactionStatus(BaseEnum):
     REVERSED = "Reversed"
 
 
+class TransactionFinalisationState(BaseEnum):
+    PENDING = "pending"
+    SUCCESS_FINALISED = "success_finalised"
+    FAILED_FINALISED = "failed_finalised"
+    SUCCESS_NOT_FINALISED = "success_not_finalised"
+    FAILED_NOT_FINALISED = "failed_not_finalised"
+    REFUND_REQUIRED = "refund_required"
+    REFUND_PENDING = "refund_pending"
+    REFUND_FAILED = "refund_failed"
+
+
 class EntryStatus(BaseEnum):
     PENDING = "Pending"
     COMPLETED = "Completed"
