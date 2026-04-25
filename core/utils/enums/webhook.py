@@ -10,3 +10,14 @@ class WebhookEvent(BaseEnum):
     FUNDING_FAILED = "funding_failed"
     BANK_CHARGE_INITIATED = "bank_charge_initiated"
     BANK_CHARGE_INITIATION_FAILED = "bank_charge_initiation_failed"
+
+
+class WebhookProvider(BaseEnum):
+    FLUTTERWAVE = "flutterwave"
+
+
+class WebhookProcessingState(BaseEnum):
+    RECEIVED = "received"
+    ACKNOWLEDGED = "acknowledged"
+    IGNORED = "ignored"
+    FAILED = "failed"

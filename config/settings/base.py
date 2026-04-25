@@ -321,10 +321,10 @@ UNFOLD = {
                 "collapsible": True,
                 "items": [
                     {
-                        "title": _("Webhook Endpoints"),
+                        "title": _("Webhook"),
                         "icon": "link",
                         "link": reverse_lazy(
-                            "admin:webhook_webhookendpoint_changelist"
+                            "admin:webhook_providerwebhookevent_changelist"
                         ),
                     },
                 ],
@@ -432,6 +432,11 @@ CELERY_BEAT_SCHEDULE = {
     },
     "expire-due-rentals": {
         "task": "core.feed.tasks.expire_due_rentals",
+        "schedule": crontab(minute="*/5"),
+        "options": {"queue": "beats"},
+    },
+    "reconcile-flutterwave-finalization-failures": {
+        "task": "core.payment.tasks.reconcile_flutterwave_finalization_failures",
         "schedule": crontab(minute="*/5"),
         "options": {"queue": "beats"},
     },
