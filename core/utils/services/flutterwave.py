@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from loguru import logger
 
 from config import env
@@ -148,13 +150,65 @@ class FlutterwaveService(BaseService):
 
         return data
 
-    def verify_transfer(self, transfer_id: int):
-        endpoint = f"transfers/{transfer_id}"
+    def check_payout_subaccount_balance(
+        self, account_reference: str, currency: str = "NGN"
+    ) -> dict:
+        endpoint = f"payout-subaccounts/{account_reference}/balances"
         response = self.get(endpoint)
         Handlers.handle_request_failure(
-            response, f"Failed to verify transfer: {response.text}"
+            response,
+            f"Failed to fetch subaccount balance for {account_reference}: {response.text}",
         )
-        logger.info(f"Transfer verification successful for id={transfer_id}")
-        status = response.json()["status"]
 
-        return status
+        payload = response.json()
+        data = payload.get("data")
+        balances = []
+
+        if isinstance(data, dict):
+            if isinstance(data.get("balances"), list):
+                balances = data["balances"]
+            else:
+                balances = [data]
+        elif isinstance(data, list):
+            balances = data
+
+        selected = None
+        if balances:
+            for entry in balances:
+                if str(entry.get("currency", "")).upper() == currency.upper():
+                    selected = entry
+                    break
+            if not selected:
+                selected = balances[0]
+
+        balance_value = None
+        balance_currency = currency
+        if selected:
+            for key in ["available_balance", "balance", "ledger_balance"]:
+                if key in selected:
+                    balance_value = selected.get(key)
+                    break
+            balance_currency = selected.get("currency") or currency
+
+        if balance_value is None:
+            raise exceptions.ServiceRequestException(
+                message="Failed to parse Flutterwave subaccount balance response",
+                errors=[str(payload)],
+            )
+
+        try:
+            balance = Decimal(str(balance_value))
+        except (TypeError, ValueError, ArithmeticError) as exc:
+            raise exceptions.ServiceRequestException(
+                message="Invalid Flutterwave balance value",
+                errors=[str(balance_value)],
+            ) from exc
+
+        logger.info(
+            f"Subaccount balance fetched for account_reference={account_reference}"
+        )
+        return {
+            "status": payload.get("status"),
+            "balance": balance,
+            "currency": balance_currency,
+        }

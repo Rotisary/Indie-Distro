@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from django.urls import reverse
 from django.utils import timezone
 
@@ -11,6 +13,8 @@ from core.feed.models import Feed, Short
 from core.feed.tests.factories.feed_factories import FeedFactory, ShortFactory
 from core.file_storage.tests.factories.file_storage_factories import FileModelFactory
 from core.utils import enums
+from core.utils.services.flutterwave import FlutterwaveService
+from core.wallet.tests.factories.wallet_factories import WalletFactory
 
 pytestmark = pytest.mark.django_db
 
@@ -79,6 +83,17 @@ def build_purchase_payload(
     method=enums.PaymentType.BANK_CHARGE.value, wallet_pin="1234"
 ):
     return {"method": method, "wallet_pin": wallet_pin}
+
+
+def build_balance_response(balance, currency="NGN"):
+    def fake_balance(self, account_reference, currency=currency):
+        return {
+            "status": "success",
+            "balance": Decimal(str(balance)),
+            "currency": currency,
+        }
+
+    return fake_balance
 
 
 # List/create films
@@ -483,6 +498,88 @@ def test_purchase_film_not_found(creator_client):
     )
 
     assert response.status_code == status.HTTP_404_NOT_FOUND
+
+
+def test_purchase_film_transfer_success(
+    monkeypatch, other_creator_client, other_creator_user, creator_user
+):
+    film = FeedFactory(owner=creator_user, is_released=False, price="20.00")
+    WalletFactory(
+        owner=other_creator_user,
+        wallet_pin="1234",
+        funding_balance=Decimal("500.00"),
+        total_balance=Decimal("500.00"),
+    )
+
+    def fake_transfer(self, **kwargs):
+        return self.PaymentResponse(status="initiated", data={"ok": True})
+
+    monkeypatch.setattr(
+        FlutterwaveService,
+        "check_payout_subaccount_balance",
+        build_balance_response("500.00"),
+    )
+    monkeypatch.setattr(feed_views.payment.PaymentHelper, "transfer", fake_transfer)
+
+    response = other_creator_client.post(
+        purchase_film_url(film.id),
+        build_purchase_payload(method=enums.PaymentType.TRANSFER.value),
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_202_ACCEPTED
+
+
+def test_purchase_film_transfer_balance_mismatch(
+    monkeypatch, other_creator_client, other_creator_user, creator_user
+):
+    film = FeedFactory(owner=creator_user, is_released=False, price="20.00")
+    WalletFactory(
+        owner=other_creator_user,
+        wallet_pin="1234",
+        funding_balance=Decimal("500.00"),
+        total_balance=Decimal("500.00"),
+    )
+
+    monkeypatch.setattr(
+        FlutterwaveService,
+        "check_payout_subaccount_balance",
+        build_balance_response("200.00"),
+    )
+
+    response = other_creator_client.post(
+        purchase_film_url(film.id),
+        build_purchase_payload(method=enums.PaymentType.TRANSFER.value),
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+
+
+def test_purchase_film_transfer_balance_insufficient(
+    monkeypatch, other_creator_client, other_creator_user, creator_user
+):
+    film = FeedFactory(owner=creator_user, is_released=False, price="100.00")
+    WalletFactory(
+        owner=other_creator_user,
+        wallet_pin="1234",
+        funding_balance=Decimal("50.00"),
+        total_balance=Decimal("50.00"),
+    )
+
+    monkeypatch.setattr(
+        FlutterwaveService,
+        "check_payout_subaccount_balance",
+        build_balance_response("50.00"),
+    )
+
+    response = other_creator_client.post(
+        purchase_film_url(film.id),
+        build_purchase_payload(method=enums.PaymentType.TRANSFER.value),
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
 # Bookmark

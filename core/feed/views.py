@@ -329,6 +329,7 @@ class PurchaseFilm(views.APIView):
             transaction = payment.PostLedgerData.as_pending(
                 ledger_data=entry_lines,
                 tx_purpose=enums.TransactionPurpose.PURCHASE.value,
+                type=enums.PaymentType.BANK_CHARGE.value,
                 description="film purchase via bank charge",
             )
 
@@ -355,11 +356,13 @@ class PurchaseFilm(views.APIView):
 
     @staticmethod
     def _purchase_film_with_transfer(request, entry_lines: list, film):
+        request.user.wallet.verify_flutterwave_balance(film.price)
         with db_transaction.atomic():
             request.user.wallet.withdraw_funds(film.price)
             transaction = payment.PostLedgerData.as_pending(
                 ledger_data=entry_lines,
                 tx_purpose=enums.TransactionPurpose.PURCHASE.value,
+                type=enums.PaymentType.TRANSFER.value,
                 description="film purchase via transfer",
             )
 

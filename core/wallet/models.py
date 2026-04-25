@@ -6,9 +6,12 @@ from django.db.models import F
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
+from rest_framework import status
+
 from core.utils import enums, mixins
 from core.utils.exceptions import exceptions
 from core.websocket.utils import emit_websocket_event
+from core.utils.services import FlutterwaveService
 
 
 class Wallet(mixins.BaseModelMixin):
@@ -175,7 +178,7 @@ class Wallet(mixins.BaseModelMixin):
             ["Invalid PIN"], "The PIN you provided is incorrect"
         )
 
-    def check_balance(self, amount):
+    def verify_flutterwave_balance(self, amount, *, currency: str = "NGN"):
         if not isinstance(amount, Decimal):
             amount = Decimal(str(amount))
 
@@ -184,14 +187,32 @@ class Wallet(mixins.BaseModelMixin):
                 ["Invalid Number"], "Must be greater than zero"
             )
 
-        with transaction.atomic():
-            locked_wallet = Wallet.objects.select_for_update().get(pk=self.pk)
+        service = FlutterwaveService()
+        balance_data = service.check_payout_subaccount_balance(
+            self.account_reference, currency=currency
+        )
+        provider_balance = balance_data.get("balance")
+        wallet_balance = self.total_balance
 
-            if locked_wallet.funding_balance < amount:
-                raise exceptions.WalletException(
-                    ["Insufficient funds"],
-                    "Insufficient funds in wallet, fund your wallet to continue",
-                )
+        if provider_balance != wallet_balance:
+            raise exceptions.CustomException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                message="Flutterwave balance does not match wallet balance.",
+                errors={
+                    "flutterwave_balance": str(provider_balance),
+                    "wallet_balance": str(wallet_balance),
+                },
+            )
+
+        if provider_balance < amount:
+            raise exceptions.CustomException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                message="Flutterwave balance is insufficient for this transfer.",
+                errors={
+                    "flutterwave_balance": str(provider_balance),
+                    "requested_amount": str(amount),
+                },
+            )
 
         return True
 
