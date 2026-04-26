@@ -8,7 +8,6 @@ import pytest
 from core.payment.models import JournalEntry, LedgerAccount, LedgerJournal, Transaction
 from core.payment.tasks import reconcile_flutterwave_finalization_failures
 from core.utils import enums
-from core.utils.helpers.payment import PostLedgerData
 from core.utils.helpers.payment.handlers import PaymentHandlers
 from core.wallet.tests.factories.wallet_factories import WalletFactory
 from core.webhook.models import ProviderWebhookEvent
@@ -95,40 +94,6 @@ def test_reconcile_uses_persisted_webhook_outcome_and_finalises_as_failed(
     )
     assert tx.metadata["provider_outcome"]["status"] == "successful"
     assert entry.status == enums.EntryStatus.FAILED.value
-
-
-def test_reconcile_moves_to_failed_not_finalised_when_failed_finalisation_fails(
-    monkeypatch, user
-):
-    monkeypatch.setattr(
-        PaymentHandlers,
-        "_emit_payment_event",
-        staticmethod(lambda *args, **kwargs: None),
-    )
-
-    tx = build_payout_transaction(
-        user,
-        suffix="100002",
-        finalisation_state=enums.TransactionFinalisationState.SUCCESS_NOT_FINALISED.value,
-    )
-    build_webhook_event(tx, "successful", "evt-2")
-
-    def raise_failed_post(*args, **kwargs):
-        raise RuntimeError("ledger write failed")
-
-    monkeypatch.setattr(PostLedgerData, "as_failed", staticmethod(raise_failed_post))
-
-    result = PaymentHandlers.reconcile_transaction_finalization(tx.reference)
-
-    tx.refresh_from_db()
-
-    assert result["status"] == "failed"
-    assert result["detail"] == "reconciliation required"
-    assert (
-        tx.finalisation_state
-        == enums.TransactionFinalisationState.FAILED_NOT_FINALISED.value
-    )
-    assert tx.metadata["provider_outcome"]["status"] == "successful"
 
 
 def test_reconcile_task_filters_by_finalisation_state_and_provider_outcome(

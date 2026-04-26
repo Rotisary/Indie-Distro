@@ -293,12 +293,11 @@ class PaymentHandlers:
         return tx
 
     @staticmethod
-    def _post_successful_charge(tx: Transaction, data: dict, flw_status: str):
+    def _finalise_successful_charge(tx: Transaction, data: dict, flw_status: str):
         try:
             PostLedgerData.as_successful(tx, data, "charge")
             return True
         except Exception as e:
-            # TODO issue refund
             logger.warning(
                 f"charge.completed: tx {tx.reference} success posting failed"
             )
@@ -623,24 +622,35 @@ class PaymentHandlers:
                     "detail": "provider outcome unavailable",
                 }
 
+            reconciliation_payload = {
+                "webhook": payload,
+                "provider_outcome": provider_outcome,
+                "reconciled": True,
+            }
             if tx.type == enums.PaymentType.BANK_CHARGE.value:
-                result = PaymentHandlers._finalise_failed_charge(
-                    tx,
-                    {
-                        "webhook": payload,
-                        "provider_outcome": provider_outcome,
-                        "reconciled": True,
-                    },
-                    provider_outcome,
-                )
+                if provider_outcome == "successful":
+                    result = PaymentHandlers._finalise_successful_charge(
+                        tx, reconciliation_payload, provider_outcome
+                    )
+                elif provider_outcome != "successful":
+                    result = PaymentHandlers._finalise_failed_charge(
+                        tx, reconciliation_payload, provider_outcome
+                    )
             else:
-                result = PaymentHandlers._finalise_failed_transfer(
-                    tx,
-                    {
-                        "webhook": payload,
-                        "provider_outcome": provider_outcome,
-                        "reconciled": True,
-                    },
-                    provider_outcome,
-                )
+                if provider_outcome == "successful":
+                    amount = PaymentHandlers._extract_transfer_webhook_context(
+                        payload.get("data", {})
+                    )["amount"]
+                    result = PaymentHandlers._finalise_successful_transfer(
+                        tx,
+                        reconciliation_payload,
+                        amount,
+                        provider_outcome,
+                    )
+                elif provider_outcome != "successful":
+                    result = PaymentHandlers._finalise_failed_transfer(
+                        tx,
+                        reconciliation_payload,
+                        provider_outcome,
+                    )
             return {"tx_ref": tx_ref, **result}

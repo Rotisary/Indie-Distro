@@ -7204,3 +7204,158 @@ Bad Request: /api/webhook/flutterwave/
 Forbidden: /api/webhook/flutterwave/
 Bad Request: /api/webhook/flutterwave/
 Not Found: /api/webhook/flutterwave/unknown/
+Unauthorized: /api/feed/films/
+Forbidden: /api/feed/films/
+Unauthorized: /api/feed/films/
+Forbidden: /api/feed/films/
+Bad Request: /api/feed/films/
+Bad Request: /api/feed/films/
+Not Found: /api/feed/films/unknown/
+Unauthorized: /api/feed/films/5/
+Not Found: /api/feed/films/999999/
+Unauthorized: /api/feed/films/8/
+Forbidden: /api/feed/films/9/
+Bad Request: /api/feed/films/10/
+Not Found: /api/feed/films/999999/
+Unauthorized: /api/feed/films/12/
+Not Found: /api/feed/films/999999/
+Bad Request: /api/feed/films/all/
+Forbidden: /api/feed/films/all/
+Not Found: /api/feed/films/all/unknown/
+Unauthorized: /api/feed/users/42/feeds/
+Forbidden: /api/feed/users/44/feeds/
+Bad Request: /api/feed/users/52/feeds/
+Not Found: /api/feed/users/53/feeds/unknown/
+Unauthorized: /api/feed/films/48/purchase
+Forbidden: /api/feed/films/49/purchase
+Bad Request: /api/feed/films/50/purchase
+Not Found: /api/feed/films/999999/purchase
+Unprocessable Entity: /api/feed/films/52/purchase
+Unprocessable Entity: /api/feed/films/53/purchase
+Unauthorized: /api/feed/bookmark/
+Forbidden: /api/feed/bookmark/
+Bad Request: /api/feed/bookmark/
+Not Found: /api/feed/bookmark/
+Unauthorized: /api/feed/remove_bookmark/
+Forbidden: /api/feed/remove_bookmark/
+Bad Request: /api/feed/remove_bookmark/
+Not Found: /api/feed/remove_bookmark/
+Unauthorized: /api/feed/shorts/
+Forbidden: /api/feed/shorts/
+Unauthorized: /api/feed/shorts/
+Forbidden: /api/feed/shorts/
+Bad Request: /api/feed/shorts/
+Bad Request: /api/feed/shorts/
+Not Found: /api/feed/shorts/unknown/
+Unauthorized: /api/feed/shorts/5/
+Not Found: /api/feed/shorts/999999/
+Unauthorized: /api/feed/shorts/8/
+Forbidden: /api/feed/shorts/9/
+Forbidden: /api/feed/shorts/10/
+Bad Request: /api/feed/shorts/11/
+Not Found: /api/feed/shorts/999999/
+Unauthorized: /api/feed/shorts/13/
+Forbidden: /api/feed/shorts/14/
+Not Found: /api/feed/shorts/999999/
+Bad Request: /api/feed/shorts/all/
+Forbidden: /api/feed/shorts/all/
+Not Found: /api/feed/shorts/all/unknown/
+Unauthorized: /api/feed/users/129/shorts/
+Forbidden: /api/feed/users/131/shorts/
+Bad Request: /api/feed/users/139/shorts/
+Not Found: /api/feed/users/140/shorts/unknown/
+Unauthorized: /api/files/get_signed_url/
+Forbidden: /api/files/get_signed_url/
+Bad Request: /api/files/get_signed_url/
+Bad Request: /api/files/get_signed_url/
+Not Found: /api/files/get_signed_url/unknown/
+Unauthorized: /api/files/create_file_object/
+Forbidden: /api/files/create_file_object/
+Bad Request: /api/files/create_file_object/
+Bad Request: /api/files/create_file_object/
+Not Found: /api/files/create_file_object/unknown/
+Unauthorized: /api/files/file-52/
+Forbidden: /api/files/file-53/
+Not Found: /api/files/missing-file/
+Unauthorized: /api/files/file-55/delete/
+Forbidden: /api/files/file-56/delete/
+Not Found: /api/files/missing-file/delete/
+Unauthorized: /api/playback/films/get_url/
+Forbidden: /api/playback/films/get_url/
+Bad Request: /api/playback/films/get_url/
+Not Found: /api/playback/films/get_url/
+Unauthorized: /api/playback/films/token/refresh/
+Forbidden: /api/playback/films/token/refresh/
+Bad Request: /api/playback/films/token/refresh/
+Not Found: /api/playback/films/token/refresh/
+Unauthorized: /api/playback/shorts/get_url/
+Forbidden: /api/playback/shorts/get_url/
+Bad Request: /api/playback/shorts/get_url/
+Not Found: /api/playback/shorts/get_url/
+Unauthorized: /api/playback/shorts/token/refresh/
+Forbidden: /api/playback/shorts/token/refresh/
+Bad Request: /api/playback/shorts/token/refresh/
+Not Found: /api/playback/shorts/token/refresh/
+Unauthorized: /api/users/
+Forbidden: /api/users/
+Bad Request: /api/users/
+Bad Request: /api/users/
+Not Found: /api/users/unknown/
+Unauthorized: /api/auth/login/
+Forbidden: /api/auth/login/
+Bad Request: /api/auth/login/
+Bad Request: /api/auth/login/
+Not Found: /api/auth/login/unknown/
+Unauthorized: /api/auth/token/refresh/
+Forbidden: /api/auth/token/refresh/
+Bad Request: /api/auth/token/refresh/
+Bad Request: /api/auth/token/refresh/
+Not Found: /api/auth/token/refresh/unknown/
+Unauthorized: /api/users/me/
+Forbidden: /api/users/me/
+Not Found: /api/users/me/unknown/
+Bad Request: /api/users/me/
+Unauthorized: /api/users/me/
+Forbidden: /api/users/me/
+Unauthorized: /api/users/me/become-creator/
+Forbidden: /api/users/me/become-creator/
+Bad Request: /api/users/me/become-creator/
+Not Found: /api/users/me/become-creator/unknown/
+Unauthorized: /api/auth/logout/
+Forbidden: /api/auth/logout/
+Bad Request: /api/auth/logout/
+Not Found: /api/auth/logout/unknown/
+Unauthorized: /api/wallet/acct-00016/fetch-virtual-account/
+Forbidden: /api/wallet/acct-00017/fetch-virtual-account/
+Not Found: /api/wallet/missing-wallet/fetch-virtual-account/
+Unauthorized: /api/wallet/fund-with-bank-charge/
+Forbidden: /api/wallet/fund-with-bank-charge/
+Bad Request: /api/wallet/fund-with-bank-charge/
+Bad Request: /api/wallet/fund-with-bank-charge/
+Not Found: /api/wallet/fund-with-bank-charge/unknown/
+Unprocessable Entity: /api/wallet/payouts/initiate/
+Unprocessable Entity: /api/wallet/payouts/initiate/
+Unauthorized: /api/wallet/payouts/initiate/
+Forbidden: /api/wallet/payouts/initiate/
+Bad Request: /api/wallet/payouts/initiate/
+Bad Request: /api/wallet/payouts/initiate/
+Not Found: /api/wallet/payouts/initiate/unknown/
+Unauthorized: /api/wallet/acct-00027/pin/set/
+Forbidden: /api/wallet/acct-00028/pin/set/
+Bad Request: /api/wallet/acct-00029/pin/set/
+Bad Request: /api/wallet/acct-00030/pin/set/
+Not Found: /api/wallet/missing-wallet/pin/set/
+Unauthorized: /api/wallet/acct-00032/pin/change/
+Forbidden: /api/wallet/acct-00033/pin/change/
+Bad Request: /api/wallet/acct-00034/pin/change/
+Bad Request: /api/wallet/acct-00035/pin/change/
+Not Found: /api/wallet/missing-wallet/pin/change/
+Unauthorized: /api/webhook/flutterwave/
+Bad Request: /api/webhook/flutterwave/
+Forbidden: /api/webhook/flutterwave/
+Bad Request: /api/webhook/flutterwave/
+Not Found: /api/webhook/flutterwave/unknown/
+Unauthorized: /api/websocket/events/last/
+Forbidden: /api/websocket/events/last/
+Bad Request: /api/websocket/events/last/
+Not Found: /api/websocket/events/last/missing/

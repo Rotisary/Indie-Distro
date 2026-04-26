@@ -212,3 +212,36 @@ class FlutterwaveService(BaseService):
             "balance": balance,
             "currency": balance_currency,
         }
+
+    def refund_virtual_account_funding(
+        self, funding_reference: str, debit_currency: str = "NGN"
+    ) -> dict:
+        endpoint = "payout-subaccounts/refunds"
+        data = {
+            "funding_reference": funding_reference,
+            "debit_currency": debit_currency,
+        }
+        response = self.post(endpoint, data=data)
+        Handlers.handle_request_failure(
+            response,
+            f"Failed to refund payout-subaccount funding {funding_reference}: {response.text}",
+        )
+
+        payload = response.json()
+        refund_data = payload.get("data") or {}
+
+        logger.info(
+            f"Refund initiated successfully for payout-subaccount funding_reference={funding_reference}"
+        )
+        return {
+            "status": payload.get("status"),
+            "message": payload.get("message"),
+            "id": refund_data.get("id"),
+            "reference": refund_data.get("reference"),
+            "provider_status": refund_data.get("status"),
+            "amount": refund_data.get("amount"),
+            "currency": refund_data.get("currency"),
+            "debit_currency": refund_data.get("debit_currency"),
+            "narration": refund_data.get("narration"),
+            "raw": payload,
+        }

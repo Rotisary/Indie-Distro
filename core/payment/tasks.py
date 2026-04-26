@@ -41,6 +41,8 @@ def verify_charge_and_initiate_subaccount_transfer_task(
 
     try:
         tx = Transaction.objects.get(reference=tx_ref)
+        if PaymentHandlers._transaction_is_finalized(tx):
+            return {"status": "already processed"}
 
         service = FlutterwaveService()
         verification_response = service.verify_transaction(tx_id)
@@ -72,7 +74,7 @@ def verify_charge_and_initiate_subaccount_transfer_task(
             "webhook": webhook_payload,
             "verif_status": verification_response,
         }
-        successful = PaymentHandlers._post_successful_charge(
+        successful = PaymentHandlers._finalise_successful_charge(
             tx, success_data, verification_response["data.status"]
         )
         if not successful:
@@ -114,6 +116,8 @@ def verify_transfer_and_finalize_task(
 
     try:
         tx = Transaction.objects.get(reference=tx_ref)
+        if PaymentHandlers._transaction_is_finalized(tx):
+            return {"status": "already processed"}
 
         service = FlutterwaveService()
         verification_response = service.verify_transaction(tx_id)
@@ -176,6 +180,10 @@ def handle_virtual_funding_task(
     from core.utils.helpers.payment.handlers import PaymentHandlers
 
     try:
+        existing = PaymentHandlers._find_transaction_by_reference(tx_ref)
+        if existing and existing.finalisation_state in PaymentHandlers.FINALIZED_STATES:
+            return {"status": "already processed"}
+
         service = FlutterwaveService()
         verification_response = service.verify_transaction(tx_id)
         if verification_response["status"].lower() != "success":
