@@ -15,6 +15,7 @@ from core.utils import exceptions
 from core.utils.helpers.authenticators import ServerAuthentication
 
 
+@extend_schema(tags=["auth"])
 class CreateUser(views.APIView):
     http_method_names = ["post"]
     authentication_classes = [ServerAuthentication]
@@ -49,6 +50,7 @@ class CreateUser(views.APIView):
         return response.Response(response_data, status=status.HTTP_201_CREATED)
 
 
+@extend_schema(tags=["users"])
 class RetrieveUpdateUser(views.APIView):
     http_method_names = ["get", "patch"]
     permission_classes = [IsAuthenticated]
@@ -82,6 +84,7 @@ class RetrieveUpdateUser(views.APIView):
         return response.Response(data=response_data, status=status.HTTP_200_OK)
 
 
+@extend_schema(tags=["users"])
 class BecomeCreator(views.APIView):
     http_method_names = ["post"]
     permission_classes = [IsAuthenticated]
@@ -112,6 +115,7 @@ class BecomeCreator(views.APIView):
         return response.Response(data=response_data, status=status.HTTP_200_OK)
 
 
+@extend_schema(tags=["auth"])
 class Login(views.APIView):
     http_method_names = ["post"]
     authentication_classes = [ServerAuthentication]
@@ -154,6 +158,7 @@ class Login(views.APIView):
         return response.Response(response_data, status=status.HTTP_200_OK)
 
 
+@extend_schema(tags=["auth"])
 class Logout(views.APIView):
     http_method_names = ["post"]
     permission_classes = [
@@ -163,7 +168,7 @@ class Logout(views.APIView):
     @extend_schema(
         description="endpoint for user logout",
         request=AuthSerializer.Logout,
-        responses={200: None},
+        responses={205: None},
     )
     def post(self, request):
         try:
@@ -183,12 +188,14 @@ class Logout(views.APIView):
             return response.Response(status=status.HTTP_205_RESET_CONTENT)
 
 
+@extend_schema(tags=["auth"])
 class TokenRefresh(views.APIView):
     http_method_names = ["post"]
     authentication_classes = [ServerAuthentication]
     parser_classes = [JSONParser]
 
     @extend_schema(
+        auth=[],
         description="endpoint for refreshing user access token after it expires",
         request=AuthSerializer.TokenRefresh,
         responses={200: TokenSerializer},

@@ -3,8 +3,9 @@ from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 
+from drf_spectacular.utils import extend_schema, inline_serializer
 from loguru import logger
-from rest_framework import response, status, views
+from rest_framework import response, serializers, status, views
 from rest_framework.parsers import JSONParser
 
 from core.utils import enums
@@ -12,6 +13,7 @@ from core.utils.helpers.payment.handlers import PaymentHandlers
 from core.webhook.models import ProviderWebhookEvent
 
 
+@extend_schema(tags=["webhooks"])
 class FlutterwaveWebhook(views.APIView):
     authentication_classes = []
     permission_classes = []
@@ -22,6 +24,47 @@ class FlutterwaveWebhook(views.APIView):
     def dispatch(self, *args, **kwargs):
         return super().dispatch(*args, **kwargs)
 
+    @extend_schema(
+        auth=[],
+        description="Receive and acknowledge Flutterwave webhook events for charges and transfers.",
+        request=inline_serializer(
+            name="FlutterwaveWebhookRequest",
+            fields={
+                "event": serializers.CharField(),
+                "data": serializers.DictField(),
+            },
+        ),
+        responses={
+            200: inline_serializer(
+                name="FlutterwaveWebhookSuccessResponse",
+                fields={
+                    "status": serializers.CharField(),
+                    "detail": serializers.CharField(required=False),
+                },
+            ),
+            400: inline_serializer(
+                name="FlutterwaveWebhookBadRequestResponse",
+                fields={
+                    "status": serializers.CharField(),
+                    "detail": serializers.CharField(),
+                },
+            ),
+            401: inline_serializer(
+                name="FlutterwaveWebhookUnauthorizedResponse",
+                fields={
+                    "status": serializers.CharField(),
+                    "detail": serializers.CharField(),
+                },
+            ),
+            500: inline_serializer(
+                name="FlutterwaveWebhookErrorResponse",
+                fields={
+                    "status": serializers.CharField(),
+                    "detail": serializers.CharField(),
+                },
+            ),
+        },
+    )
     def post(self, request):
         secret = getattr(settings, "FLW_WEBHOOK_SECRET", None)
         flw_hash = request.headers.get("Verif-Hash")

@@ -7359,3 +7359,17 @@ Unauthorized: /api/websocket/events/last/
 Forbidden: /api/websocket/events/last/
 Bad Request: /api/websocket/events/last/
 Not Found: /api/websocket/events/last/missing/
+Watching for file changes with StatReloader
+HTTP/2 support not enabled (install the http2 and tls Twisted extras)
+Configuring endpoint tcp:port=8000:interface=127.0.0.1
+Listening on TCP address 127.0.0.1:8000
+Not Found: /docs
+[33mHTTP GET /docs 404 [0.82, 127.0.0.1:61576][0m
+[32mHTTP GET /api/docs 301 [0.19, 127.0.0.1:61576][0m
+[mHTTP GET /api/docs/ 200 [4.73, 127.0.0.1:61576][0m
+[mHTTP GET /api/schema/ 200 [0.86, 127.0.0.1:61576][0m
+C:\Users\olado\Documents\django-projects\Indie-Distro\core\websocket\views.py changed, reloading.
+Watching for file changes with StatReloader
+HTTP/2 support not enabled (install the http2 and tls Twisted extras)
+Configuring endpoint tcp:port=8000:interface=127.0.0.1
+Listening on TCP address 127.0.0.1:8000
